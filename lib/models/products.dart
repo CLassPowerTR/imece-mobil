@@ -7,19 +7,18 @@ class Product {
   final String? urunUretimTarihi;
   final String? urunEklemeTarihi;
   final String? urunBilgisiGuncellemeTarihi;
-  final String? urunKalitesi;
-  final String? birimi;
-  final dynamic fiyat;
+  final bool? imeceOnayli;
+  final String? urunParakendeFiyat;
+  final String? urunMinFiyat;
   final int? stokDurumu;
-  final dynamic degerlendirmePuani;
-  final int? minimumSiparisMiktari;
+  final dynamic? degerlendirmePuani;
   final String? labSonucPdf;
   final String? urunSertifikaPdf;
   final String? kapakGorseli;
   final bool? urunGorunurluluk;
+  final int? satis_turu;
   final int? satici;
   final int? kategori;
-  final double? populerlik;
 
   Product({
     this.urunId,
@@ -28,19 +27,18 @@ class Product {
     this.urunUretimTarihi,
     this.urunEklemeTarihi,
     this.urunBilgisiGuncellemeTarihi,
-    this.urunKalitesi,
-    this.birimi,
-    this.fiyat,
+    this.imeceOnayli,
+    this.urunParakendeFiyat,
+    this.urunMinFiyat,
     this.stokDurumu,
     this.degerlendirmePuani,
-    this.minimumSiparisMiktari,
     this.labSonucPdf,
     this.urunSertifikaPdf,
     this.kapakGorseli,
     this.urunGorunurluluk,
+    this.satis_turu,
     this.satici,
     this.kategori,
-    this.populerlik,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -52,19 +50,30 @@ class Product {
       urunEklemeTarihi: json['urun_ekleme_tarihi'] as String? ?? '',
       urunBilgisiGuncellemeTarihi:
           json['urunbilgisi_guncelleme_tarihi'] as String? ?? '',
-      urunKalitesi: json['urun_kalitesi'] as String? ?? '',
-      birimi: json['birimi'] as String? ?? '',
-      fiyat: json['fiyat'] as dynamic ?? 0.0,
+      imeceOnayli: json['imece_onayli'] as bool? ?? false,
+      urunParakendeFiyat: json['urun_parakende_fiyat'] as String? ?? '',
+      urunMinFiyat: json['urun_min_fiyat'] as String? ?? '',
       stokDurumu: json['stok_durumu'] as int? ?? 0,
-      degerlendirmePuani: json['degerlendirme_puani'] as dynamic ?? 0.0,
-      minimumSiparisMiktari: json['minimum_siparis_miktari'] as int? ?? 0,
+      degerlendirmePuani: (() {
+        final val = json['degerlendirme_puani'];
+        if (val == null || val == '-' || val.toString().isEmpty) {
+          return 0.0;
+        }
+        if (val is int) {
+          return val.toDouble();
+        }
+        if (val is double) {
+          return val;
+        }
+        return double.tryParse(val.toString()) ?? 0.0;
+      })(),
       labSonucPdf: json['lab_sonuc_pdf'] as String? ?? '',
       urunSertifikaPdf: json['urun_sertifika_pdf'] as String? ?? '',
       kapakGorseli: json['kapak_gorseli'] as String? ?? '',
       urunGorunurluluk: json['urun_gorunurluluk'] as bool? ?? false,
+      satis_turu: json['satis_turu'] as int? ?? 0,
       satici: json['satici'] as int? ?? 0,
       kategori: json['kategori'] as int? ?? 0,
-      populerlik: json['populerlik'] as double? ?? 0.0,
     );
   }
 
@@ -76,19 +85,15 @@ class Product {
       'urun_uretim_tarihi': urunUretimTarihi,
       'urun_ekleme_tarihi': urunEklemeTarihi,
       'urunbilgisi_guncelleme_tarihi': urunBilgisiGuncellemeTarihi,
-      'urun_kalitesi': urunKalitesi,
-      'birimi': birimi,
-      'fiyat': fiyat,
       'stok_durumu': stokDurumu,
       'degerlendirme_puani': degerlendirmePuani,
-      'minimum_siparis_miktari': minimumSiparisMiktari,
       'lab_sonuc_pdf': labSonucPdf,
       'urun_sertifika_pdf': urunSertifikaPdf,
       'kapak_gorseli': kapakGorseli,
       'urun_gorunurluluk': urunGorunurluluk,
+      'satis_turu': satis_turu,
       'satici': satici,
       'kategori': kategori,
-      'populerlik': populerlik,
     };
   }
 }

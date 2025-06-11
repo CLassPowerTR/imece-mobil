@@ -236,7 +236,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                       onTap: () {
                         setState(() {
                           Navigator.pushNamed(context, '/profil/sellerProfile',
-                              arguments: [user,false]);
+                              arguments: [user, false]);
                         });
                       },
                       child: customText(user.username, context,
@@ -250,7 +250,10 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                         width: 35,
                         height: 20,
                         isBoxShadow: false,
-                        child: customText(user.degerlendirmePuani, context,
+                        child: customText(
+                            user.saticiProfili?.degerlendirmePuani.toString() ??
+                                '0.0',
+                            context,
                             color: themeData.onSecondary,
                             weight: FontWeight.bold)),
                     customText(
@@ -286,7 +289,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                     ),
                     Builder(
                       builder: (context) {
-                        if (user.imeceOnay) {
+                        if (user.saticiProfili?.imeceOnay ?? false) {
                           return richText(context, children: [
                             TextSpan(text: 'İmece onaylı'),
                             WidgetSpan(

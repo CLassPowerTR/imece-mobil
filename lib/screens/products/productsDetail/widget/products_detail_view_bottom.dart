@@ -53,7 +53,7 @@ class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
                 children: [
                   TextSpan(text: 'KG:'),
                   TextSpan(
-                      text: ' ${widget.product.fiyat} TL',
+                      text: ' ${widget.product.urunMinFiyat} TL',
                       style: TextStyle(color: themeData.secondary)),
                   TextSpan(text: '\nKalan:'),
                   TextSpan(

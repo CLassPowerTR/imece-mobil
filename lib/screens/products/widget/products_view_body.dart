@@ -102,6 +102,7 @@ class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
           // Veri başarıyla alındı
 
           final products = snapshot.data!;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

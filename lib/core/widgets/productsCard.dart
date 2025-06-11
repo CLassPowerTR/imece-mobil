@@ -154,11 +154,11 @@ class _productsCardState extends State<productsCard> {
                   weight: FontWeight.bold,
                   size: HomeStyle(context: context).bodyLarge.fontSize),
               buildRatingStars(
-                  double.tryParse(widget.product.degerlendirmePuani)!
-                      .toDouble()),
+                widget.product.degerlendirmePuani ?? 0.0,
+              ),
               customText('${widget.product.aciklama}', context,
                   size: 14, maxLines: 2),
-              customText("KG: ${widget.product.fiyat} TL", context,
+              customText("KG: ${widget.product.urunMinFiyat} TL", context,
                   size: HomeStyle(context: context).bodyLarge.fontSize,
                   color: HomeStyle(context: context).secondary),
               Row(

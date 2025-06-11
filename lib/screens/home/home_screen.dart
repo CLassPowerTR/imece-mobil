@@ -9,9 +9,7 @@ import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/productCategories.dart';
 import 'package:imecehub/models/products.dart';
-import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/home_screen_mixin.dart';
-import 'package:imecehub/screens/home/manager/home_manager.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/products/products_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
@@ -70,5 +68,4 @@ class _HomeScreenState extends State<HomeScreen> with HomeScreenMixin {
 
 extension _HomeStyleExtension on BuildContext {
   HomeStyle get homeStyle => HomeStyle(context: this);
-  HomeManager get homeManager => HomeManager(context: this);
 }

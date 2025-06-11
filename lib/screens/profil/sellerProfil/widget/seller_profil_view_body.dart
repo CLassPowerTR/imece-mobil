@@ -231,7 +231,7 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
   Widget _profilHakkinda(
       HomeStyle themeData, double width, BuildContext context) {
     return Builder(builder: (context) {
-      if (widget.sellerProfil.profilTanitimYazisi != '') {
+      if (widget.sellerProfil.saticiProfili?.profilTanitimYazisi != '') {
         return container(
           context,
           color: themeData.surfaceContainer,
@@ -247,9 +247,11 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
               customText('Hakkında', context,
                   size: themeData.bodyLarge.fontSize, weight: FontWeight.w800),
               customText(
-                  widget.sellerProfil.profilTanitimYazisi == ''
+                  widget.sellerProfil.saticiProfili?.profilTanitimYazisi == ''
                       ? 'Noname'
-                      : widget.sellerProfil.profilTanitimYazisi,
+                      : widget.sellerProfil.saticiProfili
+                              ?.profilTanitimYazisi ??
+                          '',
                   context,
                   weight: FontWeight.w400,
                   maxLines: 13,
@@ -438,7 +440,7 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
       children: [
         Builder(
           builder: (context) {
-            if (widget.sellerProfil.imeceOnay) {
+            if (widget.sellerProfil.saticiProfili?.imeceOnay ?? false) {
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
                   colors: [
@@ -583,6 +585,8 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
   }
 
   Positioned _profilFoto(double width) {
+    final String defaultProfileImage =
+        'https://www.halifuryasi.com/Upload/null.png';
     return Positioned(
       top: coverHeight - profileSize / 1.5,
       left: 20, // Ortalamak için
@@ -594,9 +598,10 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white, width: 2),
               image: DecorationImage(
-                  image: NetworkImage(widget.sellerProfil.profilFotograf == ''
-                      ? notFoundImageUrl
-                      : 'widget.sellerProfil.profilFotograf'))),
+                  image: NetworkImage(
+                      widget.sellerProfil.profilFotograf?.isNotEmpty == true
+                          ? widget.sellerProfil.profilFotograf!
+                          : defaultProfileImage))),
         ),
         Positioned(
           bottom: 0,
@@ -619,9 +624,10 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
       height: coverHeight,
       decoration: BoxDecoration(
           image: DecorationImage(
-              image: NetworkImage(widget.sellerProfil.profilBanner == ''
-                  ? notFoundImageUrl
-                  : widget.sellerProfil.profilBanner),
+              image: NetworkImage(
+                  widget.sellerProfil.saticiProfili?.profilBanner == ''
+                      ? notFoundImageUrl
+                      : widget.sellerProfil.saticiProfili?.profilBanner ?? ''),
               fit: BoxFit.cover)),
     );
   }

@@ -1,15 +1,13 @@
 class Category {
   final int kategoriId;
-  final String anaKategoriAdi;
+  final int anaKategoriAdi;
   final String altKategoriAdi;
-  final String cesidi;
   final String gorsel;
 
   Category({
     required this.kategoriId,
     required this.anaKategoriAdi,
     required this.altKategoriAdi,
-    required this.cesidi,
     required this.gorsel,
   });
 
@@ -17,9 +15,8 @@ class Category {
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       kategoriId: json['kategori_id'] as int? ?? 0,
-      anaKategoriAdi: json['ana_kategori_adi'] as String? ?? '',
+      anaKategoriAdi: json['ana_kategori_adi'] as int? ?? 0,
       altKategoriAdi: json['alt_kategori_adi'] as String? ?? '',
-      cesidi: json['cesidi'] as String? ?? '',
       gorsel: json['gorsel'] as String? ?? '',
     );
   }
@@ -30,7 +27,6 @@ class Category {
       'kategori_id': kategoriId,
       'ana_kategori_adi': anaKategoriAdi,
       'alt_kategori_adi': altKategoriAdi,
-      'cesidi': cesidi,
       'gorsel': gorsel,
     };
   }

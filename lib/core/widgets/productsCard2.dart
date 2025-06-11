@@ -163,7 +163,7 @@ class _productsCardState extends State<productsCard2> {
                   TextSpan(
                       text: 'KG: ',
                       style: TextStyle(fontWeight: FontWeight.bold)),
-                  TextSpan(text: '${widget.product.fiyat} TL'),
+                  TextSpan(text: '${widget.product.urunMinFiyat} TL'),
                   TextSpan(text: '\n\n', style: TextStyle(fontSize: 3)),
                   TextSpan(
                       text: 'Stok: ',

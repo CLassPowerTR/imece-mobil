@@ -78,7 +78,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                       _futurePopulerProductsView(width, height),
                       _onerilerContainer(height, context, width),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.12,
+                        height: MediaQuery.of(context).size.height * 0.14,
                       ),
                     ])))),
       ),
@@ -106,7 +106,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
 
               return _populerUrunCards(width, height, populerProducts);
             } else {
-              return Text("Veri bulunamadı");
+              return SizedBox();
             }
           },
         ),
@@ -145,7 +145,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             return _sellerList(
                 sellers, avatarContainerHeight, saticiContainerWidth);
           } else {
-            return Text("Veri bulunamadı");
+            return SizedBox();
           }
         },
       ),
