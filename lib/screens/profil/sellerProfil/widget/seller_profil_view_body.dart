@@ -333,7 +333,8 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
         container(
           context,
           color: HomeStyle(context: context).surfaceContainer,
-          height: 306,
+          //height: 306,
+          padding: EdgeInsets.only(bottom: 10),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,7 +442,7 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
         Builder(
           builder: (context) {
             if (widget.sellerProfil.saticiProfili?.imeceOnay ?? false) {
-              ShaderMask(
+              return ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
                   colors: [
                     Color.fromRGBO(255, 229, 0, 1),
@@ -474,9 +475,7 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
                 ),
               );
             }
-            return SizedBox(
-              height: 5,
-            );
+            return SizedBox();
           },
         ),
         Builder(builder: (context) {
@@ -518,7 +517,8 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
                   ),
                   onPressed: () {},
                   child: customText(
-                      "${widget.sellerProfil.username} çiftliği", context,
+                      "${widget.sellerProfil.saticiProfili?.magazaAdi ?? ''}",
+                      context,
                       weight: FontWeight.bold,
                       size: HomeStyle(context: context).bodySmall.fontSize)),
             );
