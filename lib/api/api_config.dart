@@ -8,6 +8,7 @@ class ApiConfig {
   final String categoriesApiUrl;
   final String populerProductsApiUrl;
   final String companiesApiUrl;
+  final String urunYorumApiUrl;
   final String apiKey;
 
   ApiConfig({
@@ -18,6 +19,7 @@ class ApiConfig {
     required this.populerProductsApiUrl,
     required this.companiesApiUrl,
     required this.productsCategoryApiUrl,
+    required this.urunYorumApiUrl,
   });
 
   factory ApiConfig.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class ApiConfig {
       categoriesApiUrl: json['categoriesApiUrl'],
       populerProductsApiUrl: json['populerProductsApiUrl'],
       companiesApiUrl: json['companiesApiUrl'],
+      urunYorumApiUrl: json['urunYorumApiUrl'],
       apiKey: json['apiKey'],
     );
   }

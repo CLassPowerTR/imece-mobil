@@ -14,6 +14,10 @@ import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
+import 'package:imecehub/models/urunYorum.dart';
+import 'package:imecehub/services/api_service.dart';
+
+import '../../../core/variables/mainCategoryNames.dart';
 
 part 'widget/products_detail_view_header.dart';
 part 'widget/products_detail_view_body.dart';

@@ -7,6 +7,7 @@ import 'package:imecehub/models/products.dart';
 import '../models/users.dart';
 import '../models/productCategories.dart';
 import '../api/api_config.dart'; // Add this line to import ApiConfig
+import '../models/urunYorum.dart';
 
 class ApiService {
   /// API'den User verisini çekmek için metot.
@@ -156,6 +157,35 @@ class ApiService {
     } else {
       throw Exception(
           'Ürün verisi alınamadı. Durum kodu: ${response.statusCode}');
+    }
+  }
+
+  /// API'den Ürün Yorumlarını çekmek için metot.
+  static Future<List<UrunYorum>> fetchUrunYorumlar({int? urunId}) async {
+    // API konfigürasyon bilgilerini yükle.
+    final config = await ApiConfig.loadFromAsset();
+
+    // Eğer urunId verilmişse, ilgili ürünün yorumlarını çek.
+    final url = urunId == null
+        ? config.urunYorumApiUrl
+        : '${config.urunYorumApiUrl}?urun=$urunId';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Allow': 'Get',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      return data.map((json) => UrunYorum.fromJson(json)).toList();
+    } else {
+      throw Exception(
+          'Ürün yorumları alınamadı. Durum kodu: [31m[1m${response.statusCode}[0m');
     }
   }
 }

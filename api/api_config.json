@@ -5,6 +5,7 @@
     "productsCategoryApiUrl":"https://imecehub.com/api/products/kategoriler/",
     "categoriesApiUrl":"https://imecehub.com/api/products/kategoriler/?gorsel=false",
     "companiesApiUrl":"https://imecehub.com/api/sirketler/",
+    "urunYorumApiUrl":"https://imecehub.com/api/products/urunyorum/",
     "apiKey": "WNjZXNttoxNzM5Mzc3MDM3LCJpYXQiOUvKrIq06hpJl_1PenWgeKZw_7FMvL65DixY"
   }
   

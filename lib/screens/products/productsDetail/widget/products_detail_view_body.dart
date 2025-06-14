@@ -31,11 +31,14 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
         'Kesinlikle öyle bir durum yaşamazsınız hasadımız yeni gerçekleşti bütün çürükler ayrıştırıldı ve temizlendi',
   };
   late Future<User> _futureUser;
+  late Future<List<UrunYorum>> _futureUrunYorumlar;
 
   @override
   void initState() {
     super.initState();
     _futureUser = ApiService.fetchUserId(widget.product.satici) as Future<User>;
+    _futureUrunYorumlar =
+        ApiService.fetchUrunYorumlar(urunId: widget.product.urunId);
   }
 
   @override
@@ -86,13 +89,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
             ),
             Divider(),
             SizedBox(
-              height: soruCevap['cevap'].length < 100
-                  ? 225
-                  : soruCevap['cevap'].length < 200
-                      ? 275
-                      : soruCevap['cevap'].length < 300
-                          ? 325
-                          : 375, // Yorum kutularının yüksekliği
+              height: 20.0,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 4,
@@ -111,44 +108,87 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
         ));
   }
 
-  Container _urunYorumlari(
+  Widget _urunYorumlari(
       BuildContext context, double width, HomeStyle themeData) {
-    return container(context,
-        width: width,
-        color: themeData.surfaceContainer,
-        padding: EdgeInsets.only(left: 20, top: 10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          //spacing: 10,
-          children: [
-            customText(
-              'Ürün Yorumları',
+    return FutureBuilder<User>(
+      future: _futureUser,
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (userSnapshot.hasError) {
+          return Center(
+              child: Text('Satıcı verisi alınamadı: ${userSnapshot.error}'));
+        } else if (!userSnapshot.hasData) {
+          return Center(child: Text('Satıcı bulunamadı'));
+        }
+        final user = userSnapshot.data!;
+
+        return FutureBuilder<List<UrunYorum>>(
+          future: _futureUrunYorumlar,
+          builder: (context, yorumSnapshot) {
+            if (yorumSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (yorumSnapshot.hasError) {
+              return Center(
+                  child: Text('Yorumlar alınamadı: ${yorumSnapshot.error}'));
+            } else if (!yorumSnapshot.hasData || yorumSnapshot.data!.isEmpty) {
+              return Center(child: Text('Yorum bulunamadı'));
+            }
+
+            // Filtreleme işlemi
+            final filteredYorumlar = yorumSnapshot.data!
+                .where((yorum) => yorum.magaza == user.saticiProfili?.id)
+                .toList();
+
+            if (filteredYorumlar.isEmpty) {
+              return Center(child: Text('Bu mağazaya ait yorum bulunamadı'));
+            }
+
+            return container(
               context,
-              padding: EdgeInsets.symmetric(vertical: 10),
-              size: themeData.bodyLarge.fontSize,
-              weight: FontWeight.w800,
-            ),
-            Divider(),
-            SizedBox(
-              height: yorum['yorum'].length < 100
-                  ? 175
-                  : yorum['yorum'].length < 200
-                      ? 225
-                      : yorum['yorum'].length < 300
-                          ? 275
-                          : 325, // Yorum kutularının yüksekliği
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return yorumContainer(context, themeData, width, yorum);
-                },
+              width: width,
+              color: themeData.surfaceContainer,
+              padding: EdgeInsets.only(left: 20, top: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  customText(
+                    'Ürün Yorumları',
+                    context,
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    size: themeData.bodyLarge.fontSize,
+                    weight: FontWeight.w800,
+                  ),
+                  Divider(),
+                  SizedBox(
+                    height: 175,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filteredYorumlar.length,
+                      itemBuilder: (context, index) {
+                        final yorum = filteredYorumlar[index];
+                        // Yorum verisini yorumContainer'a uygun Map'e çeviriyoruz
+                        final yorumMap = {
+                          'yorumName': yorum.kullanici.toString() ??
+                              '', // Kullanıcı adı çekmek isterseniz ek sorgu gerekebilir
+                          'rating': (yorum.puan as num).toDouble(),
+                          'userImg': '',
+                          'yorum': yorum.yorum,
+                        };
+                        return yorumContainer(
+                            context, themeData, width, yorumMap);
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ));
+            );
+          },
+        );
+      },
+    );
   }
 
   AnimatedContainer _urunAciklama(
@@ -404,8 +444,12 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                   fontSize: themeData.bodyLarge.fontSize,
                   fontWeight: FontWeight.bold),
               children: [
-                TextSpan(text: '${widget.product.urunAdi}  '),
-                TextSpan(text: 'sebze, biber, tatlı ')
+                TextSpan(text: '${widget.product.urunAdi}  - '),
+                TextSpan(
+                  text: mainCategoryToString(
+                      mainCategoryFromInt(widget.product.kategori) ??
+                          MainCategory.meyveler),
+                )
               ])),
     );
   }
