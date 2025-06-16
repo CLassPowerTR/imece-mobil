@@ -15,13 +15,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
   double urunAciklamaContainerHeight = 150;
   double sizedBoxHeight = 200;
   String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
-  Map<dynamic, dynamic> yorum = {
-    'yorumName': 'Murat Y.',
-    'rating': 5.0,
-    'userImg': '',
-    'yorum':
-        'Burada kişilerin yorumları görünecektir.Burada kişilerin yorumları görünecektir.Burada kişilerin yorumları görünecektir.Burada kişilerin yorumları görünecektir.Burada kişilerin yorumları görünecektir'
-  };
+
   Map<dynamic, dynamic> soruCevap = {
     'soruProfilAdi': 'Murat Y.',
     'soru': 'Ürünün içinde çürük var mı?',
@@ -46,7 +40,6 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     final themeData = HomeStyle(context: context);
-    print(yorum['yorum'].length);
 
     return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

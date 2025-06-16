@@ -30,10 +30,16 @@ class ProductsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _productsDetailAppBar(context),
-      body: ProductsDetailViewBody(product: product),
-      bottomNavigationBar: ProductsDetailViewBottom(product: product),
+    return SafeArea(
+      bottom: true,
+      top: true,
+      left: true,
+      right: true,
+      child: Scaffold(
+        appBar: _productsDetailAppBar(context),
+        body: ProductsDetailViewBody(product: product),
+        bottomNavigationBar: ProductsDetailViewBottom(product: product),
+      ),
     );
   }
 }

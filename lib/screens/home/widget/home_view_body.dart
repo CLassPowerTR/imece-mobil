@@ -630,7 +630,10 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               borderRadius:
                   HomeStyle(context: context).bodyCategoryContainerBorderRadius,
               image: DecorationImage(
-                image: NetworkImage(category.gorsel),
+                image: (category.gorsel != null && category.gorsel.isNotEmpty)
+                    ? NetworkImage(category.gorsel)
+                    : NetworkImage(
+                        'https://imecehub.com/media/kapak_gorseli/2025/05/05/imecehub.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -679,7 +682,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
       _futureCategory = Future.value(cachedCategories);
     } else {
-      // İlk açılışta veya cache boşsa API’den verileri çek
+      // İlk açılışta veya cache boşsa API'den verileri çek
       _futureCategory = ApiService.fetchCategories() as Future<List<Category>>;
       _futureCategory.then((categories) {
         // Gelen veriyi cache'e atıyoruz.
@@ -693,7 +696,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
       _futureSellers = Future.value(cachedSellers);
     } else {
-      // İlk açılışta veya cache boşsa API’den verileri çek
+      // İlk açılışta veya cache boşsa API'den verileri çek
       _futureSellers = ApiService.fetchSellers() as Future<List<Company>>;
       _futureSellers.then((sellers) {
         // Gelen veriyi cache'e atıyoruz.
@@ -707,7 +710,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
       _futurePopulerProducts = Future.value(cachedPopulerProducts);
     } else {
-      // İlk açılışta veya cache boşsa API’den verileri çek
+      // İlk açılışta veya cache boşsa API'den verileri çek
       _futurePopulerProducts =
           ApiService.fetchPopulerProducts() as Future<List<Product>>;
       _futurePopulerProducts.then((populerProducts) {
