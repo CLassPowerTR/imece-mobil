@@ -1,4 +1,4 @@
-part of '../sign_in_screen.dart';
+part of 'sign_in_screen.dart';
 
 AppBar SignInAppBar(BuildContext context) {
   return AppBar(

@@ -6,11 +6,14 @@ import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/providers/auth_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'package:imecehub/models/users.dart';
 
 import '../../core/widgets/showTemporarySnackBar.dart';
 part 'profileNotLogin.dart';
 
-part 'SignUp/widget/sign_up_view_header.dart';
+part 'SignUp/sign_up_view_header.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -20,20 +23,56 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  int testUserId = 2;
+  String accesToken = '';
+  bool isTimeout = false;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    // Uygulama ilk açıldığında kullanıcıyı çek
-    Future.microtask(() {
-      ref.read(userProvider.notifier).fetchUser(testUserId);
-      ref.read(loginStateProvider.notifier).state = true; // örnek olarak login
+    _loadAccessToken();
+    _startTimeout();
+  }
+
+  void _startTimeout() {
+    _timer?.cancel();
+    isTimeout = false;
+    _timer = Timer(const Duration(seconds: 5), () {
+      if (mounted && userAsyncIsLoading()) {
+        setState(() {
+          isTimeout = true;
+        });
+      }
     });
   }
 
+  bool userAsyncIsLoading() {
+    final userAsync = ref.read(userProvider);
+    return userAsync is AsyncLoading<User?>;
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      accesToken = token;
+    });
+    if (accesToken.isNotEmpty) {
+      ref.read(userProvider.notifier).fetchUserLogin(accesToken);
+      ref.read(loginStateProvider.notifier).state = true; // örnek olarak login
+    }
+    _startTimeout();
+  }
+
   Future<void> _refreshSeller() async {
-    await ref.read(userProvider.notifier).fetchUser(testUserId);
+    await ref.read(userProvider.notifier).fetchUserLogin(accesToken);
+    _startTimeout();
   }
 
   @override
@@ -45,26 +84,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _refreshSeller,
-        child: userAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Error: $error'),
-                textButton(
-                  context,
-                  'Tekrar Dene',
-                  onPressed: () {
-                    ref.read(userProvider.notifier).fetchUser(testUserId);
-                  },
-                )
-              ],
-            ),
-          ),
-          data: (user) {
+        child: Builder(
+          builder: (context) {
+            final user = userAsync.value;
+            print('user: $user');
             if (!isLoggedIn || user == null) {
               return ProfileNotLogin();
             }

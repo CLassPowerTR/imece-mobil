@@ -1,4 +1,4 @@
-part of '../sign_in_screen.dart';
+part of 'sign_in_screen.dart';
 
 RichText headText(BuildContext context) {
   return RichText(
@@ -90,7 +90,9 @@ Material signInWithGoogle(
                 HomeStyle(context: context).surface),
             minimumSize:
                 WidgetStateProperty.all(Size(width, containerHeight ?? 65))),
-        onPressed: () {},
+        onPressed: () {
+          showTemporarySnackBar(context, 'Bu özellik yakında eklenecek...');
+        },
         label: customText('sign in with google', context,
             size: HomeStyle(context: context).headlineSmall.fontSize,
             weight: FontWeight.w400)),
@@ -224,6 +226,7 @@ SizedBox passwordContainer(
   bool obscureText = false,
   VoidCallback? onTap,
   bool showSuffixIcon = false,
+
 }) {
   return SizedBox(
     height: containerHeight ?? 90,
@@ -247,6 +250,7 @@ SizedBox passwordContainer(
                 controller: textFieldController,
                 obscureText: obscureText,
                 showSuffixIcon: showSuffixIcon,
+                
                 onTap: onTap)),
       ],
     ),
@@ -254,7 +258,9 @@ SizedBox passwordContainer(
 }
 
 SizedBox emailAdressContainer(double width, BuildContext context,
-    {double? textFieldHeight, double? containerHeight}) {
+    {double? textFieldHeight,
+    double? containerHeight,
+    TextEditingController? controller}) {
   return SizedBox(
     height: containerHeight ?? 90,
     width: width,
@@ -272,14 +278,17 @@ SizedBox emailAdressContainer(double width, BuildContext context,
         ),
         SizedBox(
             height: textFieldHeight ?? 55,
-            child: textField(context, hintText: 'Enter your email adress')),
+            child: textField(context,
+                hintText: 'Enter your email adress', controller: controller)),
       ],
     ),
   );
 }
 
 SizedBox usernameContainer(double width, BuildContext context,
-    {double? textFieldHeight, double? containerHeight}) {
+    {double? textFieldHeight,
+    double? containerHeight,
+    TextEditingController? controller}) {
   return SizedBox(
     height: containerHeight ?? 90,
     width: width,
@@ -300,6 +309,7 @@ SizedBox usernameContainer(double width, BuildContext context,
           child: textField(
             context,
             hintText: 'Enter your username',
+            controller: controller,
           ),
         ),
       ],

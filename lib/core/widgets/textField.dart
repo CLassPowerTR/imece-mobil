@@ -24,13 +24,17 @@ TextField textField(
   TextAlignVertical? textAlignVertical,
   List<TextInputFormatter>? inputFormatters,
 }) {
+  // Eğer şifre alanı ise, minLines ve maxLines 1 olmalı
+  final effectiveMinLines = obscureText ? 1 : (expands ? null : minLines);
+  final effectiveMaxLines = obscureText ? 1 : (expands ? null : maxLines);
+
   return TextField(
     readOnly: readOnly,
     controller: controller,
     obscureText: obscureText,
     inputFormatters: inputFormatters,
-    minLines: expands ? null : minLines,
-    maxLines: expands ? null : maxLines,
+    minLines: effectiveMinLines,
+    maxLines: effectiveMaxLines,
     expands: expands, // Bu alanı doldurmasını sağlar.
     textAlignVertical: TextAlignVertical.top, // Metin üstte hizalanır
     style: TextStyle(

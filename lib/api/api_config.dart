@@ -3,6 +3,9 @@ import 'package:flutter/services.dart' show rootBundle;
 
 class ApiConfig {
   final String usersApiUrl;
+  final String userMeApiUrl;
+  final String userRqLoginApiUrl;
+  final String userRqRegisterApiUrl;
   final String productsApiUrl;
   final String productsCategoryApiUrl;
   final String categoriesApiUrl;
@@ -13,6 +16,9 @@ class ApiConfig {
 
   ApiConfig({
     required this.usersApiUrl,
+    required this.userMeApiUrl,
+    required this.userRqLoginApiUrl,
+    required this.userRqRegisterApiUrl,
     required this.apiKey,
     required this.productsApiUrl,
     required this.categoriesApiUrl,
@@ -25,6 +31,9 @@ class ApiConfig {
   factory ApiConfig.fromJson(Map<String, dynamic> json) {
     return ApiConfig(
       usersApiUrl: json['usersApiUrl'],
+      userMeApiUrl: json['userMeApiUrl'],
+      userRqLoginApiUrl: json['userRqLoginApiUrl'],
+      userRqRegisterApiUrl: json['userRqRegisterApiUrl'],
       productsApiUrl: json['productsApiUrl'],
       productsCategoryApiUrl: json['productsCategoryApiUrl'],
       categoriesApiUrl: json['categoriesApiUrl'],

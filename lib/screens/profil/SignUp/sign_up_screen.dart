@@ -9,6 +9,13 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isCheckedContract = false;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  String? errorMessage;
+  bool showPassword = true;
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -26,14 +33,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             headText(context),
             emailAdressContainer(width, context,
-                textFieldHeight: 50, containerHeight: 80),
+                textFieldHeight: 50,
+                containerHeight: 80,
+                controller: emailController),
             usernameContainer(width, context,
-                textFieldHeight: 50, containerHeight: 80),
+                textFieldHeight: 50,
+                containerHeight: 80,
+                controller: usernameController),
             passwordContainer(width, context,
                 textFieldHeight: 50,
                 containerHeight: 80,
-                obscureText: true,
-                showSuffixIcon: true),
+                obscureText: showPassword,
+                showSuffixIcon: true, onTap: () {
+              setState(() {
+                showPassword = !showPassword;
+              });
+            }, textFieldController: passwordController),
             checkContract(
               width,
               context,
@@ -44,7 +59,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 });
               },
             ),
-            NextButton(context, isCheckedContract, minSizeHeight: 50),
+            if (isLoading) const CircularProgressIndicator(),
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(errorMessage!,
+                    style: const TextStyle(color: Colors.red)),
+              ),
+            NextButton(context, isCheckedContract, minSizeHeight: 50,
+                onPressed: () async {
+              setState(() {
+                isLoading = true;
+                errorMessage = null;
+              });
+              try {
+                await ApiService.fetchUserLogin(
+                  emailController.text.trim(),
+                  usernameController.text.trim(),
+                  passwordController.text.trim(),
+                );
+                setState(() {
+                  isLoading = false;
+                });
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Kayıt başarılı!')),
+                  );
+                  Navigator.pushReplacementNamed(context, '/profil/signIn');
+                }
+              } catch (e) {
+                setState(() {
+                  isLoading = false;
+                  errorMessage = e.toString();
+                });
+              }
+            }),
             orLine(width, context, containerHeight: 16),
             signInWithGoogle(context, width, containerHeight: 50),
             //SizedBox(height: 5),

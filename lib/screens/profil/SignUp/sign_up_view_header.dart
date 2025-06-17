@@ -1,4 +1,4 @@
-part of '../../profile_screen.dart';
+part of '../profile_screen.dart';
 
 AppBar _SignUpAppBar(BuildContext context) {
   return AppBar(

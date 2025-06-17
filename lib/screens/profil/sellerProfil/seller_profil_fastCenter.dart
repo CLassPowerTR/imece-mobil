@@ -1,4 +1,4 @@
-part of '../seller_profil_screen.dart';
+part of 'seller_profil_screen.dart';
 
 class ShortcutCenter extends StatefulWidget {
   final User user;

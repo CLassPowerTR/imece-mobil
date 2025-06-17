@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/services/api_service.dart';
 
-part 'widget/sign_in_view_header.dart';
-part 'widget/sign_in_widget_items.dart';
+part 'sign_in_view_header.dart';
+part 'sign_in_widget_items.dart';
 part '../SignUp/sign_up_screen.dart';
 part '../changePassword/change_password_screen.dart';
 

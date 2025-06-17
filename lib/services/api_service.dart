@@ -8,6 +8,7 @@ import '../models/users.dart';
 import '../models/productCategories.dart';
 import '../api/api_config.dart'; // Add this line to import ApiConfig
 import '../models/urunYorum.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   /// API'den User verisini çekmek için metot.
@@ -186,6 +187,35 @@ class ApiService {
     } else {
       throw Exception(
           'Ürün yorumları alınamadı. Durum kodu: [31m[1m${response.statusCode}[0m');
+    }
+  }
+
+  static Future<User> fetchUserLogin(
+      String email, String userName, String password) async {
+    final config = await ApiConfig.loadFromAsset();
+    final response = await http.post(
+      Uri.parse(config.userRqLoginApiUrl),
+      body: {
+        'email': email,
+        'username': userName,
+        'password': password,
+        'rol': 'alici'
+      },
+    );
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      // Tokenları kaydet
+      if (jsonData['tokens'] != null) {
+        final accessToken = jsonData['tokens']['access'] ?? '';
+        final refreshToken = jsonData['tokens']['refresh'] ?? '';
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accesToken', accessToken);
+        await prefs.setString('refreshToken', refreshToken);
+      }
+      return User.fromJson(jsonData);
+    } else {
+      throw Exception(
+          'Kullanıcı girişi başarısız. Durum kodu: ${response.statusCode}');
     }
   }
 }

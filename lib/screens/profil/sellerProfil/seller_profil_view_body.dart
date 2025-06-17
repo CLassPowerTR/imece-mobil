@@ -1,4 +1,4 @@
-part of '../seller_profil_screen.dart';
+part of 'seller_profil_screen.dart';
 
 class SellerProfilBody extends StatefulWidget {
   final User sellerProfil;

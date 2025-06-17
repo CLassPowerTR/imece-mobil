@@ -1,5 +1,8 @@
 {
     "usersApiUrl": "https://imecehub.com/api/users/kullanicilar/",
+    "userMeApiUrl": "https://imecehub.com/api/users/kullanicilar/me/",
+    "userRqLoginApiUrl": "https://imecehub.com/users/rq_login/",
+    "userRqRegisterApiUrl": "https://imecehub.com/users/rq_register/",
     "productsApiUrl":"https://imecehub.com/api/products/urunler/",
     "populerProductsApiUrl":"https://imecehub.com/products/populer-urunler/",
     "productsCategoryApiUrl":"https://imecehub.com/api/products/kategoriler/",

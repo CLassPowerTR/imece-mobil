@@ -12,9 +12,9 @@ import 'package:imecehub/core/widgets/yorumContainer.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
-part 'widget/seller_profil_view_header.dart';
-part 'widget/seller_profil_view_body.dart';
-part 'widget/seller_profil_fastCenter.dart';
+part 'seller_profil_view_header.dart';
+part 'seller_profil_view_body.dart';
+part 'seller_profil_fastCenter.dart';
 
 class SellerProfilScreen extends StatefulWidget {
   final User sellerProfil;
