@@ -21,6 +21,10 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreen extends State<SignInScreen> {
   bool isCheckedContract = false;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,6 @@ class _SignInScreen extends State<SignInScreen> {
               width,
               context,
             ),
-
             passwordContainer(width, context,
                 obscureText: true, showSuffixIcon: true),
             checkContract(
@@ -56,10 +59,49 @@ class _SignInScreen extends State<SignInScreen> {
                 });
               },
             ),
+            if (isLoading) const CircularProgressIndicator(),
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 100, // Maksimum yükseklik belirleyin
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ),
             NextButton(
               context,
               isCheckedContract,
-              onPressed: () {},
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                  errorMessage = null;
+                });
+                try {
+                  await ApiService.fetchUserLogin(emailController.text.trim(),
+                      passwordController.text.trim());
+                  setState(() {
+                    isLoading = false;
+                  });
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Giriş başarılı!')),
+                    );
+                    Navigator.pushReplacementNamed(context, '/profil');
+                  }
+                } catch (e) {
+                  setState(() {
+                    isLoading = false;
+                    errorMessage = e.toString();
+                  });
+                }
+              },
             ),
             orLine(width, context),
             _changedPassword(context),

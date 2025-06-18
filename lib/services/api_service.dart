@@ -190,7 +190,7 @@ class ApiService {
     }
   }
 
-  static Future<User> fetchUserLogin(
+  static Future<User> fetchUserRegister(
       String email, String userName, String password) async {
     final config = await ApiConfig.loadFromAsset();
     final response = await http.post(
@@ -202,10 +202,17 @@ class ApiService {
         'rol': 'alici'
       },
     );
+    final isJson =
+        response.headers['content-type']?.contains('application/json') ?? false;
+    dynamic jsonData;
+    if (isJson) {
+      jsonData = json.decode(utf8.decode(response.bodyBytes));
+    } else {
+      jsonData = null;
+    }
     if (response.statusCode == 200) {
-      final jsonData = json.decode(utf8.decode(response.bodyBytes));
       // Tokenları kaydet
-      if (jsonData['tokens'] != null) {
+      if (jsonData != null && jsonData['tokens'] != null) {
         final accessToken = jsonData['tokens']['access'] ?? '';
         final refreshToken = jsonData['tokens']['refresh'] ?? '';
         final prefs = await SharedPreferences.getInstance();
@@ -214,8 +221,48 @@ class ApiService {
       }
       return User.fromJson(jsonData);
     } else {
-      throw Exception(
-          'Kullanıcı girişi başarısız. Durum kodu: ${response.statusCode}');
+      final errorStatus = jsonData != null
+          ? (jsonData['status'] ?? response.statusCode)
+          : response.statusCode;
+      final errorMessage = jsonData != null
+          ? (jsonData['message'] ?? 'Kullanıcı kaydı başarısız.')
+          : response.body;
+      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
+    }
+  }
+
+  static Future<User> fetchUserLogin(String email, String password) async {
+    final config = await ApiConfig.loadFromAsset();
+    final response = await http.post(
+      Uri.parse(config.userRqLoginApiUrl),
+      body: {'email': email, 'password': password},
+    );
+    final isJson =
+        response.headers['content-type']?.contains('application/json') ?? false;
+    dynamic jsonData;
+    if (isJson) {
+      jsonData = json.decode(utf8.decode(response.bodyBytes));
+    } else {
+      jsonData = null;
+    }
+    if (response.statusCode == 200) {
+      // Tokenları kaydet
+      if (jsonData != null && jsonData['tokens'] != null) {
+        final accessToken = jsonData['tokens']['access'] ?? '';
+        final refreshToken = jsonData['tokens']['refresh'] ?? '';
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accesToken', accessToken);
+        await prefs.setString('refreshToken', refreshToken);
+      }
+      return User.fromJson(jsonData);
+    } else {
+      final errorStatus = jsonData != null
+          ? (jsonData['status'] ?? response.statusCode)
+          : response.statusCode;
+      final errorMessage = jsonData != null
+          ? (jsonData['message'] ?? 'Kullanıcı girişi başarısız.')
+          : response.body;
+      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
     }
   }
 }

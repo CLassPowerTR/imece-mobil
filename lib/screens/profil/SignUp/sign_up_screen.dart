@@ -63,8 +63,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             if (errorMessage != null)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(errorMessage!,
-                    style: const TextStyle(color: Colors.red)),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 100, // Maksimum yükseklik belirleyin
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
               ),
             NextButton(context, isCheckedContract, minSizeHeight: 50,
                 onPressed: () async {
@@ -73,7 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 errorMessage = null;
               });
               try {
-                await ApiService.fetchUserLogin(
+                await ApiService.fetchUserRegister(
                   emailController.text.trim(),
                   usernameController.text.trim(),
                   passwordController.text.trim(),
