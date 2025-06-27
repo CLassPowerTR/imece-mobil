@@ -7,11 +7,35 @@ class ProfileNotLogin extends StatefulWidget {
   State<ProfileNotLogin> createState() => _profileNotLoginState();
 }
 
-class _profileNotLoginState extends State<ProfileNotLogin> {
+class _profileNotLoginState extends State<ProfileNotLogin> with RouteAware {
+  final RouteObserver<ModalRoute<void>> routeObserver =
+      RouteObserver<ModalRoute<void>>();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => ProfileScreen(refresh: true)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SafeArea(
           child: Padding(
@@ -40,9 +64,7 @@ class _profileNotLoginState extends State<ProfileNotLogin> {
               context,
               'Üye Ol',
               onPressed: () {
-                setState(() {
-                  Navigator.pushNamed(context, '/profil/signUp');
-                });
+                Navigator.pushNamed(context, '/profil/signUp');
               },
               shadowColor:
                   HomeStyle(context: context).secondary.withOpacity(0.5),
@@ -56,9 +78,7 @@ class _profileNotLoginState extends State<ProfileNotLogin> {
               shadowColor:
                   HomeStyle(context: context).secondary.withOpacity(0.5),
               onPressed: () {
-                setState(() {
-                  Navigator.pushNamed(context, '/profil/signIn');
-                });
+                Navigator.pushNamed(context, '/profil/signIn');
               },
             )
           ],

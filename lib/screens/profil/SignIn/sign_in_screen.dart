@@ -5,26 +5,47 @@ import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/services/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:imecehub/screens/home/home_screen.dart';
 
 part 'sign_in_view_header.dart';
 part 'sign_in_widget_items.dart';
 part '../SignUp/sign_up_screen.dart';
 part '../changePassword/change_password_screen.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreen();
+  ConsumerState<SignInScreen> createState() => _SignInScreen();
 }
 
-class _SignInScreen extends State<SignInScreen> {
+class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
   bool isCheckedContract = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
+  bool showPassword = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ProfileScreen(refresh: true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +67,15 @@ class _SignInScreen extends State<SignInScreen> {
             emailAdressContainer(
               width,
               context,
+              controller: emailController,
             ),
             passwordContainer(width, context,
-                obscureText: true, showSuffixIcon: true),
+                textFieldController: passwordController,
+                obscureText: showPassword, onTap: () {
+              setState(() {
+                showPassword = !showPassword;
+              });
+            }, showSuffixIcon: true),
             checkContract(
               width,
               context,
@@ -84,8 +111,10 @@ class _SignInScreen extends State<SignInScreen> {
                   errorMessage = null;
                 });
                 try {
-                  await ApiService.fetchUserLogin(emailController.text.trim(),
-                      passwordController.text.trim());
+                  await ApiService.fetchUserLogin(
+                    emailController.text.trim(),
+                    passwordController.text.trim(),
+                  );
                   setState(() {
                     isLoading = false;
                   });
@@ -93,7 +122,8 @@ class _SignInScreen extends State<SignInScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Giriş başarılı!')),
                     );
-                    Navigator.pushReplacementNamed(context, '/profil');
+                    ref.read(bottomNavIndexProvider.notifier).state = 3;
+                    Navigator.pushReplacementNamed(context, '/home');
                   }
                 } catch (e) {
                   setState(() {

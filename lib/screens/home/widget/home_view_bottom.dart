@@ -1,13 +1,11 @@
 part of '../home_screen.dart';
 
-class _HomeBottomNavigationBarTest extends StatelessWidget {
-  int selectedIndex;
-  final ValueChanged<int> onPressed;
-  _HomeBottomNavigationBarTest(
-      {super.key, required this.onPressed, required this.selectedIndex});
+class _HomeBottomNavigationBarTest extends ConsumerWidget {
+  const _HomeBottomNavigationBarTest({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIndex = ref.watch(bottomNavIndexProvider);
     return Positioned(
       left: 0,
       right: 0,
@@ -34,36 +32,41 @@ class _HomeBottomNavigationBarTest extends StatelessWidget {
                 'Anasayfa',
                 'assets/vectors/homePage.svg',
                 0,
+                selectedIndex,
               ),
               _buildBottomNavigationBarItem(
                 context,
                 'Ürünler',
                 'assets/vectors/urunler.svg',
                 1,
+                selectedIndex,
               ),
               _buildBottomNavigationBarItem(
                 context,
                 'Sepetim',
                 'assets/vectors/sepet.svg',
                 2,
+                selectedIndex,
               ),
               _buildBottomNavigationBarItem(
                 context,
                 'Profilim',
                 'assets/vectors/profil.svg',
                 3,
+                selectedIndex,
               ),
             ],
             type: BottomNavigationBarType.fixed,
-            onTap: onPressed,
+            onTap: (index) =>
+                ref.read(bottomNavIndexProvider.notifier).state = index,
           ),
         ),
       ),
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem(
-      BuildContext context, String label, String iconPath, int index) {
+  BottomNavigationBarItem _buildBottomNavigationBarItem(BuildContext context,
+      String label, String iconPath, int index, int selectedIndex) {
     final color = selectedIndex == index
         ? HomeStyle(context: context).secondary
         : HomeStyle(context: context).primary;

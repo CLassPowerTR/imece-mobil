@@ -1,13 +1,15 @@
 part of '../SignIn/sign_in_screen.dart';
 
-class SignUpScreen extends StatefulWidget {
+
+
+class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   bool isCheckedContract = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
@@ -94,7 +96,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Kayıt başarılı!')),
                   );
-                  Navigator.pushReplacementNamed(context, '/profil/signIn');
+                  ref.read(bottomNavIndexProvider.notifier).state = 3;
+                  Navigator.pushReplacementNamed(context, '/home');
                 }
               } catch (e) {
                 setState(() {

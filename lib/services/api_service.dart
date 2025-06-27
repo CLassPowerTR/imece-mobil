@@ -190,36 +190,43 @@ class ApiService {
     }
   }
 
-  static Future<User> fetchUserRegister(
+  static Future fetchUserRegister(
       String email, String userName, String password) async {
     final config = await ApiConfig.loadFromAsset();
     final response = await http.post(
-      Uri.parse(config.userRqLoginApiUrl),
-      body: {
+      Uri.parse(config.userRqRegisterApiUrl),
+      body: json.encode({
         'email': email,
         'username': userName,
         'password': password,
         'rol': 'alici'
+      }),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+        'Allow': 'Post',
       },
     );
-    final isJson =
-        response.headers['content-type']?.contains('application/json') ?? false;
+    final contentType = response.headers.entries
+        .firstWhere((e) => e.key.toLowerCase() == 'content-type',
+            orElse: () => MapEntry('', ''))
+        .value;
+    final isJson = contentType.contains('application/json');
     dynamic jsonData;
     if (isJson) {
       jsonData = json.decode(utf8.decode(response.bodyBytes));
     } else {
       jsonData = null;
     }
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 && jsonData != null) {
       // Tokenları kaydet
-      if (jsonData != null && jsonData['tokens'] != null) {
+      if (jsonData['tokens'] != null) {
         final accessToken = jsonData['tokens']['access'] ?? '';
         final refreshToken = jsonData['tokens']['refresh'] ?? '';
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accesToken', accessToken);
         await prefs.setString('refreshToken', refreshToken);
       }
-      return User.fromJson(jsonData);
     } else {
       final errorStatus = jsonData != null
           ? (jsonData['status'] ?? response.statusCode)
@@ -231,38 +238,80 @@ class ApiService {
     }
   }
 
-  static Future<User> fetchUserLogin(String email, String password) async {
+  static Future fetchUserLogin(String email, String password) async {
     final config = await ApiConfig.loadFromAsset();
     final response = await http.post(
       Uri.parse(config.userRqLoginApiUrl),
-      body: {'email': email, 'password': password},
+      body: json.encode({'email': email, 'password': password}),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+        'Allow': 'Post',
+      },
     );
-    final isJson =
-        response.headers['content-type']?.contains('application/json') ?? false;
-    dynamic jsonData;
-    if (isJson) {
-      jsonData = json.decode(utf8.decode(response.bodyBytes));
-    } else {
-      jsonData = null;
-    }
-    if (response.statusCode == 200) {
-      // Tokenları kaydet
-      if (jsonData != null && jsonData['tokens'] != null) {
+    final jsonData = json.decode(utf8.decode(response.bodyBytes));
+    if (response.statusCode == 200 && jsonData != null) {
+      if (jsonData['tokens'] != null) {
         final accessToken = jsonData['tokens']['access'] ?? '';
         final refreshToken = jsonData['tokens']['refresh'] ?? '';
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accesToken', accessToken);
         await prefs.setString('refreshToken', refreshToken);
       }
+    } else {
+      final errorStatus = jsonData['status'] ?? response.statusCode;
+      final errorMessage = jsonData['message'] ?? 'Kullanıcı girişi başarısız.';
+      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
+    }
+  }
+
+  static Future<User> fetchUserMe(String token) async {
+    final config = await ApiConfig.loadFromAsset();
+    final response = await http.get(
+      Uri.parse(config.userMeApiUrl),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+        'Allow': 'Get',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
       return User.fromJson(jsonData);
     } else {
-      final errorStatus = jsonData != null
-          ? (jsonData['status'] ?? response.statusCode)
-          : response.statusCode;
-      final errorMessage = jsonData != null
-          ? (jsonData['message'] ?? 'Kullanıcı girişi başarısız.')
-          : response.body;
-      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
+      throw Exception(
+          'Kullanıcı me bilgisi alınamadı. Durum kodu: ${response.statusCode}');
+    }
+  }
+
+  static Future<String> fetchUserLogout() async {
+    final config = await ApiConfig.loadFromAsset();
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refreshToken') ?? '';
+    try {
+      final response = await http.delete(
+        Uri.parse(config.userLogoutApiUrl),
+        body: json.encode({'refresh_token': refreshToken}),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+          'Allow': 'Post',
+        },
+      );
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        if (jsonData is Map && jsonData['status'] == 'success') {
+          return jsonData['message'];
+        } else {
+          throw Exception(
+              'Çıkış başarısız: ${jsonData['message'] ?? 'Bilinmeyen hata'}');
+        }
+      } else {
+        throw Exception('${response.body}');
+      }
+    } finally {
+      await prefs.remove('accesToken');
     }
   }
 }

@@ -3,6 +3,7 @@
     "userMeApiUrl": "https://imecehub.com/api/users/kullanicilar/me/",
     "userRqLoginApiUrl": "https://imecehub.com/users/rq_login/",
     "userRqRegisterApiUrl": "https://imecehub.com/users/rq_register/",
+    "userLogoutApiUrl": "https://imecehub.com/users/rq_logout/",
     "productsApiUrl":"https://imecehub.com/api/products/urunler/",
     "populerProductsApiUrl":"https://imecehub.com/products/populer-urunler/",
     "productsCategoryApiUrl":"https://imecehub.com/api/products/kategoriler/",

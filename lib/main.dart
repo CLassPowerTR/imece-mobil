@@ -4,6 +4,9 @@ import 'package:imecehub/product/init/theme/custom_light_theme.dart';
 import 'package:imecehub/product/navigation/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
+
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -19,6 +22,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       initialRoute: '/home',
       routes: appRoutes,
+      navigatorObservers: [routeObserver],
     );
   }
 }

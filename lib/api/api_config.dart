@@ -6,6 +6,7 @@ class ApiConfig {
   final String userMeApiUrl;
   final String userRqLoginApiUrl;
   final String userRqRegisterApiUrl;
+  final String userLogoutApiUrl;
   final String productsApiUrl;
   final String productsCategoryApiUrl;
   final String categoriesApiUrl;
@@ -19,6 +20,7 @@ class ApiConfig {
     required this.userMeApiUrl,
     required this.userRqLoginApiUrl,
     required this.userRqRegisterApiUrl,
+    required this.userLogoutApiUrl,
     required this.apiKey,
     required this.productsApiUrl,
     required this.categoriesApiUrl,
@@ -34,6 +36,7 @@ class ApiConfig {
       userMeApiUrl: json['userMeApiUrl'],
       userRqLoginApiUrl: json['userRqLoginApiUrl'],
       userRqRegisterApiUrl: json['userRqRegisterApiUrl'],
+      userLogoutApiUrl: json['userLogoutApiUrl'],
       productsApiUrl: json['productsApiUrl'],
       productsCategoryApiUrl: json['productsCategoryApiUrl'],
       categoriesApiUrl: json['categoriesApiUrl'],

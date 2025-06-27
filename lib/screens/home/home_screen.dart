@@ -14,12 +14,15 @@ import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/products/products_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/screens/shoppingCart/cart_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../services/api_service.dart';
 
 part 'widget/home_view_header.dart';
 part 'widget/home_view_bottom.dart';
 part 'widget/home_view_body.dart';
+
+final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,37 +32,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with HomeScreenMixin {
-  int _selectedIndex = 0;
-  VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
-        Expanded(child: Builder(
-          builder: (context) {
-            switch (_selectedIndex) {
+        Consumer(
+          builder: (context, ref, _) {
+            final selectedIndex = ref.watch(bottomNavIndexProvider);
+            Widget body;
+            switch (selectedIndex) {
               case 0:
-                return _HomeViewBody();
+                body = _HomeViewBody();
+                break;
               case 1:
-                return Center(
-                  child: ProductsScreen(),
-                );
+                body = Center(child: ProductsScreen());
+                break;
               case 2:
-                return OrderScreen();
+                body = OrderScreen();
+                break;
               default:
-                return ProfileScreen();
+                body = ProfileScreen();
             }
+            return body;
           },
-        )),
-        _HomeBottomNavigationBarTest(
-          selectedIndex: _selectedIndex,
-          onPressed: (value) {
-            setState(() {
-              _selectedIndex = value;
-              print(_selectedIndex);
-            });
-          },
-        )
+        ),
+        _HomeBottomNavigationBarTest(),
       ]),
       //bottomNavigationBar: _HomeBottomNavigationBar(), // Bottom NavigationBar yerine body'nin en altına taşındı
     );

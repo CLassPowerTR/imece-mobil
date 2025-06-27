@@ -3,26 +3,30 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/screens/profil/buyerProfil/buyer_profil_screen.dart';
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'package:imecehub/models/users.dart';
 
 import '../../core/widgets/showTemporarySnackBar.dart';
 part 'profileNotLogin.dart';
 
 part 'SignUp/sign_up_view_header.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
+
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  final bool? refresh;
+  const ProfileScreen({super.key, this.refresh = false});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
   String accesToken = '';
   bool isTimeout = false;
   Timer? _timer;
@@ -30,8 +34,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAccessToken();
+    _loadAccessToken(force: true);
     _startTimeout();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+    _loadAccessToken(force: true);
   }
 
   void _startTimeout() {
@@ -47,48 +58,58 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   bool userAsyncIsLoading() {
-    final userAsync = ref.read(userProvider);
-    return userAsync is AsyncLoading<User?>;
+    final user = ref.read(userProvider);
+    return user == null;
   }
 
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _timer?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadAccessToken() async {
+  @override
+  void didPopNext() {
+    // Geri dönülünce verileri yenile
+    _loadAccessToken(force: widget.refresh == true);
+    super.didPopNext();
+  }
+
+  Future<void> _loadAccessToken({bool force = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accesToken') ?? '';
     setState(() {
       accesToken = token;
     });
-    if (accesToken.isNotEmpty) {
-      ref.read(userProvider.notifier).fetchUserLogin(accesToken);
+    // Eğer force true ise veya provider'da kullanıcı yoksa API'den çek
+    if (accesToken.isNotEmpty && (force || ref.read(userProvider) == null)) {
+      await ref.read(userProvider.notifier).fetchUserMe(accesToken);
       ref.read(loginStateProvider.notifier).state = true; // örnek olarak login
     }
-    _startTimeout();
-  }
-
-  Future<void> _refreshSeller() async {
-    await ref.read(userProvider.notifier).fetchUserLogin(accesToken);
     _startTimeout();
   }
 
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = ref.watch(loginStateProvider);
-    final userAsync = ref.watch(userProvider);
+    final user = ref.watch(userProvider);
+
+    // Güvenlik: accesToken yoksa veya boşsa, ya da loginState false ise ProfileNotLogin göster
+    if (accesToken.isEmpty || !isLoggedIn) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: ProfileNotLogin(),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
-        onRefresh: _refreshSeller,
+        onRefresh: _loadAccessToken,
         child: Builder(
           builder: (context) {
-            final user = userAsync.value;
-            print('user: $user');
-            if (!isLoggedIn || user == null) {
+            if (user == null) {
               return ProfileNotLogin();
             }
             if (user.aliciProfili == null && user.saticiProfili != null) {
@@ -98,11 +119,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               );
             } else if (user.saticiProfili == null &&
                 user.aliciProfili != null) {
-              // Henüz alıcı profili ekranı yok, şimdilik boş bir Container dönüyoruz
-              return Container(
-                alignment: Alignment.center,
-                child: Text('Alıcı profili ekranı yakında!'),
-              );
+              return BuyerProfilScreen(buyerProfil: user);
             } else {
               // Her iki profil de yoksa profil bulunamadı uyarı barı ve giriş ekranı
               return Builder(
