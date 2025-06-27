@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
+import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/services/api_service.dart';
 
 class productsCard extends StatefulWidget {
   final Product product;
@@ -167,7 +169,15 @@ class _productsCardState extends State<productsCard> {
                   Expanded(
                     flex: 4,
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () async {
+                        try {
+                          await ApiService.fetchSepetEkle(
+                              1, widget.product.urunId ?? 0);
+                        } catch (e) {
+                          showTemporarySnackBar(
+                              context, 'Sepete eklenirken bir hata oluştu: $e');
+                        }
+                      },
                       child: Container(
                         height: 30,
                         alignment: Alignment.center,

@@ -37,8 +37,16 @@ class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
             buttonColor: Colors.orange, elevation: 4));
   }
 
-  Expanded _sepeteEkleButton(BuildContext context) =>
-      Expanded(child: textButton(context, 'Sepete ekle', elevation: 4));
+  Expanded _sepeteEkleButton(BuildContext context) => Expanded(
+          child: textButton(context, 'Sepete ekle', elevation: 4,
+              onPressed: () async {
+        try {
+          await ApiService.fetchSepetEkle(1, widget.product.urunId ?? 0);
+        } catch (e) {
+          showTemporarySnackBar(
+              context, 'Sepete eklenirken bir hata oluştu: $e');
+        }
+      }));
 
   Expanded _fiyatStokText(HomeStyle themeData) {
     return Expanded(

@@ -308,4 +308,70 @@ class ApiService {
       await prefs.remove('accesToken');
     }
   }
+
+  static Future fetchSepetEkle(int? miktar, int urunId) async {
+    final config = await ApiConfig();
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accesToken') ?? '';
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final response = await http.post(
+      Uri.parse(config.sepetEkleApiUrl),
+      body: json.encode({
+        'miktar': miktar ?? 0,
+        'urun_id': urunId,
+      }),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+        'Allow': 'Post',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is Map && jsonData['status'] == 'success') {
+        return jsonData['message'];
+      } else {
+        throw Exception(
+            'Sepete ekleme başarısız: Durum kodu: ${response.statusCode} \n${jsonData['detail'] ?? 'Bilinmeyen hata'}');
+      }
+    } else {
+      throw Exception(
+          'Sepete ekleme başarısız. Durum kodu: ${response.statusCode} \n${response.body}');
+    }
+  }
+
+  static Future<List<dynamic>> fetchSepetGet() async {
+    final config = await ApiConfig();
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accesToken') ?? '';
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final response = await http.get(
+      Uri.parse(config.sepetGetApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is List) {
+        print(jsonData);
+        return jsonData;
+      } else {
+        throw Exception(
+            'Sepet verisi alınamadı: Beklenen liste formatında değil. Durum kodu: ${response.statusCode}');
+      }
+    } else {
+      throw Exception(
+          'Sepet verisi alınamadı. Durum kodu: ${response.statusCode} \n${response.body}');
+    }
+  }
 }

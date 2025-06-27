@@ -497,7 +497,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                 decoration: BoxDecoration(
                     color: themeData.surfaceContainer,
                     borderRadius: BorderRadius.circular(6)),
-                child: favoriIconButton(context, selected: false)))
+                child: favoriIconButton(context, () {}, selected: false)))
       ],
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
+import 'package:imecehub/services/api_service.dart';
 
 part 'order_screen_appBar.dart';
 part 'orderScreenBottomNavigationBar.dart';
@@ -48,21 +50,21 @@ class _OrderScreenState extends State<OrderScreen> {
             });
           },
         ),
-        body: orderScreenBody(
-            context,
-            selectedCard,
-            (String? newValue) {
-              setState(() {
-                selectedCard = newValue;
-              });
-            },
-            selectedIban,
-            (String? newValue) {
-              setState(() {
-                selectedIban = newValue;
-              });
-            },
-            _focusNode));
+        body: OrderScreenBody(
+          selectedCard: selectedCard,
+          onCardChanged: (String? newValue) {
+            setState(() {
+              selectedCard = newValue;
+            });
+          },
+          selectedIban: selectedIban,
+          onIbanChanged: (String? newValue) {
+            setState(() {
+              selectedIban = newValue;
+            });
+          },
+          focusNode: _focusNode,
+        ));
   }
 }
 
