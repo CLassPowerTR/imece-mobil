@@ -1,56 +1,24 @@
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
-  final String usersApiUrl;
-  final String userMeApiUrl;
-  final String userRqLoginApiUrl;
-  final String userRqRegisterApiUrl;
-  final String userLogoutApiUrl;
-  final String productsApiUrl;
-  final String productsCategoryApiUrl;
-  final String categoriesApiUrl;
-  final String populerProductsApiUrl;
-  final String companiesApiUrl;
-  final String urunYorumApiUrl;
-  final String apiKey;
+  final String usersApiUrl = dotenv.env['USERS_API_URL'] ?? '';
+  final String userMeApiUrl = dotenv.env['USER_ME_API_URL'] ?? '';
+  final String userRqLoginApiUrl = dotenv.env['USER_RQ_LOGIN_API_URL'] ?? '';
+  final String userRqRegisterApiUrl =
+      dotenv.env['USER_RQ_REGISTER_API_URL'] ?? '';
+  final String userLogoutApiUrl = dotenv.env['USER_LOGOUT_API_URL'] ?? '';
+  final String productsApiUrl = dotenv.env['PRODUCTS_API_URL'] ?? '';
+  final String productsCategoryApiUrl =
+      dotenv.env['PRODUCTS_CATEGORY_API_URL'] ?? '';
+  final String categoriesApiUrl = dotenv.env['CATEGORIES_API_URL'] ?? '';
+  final String populerProductsApiUrl =
+      dotenv.env['POPULER_PRODUCTS_API_URL'] ?? '';
+  final String companiesApiUrl = dotenv.env['COMPANIES_API_URL'] ?? '';
+  final String urunYorumApiUrl = dotenv.env['URUN_YORUM_API_URL'] ?? '';
+  final String apiKey = dotenv.env['API_KEY'] ?? '';
 
-  ApiConfig({
-    required this.usersApiUrl,
-    required this.userMeApiUrl,
-    required this.userRqLoginApiUrl,
-    required this.userRqRegisterApiUrl,
-    required this.userLogoutApiUrl,
-    required this.apiKey,
-    required this.productsApiUrl,
-    required this.categoriesApiUrl,
-    required this.populerProductsApiUrl,
-    required this.companiesApiUrl,
-    required this.productsCategoryApiUrl,
-    required this.urunYorumApiUrl,
-  });
-
-  factory ApiConfig.fromJson(Map<String, dynamic> json) {
-    return ApiConfig(
-      usersApiUrl: json['usersApiUrl'],
-      userMeApiUrl: json['userMeApiUrl'],
-      userRqLoginApiUrl: json['userRqLoginApiUrl'],
-      userRqRegisterApiUrl: json['userRqRegisterApiUrl'],
-      userLogoutApiUrl: json['userLogoutApiUrl'],
-      productsApiUrl: json['productsApiUrl'],
-      productsCategoryApiUrl: json['productsCategoryApiUrl'],
-      categoriesApiUrl: json['categoriesApiUrl'],
-      populerProductsApiUrl: json['populerProductsApiUrl'],
-      companiesApiUrl: json['companiesApiUrl'],
-      urunYorumApiUrl: json['urunYorumApiUrl'],
-      apiKey: json['apiKey'],
-    );
-  }
-
-  /// JSON dosyasını okuyup ApiConfig nesnesi döndüren metot.
-  static Future<ApiConfig> loadFromAsset() async {
-    final jsonString = await rootBundle.loadString('api/api_config.json');
-    final jsonMap = json.decode(jsonString);
-    return ApiConfig.fromJson(jsonMap);
-  }
+  // Singleton pattern (isteğe bağlı)
+  static final ApiConfig instance = ApiConfig._internal();
+  factory ApiConfig() => instance;
+  ApiConfig._internal();
 }

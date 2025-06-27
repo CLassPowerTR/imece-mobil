@@ -13,10 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   /// API'den User verisini çekmek için metot.
   static Future<List<Company>> fetchSellers() async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
-
-    // HTTP GET isteği gönderilirken header'a API key eklenir.
+    final config = ApiConfig();
     final response = await http.get(
       Uri.parse(config.companiesApiUrl),
       headers: {
@@ -38,7 +35,7 @@ class ApiService {
 
   static Future<User> fetchUserId(int? id) async {
     // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
 
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
@@ -63,7 +60,7 @@ class ApiService {
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchProducts({String? id}) async {
     // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
 
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
@@ -88,10 +85,7 @@ class ApiService {
   }
 
   static Future<List<Category>> fetchCategories() async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
-
-    // HTTP GET isteği gönderilirken header'a API key eklenir.
+    final config = ApiConfig();
     final response = await http.get(
       Uri.parse(config.categoriesApiUrl),
       headers: {
@@ -114,7 +108,7 @@ class ApiService {
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchPopulerProducts() async {
     // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
 
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
@@ -140,7 +134,7 @@ class ApiService {
   /// API'den Product verisini çekmek için metot.
   static Future<Product> fetchProduct(int? id) async {
     // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
 
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
@@ -164,7 +158,7 @@ class ApiService {
   /// API'den Ürün Yorumlarını çekmek için metot.
   static Future<List<UrunYorum>> fetchUrunYorumlar({int? urunId}) async {
     // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
 
     // Eğer urunId verilmişse, ilgili ürünün yorumlarını çek.
     final url = urunId == null
@@ -192,7 +186,7 @@ class ApiService {
 
   static Future fetchUserRegister(
       String email, String userName, String password) async {
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
     final response = await http.post(
       Uri.parse(config.userRqRegisterApiUrl),
       body: json.encode({
@@ -239,7 +233,7 @@ class ApiService {
   }
 
   static Future fetchUserLogin(String email, String password) async {
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
     final response = await http.post(
       Uri.parse(config.userRqLoginApiUrl),
       body: json.encode({'email': email, 'password': password}),
@@ -266,7 +260,7 @@ class ApiService {
   }
 
   static Future<User> fetchUserMe(String token) async {
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
     final response = await http.get(
       Uri.parse(config.userMeApiUrl),
       headers: {
@@ -286,7 +280,7 @@ class ApiService {
   }
 
   static Future<String> fetchUserLogout() async {
-    final config = await ApiConfig.loadFromAsset();
+    final config = await ApiConfig();
     final prefs = await SharedPreferences.getInstance();
     final refreshToken = prefs.getString('refreshToken') ?? '';
     try {

@@ -23,7 +23,7 @@ class UserNotifier extends StateNotifier<User?> {
   Future<void> fetchUserMe(String accesToken) async {
     try {
       // API konfigürasyon bilgilerini yükle.
-      final config = await ApiConfig.loadFromAsset();
+      final config = await ApiConfig();
 
       // HTTP GET isteği gönderilirken header'a API key eklenir.
       final response = await http.get(

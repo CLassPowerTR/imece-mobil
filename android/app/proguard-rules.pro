@@ -1,0 +1,4 @@
+-keep class io.socket.** { *; }
+-keep class org.json.** { *; }
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
