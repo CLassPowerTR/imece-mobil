@@ -14,6 +14,7 @@ import 'package:imecehub/screens/products/products_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/screens/shoppingCart/cart_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/api_service.dart';
 

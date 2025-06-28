@@ -4,11 +4,13 @@ import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'sign_in_view_header.dart';
 part 'sign_in_widget_items.dart';
@@ -122,8 +124,13 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Giriş başarılı!')),
                     );
+
                     ref.read(bottomNavIndexProvider.notifier).state = 3;
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/home', (route) => false,
+                        arguments: {'refresh': true});
+
+                    //Navigator.pushReplacementNamed(context, '/home');
                   }
                 } catch (e) {
                   setState(() {

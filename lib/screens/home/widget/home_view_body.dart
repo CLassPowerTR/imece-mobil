@@ -14,6 +14,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
   late Future<List<Category>> _futureCategory;
   late Future<List<Company>> _futureSellers;
   late Future<List<Product>> _futurePopulerProducts;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
@@ -21,6 +22,16 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     _voidCachedCategories();
     _voidCachedSellers();
     _voidCachedPopulerProducts();
+    _checkLogin();
+  }
+
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      this.isLoggedIn = token.isNotEmpty;
+    });
+    return isLoggedIn;
   }
 
   // Refresh işlemini gerçekleştiren metod:
@@ -69,7 +80,11 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                       _futureCategories(width, height),
                       _kampanyalarText(context),
                       _kampanyalarItems(width, height),
-                      _kayitContainer(context, height),
+                      Builder(builder: (context) {
+                        return !isLoggedIn
+                            ? _kayitContainer(context, height)
+                            : SizedBox.shrink();
+                      }),
                       //_saticilarList(height, context, width),
                       _futureSellersView(height, width, themeData),
                       _alimTipiContainer(height, context),
@@ -340,7 +355,10 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return productsCard2(
-              product: populerProducts[index], width: width, context: context, height: height);
+              product: populerProducts[index],
+              width: width,
+              context: context,
+              height: height);
         });
   }
 
