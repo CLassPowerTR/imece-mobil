@@ -24,7 +24,6 @@ class UserNotifier extends StateNotifier<User?> {
     try {
       // API konfigürasyon bilgilerini yükle.
       final config = await ApiConfig();
-
       // HTTP GET isteği gönderilirken header'a API key eklenir.
       final response = await http.get(
         Uri.parse(config.userMeApiUrl),

@@ -339,10 +339,8 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
-          final product = populerProducts[index];
-          print(product);
           return productsCard2(
-              product: product, width: width, context: context, height: height);
+              product: populerProducts[index], width: width, context: context, height: height);
         });
   }
 

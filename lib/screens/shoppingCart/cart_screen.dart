@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/richText.dart';
+import 'package:imecehub/core/widgets/sepetProductsCard.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/services/api_service.dart';
 import 'package:u_credit_card/u_credit_card.dart';
+import 'package:imecehub/models/products.dart';
+import 'package:imecehub/core/widgets/productsCard2.dart';
+import 'package:intl/intl.dart';
 
 part 'widget/cart_view_header.dart';
-part 'widget/test.dart';
 part 'widget/cart_view_body.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -22,9 +26,7 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: _CartScreenHeader(context),
-        body: _CartViewBody());
+    return Scaffold(appBar: _CartScreenHeader(context), body: _CartViewBody());
   }
 }
 

@@ -344,7 +344,7 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchSepetGet() async {
+  static Future<Map<String, dynamic>> fetchSepetGet() async {
     final config = await ApiConfig();
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accesToken') ?? '';
@@ -362,16 +362,23 @@ class ApiService {
     );
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      if (jsonData is List) {
-        print(jsonData);
-        return jsonData;
+      if (jsonData is Map<String, dynamic> && jsonData.containsKey('durum')) {
+        if (jsonData['durum'] == 'SEPET_DOLU' && jsonData['sepet'] is List) {
+          return {'durum': 'SEPET_DOLU', 'sepet': jsonData['sepet']};
+        } else if (jsonData['durum'] == 'BOS_SEPET') {
+          return {
+            'durum': 'BOS_SEPET',
+            'mesaj': jsonData['mesaj'] ?? 'Sepetinizde ürün bulunmamaktadır.'
+          };
+        } else {
+          throw Exception('Bilinmeyen sepet durumu: \\${jsonData['durum']}');
+        }
       } else {
-        throw Exception(
-            'Sepet verisi alınamadı: Beklenen liste formatında değil. Durum kodu: ${response.statusCode}');
+        throw Exception('Sepet verisi alınamadı: Beklenen formatta değil.');
       }
     } else {
       throw Exception(
-          'Sepet verisi alınamadı. Durum kodu: ${response.statusCode} \n${response.body}');
+          'Sepet verisi alınamadı. Durum kodu: \\${response.statusCode} \\n\\${response.body}');
     }
   }
 }

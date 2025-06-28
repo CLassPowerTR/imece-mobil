@@ -15,8 +15,25 @@ class _CartViewBodyState extends State<_CartViewBody> {
   final TextEditingController _cvvController = TextEditingController();
   final TextEditingController _cartUserNameController = TextEditingController();
   final TextEditingController _cartNameController = TextEditingController();
+  String ic_ticket =
+      "https://www.google.com/imgres?q=ticket%20icon&imgurl=https%3A%2F%2Fwww.svgrepo.com%2Fshow%2F326845%2Fticket-outline.svg&imgrefurl=https%3A%2F%2Fwww.svgrepo.com%2Fsvg%2F326845%2Fticket-outline&docid=R1UztiKmlx_AWM&tbnid=lwM-D8NyGUByPM&vet=12ahUKEwjQ8oj37pOOAxUvSfEDHYGzJ8cQM3oECBsQAA..i&w=800&h=800&hcb=2&ved=2ahUKEwjQ8oj37pOOAxUvSfEDHYGzJ8cQM3oECBsQAA";
+  String ic_map =
+      "https://www.google.com/imgres?q=map%20icon&imgurl=https%3A%2F%2Fpics.freeicons.io%2Fuploads%2Ficons%2Fpng%2F9143113441535956911-512.png&imgrefurl=https%3A%2F%2Ffreeicons.io%2Fdaily-use-and-life-style-icons%2Fmap-google%2520map-location-icon-1378&docid=ZDNuCXzNEhVl4M&tbnid=H3IKUVZ_YzUhaM&vet=12ahUKEwjMsYOK75OOAxWuVPEDHecfL3QQM3oECGcQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwjMsYOK75OOAxWuVPEDHecfL3QQM3oECGcQAA";
+  String ic_truck =
+      "https://www.google.com/imgres?q=truck%20icon&imgurl=https%3A%2F%2Fwww.iconpacks.net%2Ficons%2F1%2Ffree-truck-icon-1058-thumb.png&imgrefurl=https%3A%2F%2Fwww.iconpacks.net%2Ffree-icon%2Ftruck-1058.html&docid=bizg7D8mL6GfRM&tbnid=uMWDGHndW9MY0M&vet=12ahUKEwi849ud75OOAxVdQ_EDHVMTN6cQM3oECGcQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwi849ud75OOAxVdQ_EDHVMTN6cQM3oECGcQAA";
+  String ic_mandalina =
+      "https://www.google.com/imgres?q=mandalina%20icon&imgurl=https%3A%2F%2Fw7.pngwing.com%2Fpngs%2F336%2F120%2Fpng-transparent-mandarin-orange-tangerine-tangerine-orange-citrus-logo.png&imgrefurl=https%3A%2F%2Fwww.pngwing.com%2Ftr%2Ffree-png-zutdb&docid=B9CeoLM85ovNxM&tbnid=TVIincIwlMg4NM&vet=12ahUKEwifqt-x75OOAxWDQvEDHX1dMFQQM3oECH4QAA..i&w=920&h=598&hcb=2&itg=1&ved=2ahUKEwifqt-x75OOAxWDQvEDHX1dMFQQM3oECH4QAA";
+  String ic_visacard =
+      "https://www.google.com/imgres?q=visa%20icon&imgurl=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F5%2F5e%2FVisa_Inc._logo.svg%2F2560px-Visa_Inc._logo.svg.png&imgrefurl=https%3A%2F%2Ftr.m.wikipedia.org%2Fwiki%2FDosya%3AVisa_Inc._logo.svg&docid=bMWGx7rZzuufMM&tbnid=HJwGCYTXeIHnwM&vet=12ahUKEwjrquzK75OOAxVRHBAIHVmjLuQQM3oECGQQAA..i&w=2560&h=829&hcb=2&ved=2ahUKEwjrquzK75OOAxVRHBAIHVmjLuQQM3oECGQQAA";
+  String ic_mastercard =
+      "https://www.google.com/imgres?q=mastercard%20icon&imgurl=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fb%2Fb7%2FMasterCard_Logo.svg%2F1280px-MasterCard_Logo.svg.png&imgrefurl=https%3A%2F%2Ftr.m.wikipedia.org%2Fwiki%2FDosya%3AMasterCard_Logo.svg&docid=-f50CVIx2-IFJM&tbnid=AqW71AenfQzC2M&vet=12ahUKEwjTqsja75OOAxXjBtsEHRcHOecQM3oECGUQAA..i&w=1280&h=768&hcb=2&ved=2ahUKEwjTqsja75OOAxXjBtsEHRcHOecQM3oECGUQAA";
+  String ic_ziraatBank =
+      "https://www.google.com/imgres?q=ziraat%20bank%20icon&imgurl=https%3A%2F%2Fw7.pngwing.com%2Fpngs%2F12%2F951%2Fpng-transparent-ziraat-bankas%25C4%25B1-turkiye-%25C4%25B0%25C5%259F-bankas%25C4%25B1-credit-turkey-bank-text-payment-logo-thumbnail.png&imgrefurl=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dziraat%2BBankas%25C4%25B1&docid=dbQLdlvVAvUm4M&tbnid=5qRUTt0xEYJ_WM&vet=12ahUKEwiM76n38JOOAxVsXvEDHQ0lMHwQM3oECFcQAA..i&w=360&h=156&hcb=2&ved=2ahUKEwiM76n38JOOAxVsXvEDHQ0lMHwQM3oECFcQAA";
+  String ic_addProduct =
+      "https://www.google.com/imgres?q=add%20product%20icon&imgurl=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F7387%2F7387315.png&imgrefurl=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fadd-product_7387315&docid=3kI8IsrBfWJUwM&tbnid=fBsrgdgr-3F1wM&vet=12ahUKEwjspZ3j8JOOAxXGVPEDHWTQH5wQM3oECGwQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwjspZ3j8JOOAxXGVPEDHWTQH5wQM3oECGwQAA";
+
   int urunKg = 11;
-  int seciliUrun = 1;
+  late Future<Map<String, dynamic>> _sepetFuture;
   final storage = FlutterSecureStorage();
   String? cardNumber;
   String? lateDate;
@@ -38,6 +55,14 @@ class _CartViewBodyState extends State<_CartViewBody> {
       setState(() {});
     });
     _loadCardInfo();
+    _fetchSepet();
+  }
+
+  // Otomatik ve manuel yenileme için fonksiyon
+  void _fetchSepet() {
+    setState(() {
+      _sepetFuture = ApiService.fetchSepetGet();
+    });
   }
 
   Future<void> _loadCardInfo() async {
@@ -86,11 +111,82 @@ class _CartViewBodyState extends State<_CartViewBody> {
           _fiyatDetay(themeData, width),
           _odemeSecenegi(context, themeData, width),
           _satinAlim(context, themeData),
+          // Sepetteki ürünleri çekmek için örnek FutureBuilder
+
           SizedBox(
             height: height * 0.15,
           )
         ]),
       ),
+    );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _sepetItemsGet(context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _sepetFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showTemporarySnackBar(context, snapshot.error.toString());
+          });
+          return Text('Sepet verisi alınamadı.');
+        } else if (snapshot.hasData) {
+          final data = snapshot.data!;
+          if (data['durum'] == 'SEPET_DOLU' && data['sepet'] is List) {
+            final sepetList = data['sepet'] as List;
+            // Sepet dolu ise, ürünleri listele
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sepetinizdeki Ürünler:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                ...sepetList.map<Widget>((item) {
+                  return FutureBuilder<Product>(
+                    future: ApiService.fetchProduct(item['urun']),
+                    builder: (context, productSnapshot) {
+                      if (productSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (productSnapshot.hasError) {
+                        return Text(
+                            'Ürün verisi alınamadı: \\${productSnapshot.error}');
+                      } else if (productSnapshot.hasData) {
+                        final product = productSnapshot.data!;
+                        return SepetProductsCard(
+                          product: product,
+                          item: item,
+                          context: context,
+                        );
+                      } else {
+                        return Text('Ürün verisi bulunamadı.');
+                      }
+                    },
+                  );
+                }).toList(),
+              ],
+            );
+          } else if (data['durum'] == 'BOS_SEPET') {
+            return Text(data['mesaj'] ?? 'Sepetinizde ürün bulunmamaktadır.');
+          } else {
+            return Text('Bilinmeyen sepet durumu.');
+          }
+        } else {
+          return Text('Sepet verisi bulunamadı.');
+        }
+      },
+    );
+  }
+
+  Row _sepetRefreshButton() {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: _fetchSepet,
+          child: Text('Sepeti Yenile'),
+        ),
+      ],
     );
   }
 
@@ -205,8 +301,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
                   value: 'Visa Card',
                   child: Row(
                     children: [
-                      Image.asset('assets/ic_visacard.svg',
-                          width: 24, height: 24),
+                      Image.network(ic_visacard, width: 24, height: 24),
                       SizedBox(width: 8),
                       Text(
                         'Visa Card',
@@ -220,8 +315,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
                   value: 'Master Card',
                   child: Row(
                     children: [
-                      Image.asset('assets/ic_mastercard.svg',
-                          width: 24, height: 24),
+                      Image.network(ic_mastercard, width: 24, height: 24),
                       SizedBox(width: 8),
                       Text(
                         'Master Card',
@@ -252,8 +346,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
                   value: 'İban',
                   child: Row(
                     children: [
-                      Image.asset('assets/ic_ziraatBankasi.svg',
-                          width: 18, height: 18),
+                      Image.network(ic_ziraatBank, width: 18, height: 18),
                       SizedBox(width: 8),
                       Text(
                         'İban',
@@ -274,7 +367,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
           Row(
             spacing: 10,
             children: [
-              Image.asset('assets/ic_ticket.svg', width: 45, height: 45),
+              Image.network(ic_ticket, width: 45, height: 45),
               Expanded(
                 child: SizedBox(
                   height: 45,
@@ -431,22 +524,9 @@ class _CartViewBodyState extends State<_CartViewBody> {
       child: Column(
         spacing: 10,
         children: [
-          Builder(
-            builder: (context) {
-              if (seciliUrun == 0) {
-                return customText('Sepetinizde ürün bulunmuyor!', context,
-                    weight: FontWeight.bold,
-                    size: themeData.bodyLarge.fontSize);
-              }
-              return SizedBox(
-                height: 0,
-                width: 0,
-              );
-            },
-          ),
-          for (int i = 0; i < seciliUrun; i++)
-            _sepetUrunleriContainer(themeData),
+          _sepetRefreshButton(),
           //_sepetUrunleriContainer(themeData),
+          _sepetItemsGet(context),
           textButton(
             context,
             '+ Ürün ekle',
@@ -455,9 +535,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
             fontSize: themeData.bodyLarge.fontSize,
             weight: FontWeight.bold,
             onPressed: () {
-              setState(() {
-                seciliUrun += 1;
-              });
+              setState(() {});
             },
           )
         ],
@@ -478,7 +556,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 8,
             children: [
-              Image.asset('assets/img_mandalina.svg'),
+              Image.network(ic_mandalina),
               Expanded(
                 child: richText(context,
                     maxLines: 6,
@@ -505,9 +583,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
               ),
               IconButton(
                   onPressed: () {
-                    setState(() {
-                      seciliUrun -= 1;
-                    });
+                    setState(() {});
                   },
                   icon: Icon(
                     Icons.delete_outline_rounded,
@@ -644,7 +720,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
           Container(
             width: MediaQuery.of(context).size.width * 0.25,
             margin: EdgeInsets.only(left: 10),
-            child: Image.asset('assets/img_truck.svg'),
+            child: Image.network(ic_truck),
           ),
           Expanded(
             child: Column(
@@ -693,7 +769,7 @@ class _CartViewBodyState extends State<_CartViewBody> {
             child: SizedBox(
               width: 100,
               height: 100,
-              child: Image.asset('assets/img_map.svg'),
+              child: Image.network(ic_map),
             ),
           ),
           Expanded(
