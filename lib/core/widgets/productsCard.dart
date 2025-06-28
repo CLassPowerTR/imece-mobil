@@ -3,10 +3,13 @@ import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class productsCard extends StatefulWidget {
+class productsCard extends ConsumerStatefulWidget {
   final Product product;
 
   final double width;
@@ -23,13 +26,30 @@ class productsCard extends StatefulWidget {
       required this.height});
 
   @override
-  State<productsCard> createState() => _productsCardState();
+  ConsumerState<productsCard> createState() => _productsCardState();
 }
 
-class _productsCardState extends State<productsCard> {
+class _productsCardState extends ConsumerState<productsCard> {
   bool favoriteProduct = false;
   String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
   bool cokluGorsel = false;
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
+
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      this.isLoggedIn = token.isNotEmpty;
+    });
+    print(isLoggedIn);
+    return isLoggedIn;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,12 +190,17 @@ class _productsCardState extends State<productsCard> {
                     flex: 4,
                     child: GestureDetector(
                       onTap: () async {
-                        try {
-                          await ApiService.fetchSepetEkle(
-                              1, widget.product.urunId ?? 0);
-                        } catch (e) {
+                        if (isLoggedIn) {
+                          try {
+                            await ApiService.fetchSepetEkle(
+                                1, widget.product.urunId ?? 0);
+                          } catch (e) {
+                            showTemporarySnackBar(context,
+                                'Sepete eklenirken bir hata oluştu: $e');
+                          }
+                        } else {
                           showTemporarySnackBar(
-                              context, 'Sepete eklenirken bir hata oluştu: $e');
+                              context, 'Lütfen giriş yapınız');
                         }
                       },
                       child: Container(
@@ -196,8 +221,26 @@ class _productsCardState extends State<productsCard> {
                     flex: 1,
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          favoriteProduct = !favoriteProduct;
+                        setState(() async {
+                          if (isLoggedIn) {
+                            final user = ref.read(userProvider);
+                            try {
+                              await ApiService.fetchUserFavorites(
+                                  null,
+                                  user!.aliciProfili?.id ?? null,
+                                  widget.product.urunId);
+                              showTemporarySnackBar(
+                                  context, 'Favoriye eklendi');
+                            } catch (e) {
+                              showTemporarySnackBar(context, 'Hata: $e');
+                            }
+                            setState(() {
+                              favoriteProduct = !favoriteProduct;
+                            });
+                          } else {
+                            showTemporarySnackBar(
+                                context, 'Lütfen giriş yapınız');
+                          }
                         });
                       },
                       child: Container(

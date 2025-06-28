@@ -7,6 +7,7 @@ class ApiConfig {
   final String userRqRegisterApiUrl =
       dotenv.env['USER_RQ_REGISTER_API_URL'] ?? '';
   final String userLogoutApiUrl = dotenv.env['USER_LOGOUT_API_URL'] ?? '';
+  final String userFavoritesApiUrl = dotenv.env['USER_FAVORITES_API_URL'] ?? '';
   final String productsApiUrl = dotenv.env['PRODUCTS_API_URL'] ?? '';
   final String productsCategoryApiUrl =
       dotenv.env['PRODUCTS_CATEGORY_API_URL'] ?? '';

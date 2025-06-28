@@ -171,7 +171,32 @@ class _userMenu extends StatelessWidget {
                 overlayColor: WidgetStateProperty.all(
                     HomeStyle(context: context).secondary),
               ),
-              onPressed: () {},
+              onPressed: () {
+                switch (i) {
+                  case 0:
+                    showTemporarySnackBar(context, 'Siparişlerim');
+                    break;
+                  case 1:
+                    showTemporarySnackBar(context, 'Değerlendirmelerim');
+                    break;
+                  case 2:
+                    showTemporarySnackBar(context, 'İndirim Kuponlarım');
+                    break;
+                  case 3:
+                    showTemporarySnackBar(context, 'Takip ettiklerim');
+                    break;
+                  case 4:
+                    showTemporarySnackBar(context, 'Adres Bilgilerim');
+                    break;
+                  case 5:
+                    showTemporarySnackBar(context, 'Kartlarım');
+                    break;
+                  default:
+                    showTemporarySnackBar(context, 'Favorilerim');
+                    Navigator.pushNamed(context, '/profil/favorite');
+                    break;
+                }
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

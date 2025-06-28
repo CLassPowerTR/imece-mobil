@@ -1,15 +1,17 @@
 part of '../products_detail_screen.dart';
 
-class ProductsDetailViewBody extends StatefulWidget {
+class ProductsDetailViewBody extends ConsumerStatefulWidget {
   final Product product;
 
   const ProductsDetailViewBody({super.key, required this.product});
 
   @override
-  State<ProductsDetailViewBody> createState() => _ProductsDetailViewBodyState();
+  ConsumerState<ProductsDetailViewBody> createState() =>
+      _ProductsDetailViewBodyState();
 }
 
-class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
+class _ProductsDetailViewBodyState
+    extends ConsumerState<ProductsDetailViewBody> {
   bool biggerContainer = false;
   final int activeIndex = 0;
   double urunAciklamaContainerHeight = 150;
@@ -26,6 +28,7 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
   };
   late Future<User> _futureUser;
   late Future<List<UrunYorum>> _futureUrunYorumlar;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
@@ -33,6 +36,17 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
     _futureUser = ApiService.fetchUserId(widget.product.satici) as Future<User>;
     _futureUrunYorumlar =
         ApiService.fetchUrunYorumlar(urunId: widget.product.urunId);
+    _checkLogin();
+  }
+
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      this.isLoggedIn = token.isNotEmpty;
+    });
+    print(isLoggedIn);
+    return isLoggedIn;
   }
 
   @override
@@ -487,17 +501,37 @@ class _ProductsDetailViewBodyState extends State<ProductsDetailViewBody> {
                 );
               })),
             )),
-        Positioned(
-            width: 40,
-            height: 40,
-            right: 10,
-            top: 10,
-            child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: themeData.surfaceContainer,
-                    borderRadius: BorderRadius.circular(6)),
-                child: favoriIconButton(context, () {}, selected: false)))
+        Builder(builder: (context) {
+          return isLoggedIn
+              ? Positioned(
+                  width: 40,
+                  height: 40,
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: themeData.surfaceContainer,
+                          borderRadius: BorderRadius.circular(6)),
+                      child: favoriIconButton(context, () async {
+                        if (isLoggedIn) {
+                          final user = ref.read(userProvider);
+                          try {
+                            await ApiService.fetchUserFavorites(
+                                null,
+                                user!.aliciProfili?.id ?? null,
+                                widget.product.urunId);
+                            showTemporarySnackBar(context, 'Favoriye eklendi');
+                          } catch (e) {
+                            showTemporarySnackBar(context, 'Hata: $e');
+                          }
+                        } else {
+                          showTemporarySnackBar(
+                              context, 'Lütfen giriş yapınız');
+                        }
+                      }, selected: false)))
+              : SizedBox.shrink();
+        })
       ],
     );
   }

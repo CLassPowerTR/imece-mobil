@@ -11,9 +11,15 @@ import '../models/urunYorum.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
+  static final config = ApiConfig();
+
+  static Future<String> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accesToken') ?? '';
+  }
+
   /// API'den User verisini çekmek için metot.
   static Future<List<Company>> fetchSellers() async {
-    final config = ApiConfig();
     final response = await http.get(
       Uri.parse(config.companiesApiUrl),
       headers: {
@@ -34,9 +40,6 @@ class ApiService {
   }
 
   static Future<User> fetchUserId(int? id) async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig();
-
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
       Uri.parse('${config.usersApiUrl}$id/'),
@@ -59,9 +62,6 @@ class ApiService {
 
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchProducts({String? id}) async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig();
-
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
       Uri.parse(
@@ -85,7 +85,6 @@ class ApiService {
   }
 
   static Future<List<Category>> fetchCategories() async {
-    final config = ApiConfig();
     final response = await http.get(
       Uri.parse(config.categoriesApiUrl),
       headers: {
@@ -107,9 +106,6 @@ class ApiService {
 
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchPopulerProducts() async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig();
-
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
       Uri.parse(config.populerProductsApiUrl),
@@ -133,9 +129,6 @@ class ApiService {
 
   /// API'den Product verisini çekmek için metot.
   static Future<Product> fetchProduct(int? id) async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig();
-
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await http.get(
       Uri.parse('${config.productsApiUrl}$id/'),
@@ -157,9 +150,6 @@ class ApiService {
 
   /// API'den Ürün Yorumlarını çekmek için metot.
   static Future<List<UrunYorum>> fetchUrunYorumlar({int? urunId}) async {
-    // API konfigürasyon bilgilerini yükle.
-    final config = await ApiConfig();
-
     // Eğer urunId verilmişse, ilgili ürünün yorumlarını çek.
     final url = urunId == null
         ? config.urunYorumApiUrl
@@ -186,7 +176,6 @@ class ApiService {
 
   static Future fetchUserRegister(
       String email, String userName, String password) async {
-    final config = await ApiConfig();
     final response = await http.post(
       Uri.parse(config.userRqRegisterApiUrl),
       body: json.encode({
@@ -233,7 +222,6 @@ class ApiService {
   }
 
   static Future fetchUserLogin(String email, String password) async {
-    final config = await ApiConfig();
     final response = await http.post(
       Uri.parse(config.userRqLoginApiUrl),
       body: json.encode({'email': email, 'password': password}),
@@ -259,12 +247,12 @@ class ApiService {
     }
   }
 
-  static Future<User> fetchUserMe(String token) async {
-    final config = await ApiConfig();
+  static Future<User> fetchUserMe() async {
+    final accessToken = await getAccessToken();
     final response = await http.get(
       Uri.parse(config.userMeApiUrl),
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
         'Content-Type': 'application/json',
         'Allow': 'Get',
@@ -280,13 +268,11 @@ class ApiService {
   }
 
   static Future<String> fetchUserLogout() async {
-    final config = await ApiConfig();
-    final prefs = await SharedPreferences.getInstance();
-    final refreshToken = prefs.getString('refreshToken') ?? '';
+    final accessToken = await getAccessToken();
     try {
       final response = await http.delete(
         Uri.parse(config.userLogoutApiUrl),
-        body: json.encode({'refresh_token': refreshToken}),
+        body: json.encode({'refresh_token': accessToken}),
         headers: {
           'X-API-Key': config.apiKey,
           'Content-Type': 'application/json',
@@ -305,14 +291,13 @@ class ApiService {
         throw Exception('${response.body}');
       }
     } finally {
-      await prefs.remove('accesToken');
+      await SharedPreferences.getInstance()
+          .then((prefs) => prefs.remove('accesToken'));
     }
   }
 
   static Future fetchSepetEkle(int? miktar, int urunId) async {
-    final config = await ApiConfig();
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accesToken') ?? '';
+    final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
@@ -345,9 +330,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> fetchSepetGet() async {
-    final config = await ApiConfig();
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accesToken') ?? '';
+    final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
@@ -379,6 +362,62 @@ class ApiService {
     } else {
       throw Exception(
           'Sepet verisi alınamadı. Durum kodu: \\${response.statusCode} \\n\\${response.body}');
+    }
+  }
+
+  static Future<List<dynamic>> fetchUserFavorites(
+      int? id, int? userID, int? urunID) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    String url;
+    if (id == null) {
+      url = config.userFavoritesApiUrl;
+    } else {
+      url = '${config.userFavoritesApiUrl}$id/';
+    }
+    // userID ve urunID doluysa query parametre olarak ekle
+    if (userID != null || urunID != null) {
+      if (userID != null || urunID != null) {
+        return ['userID ve urunID boş olamaz.'];
+      } else {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'X-API-Key': config.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'alici': userID,
+            'urun': urunID,
+          }),
+        );
+        if (response.statusCode == 200 && response.body.isNotEmpty) {
+          final jsonData = json.decode(utf8.decode(response.bodyBytes));
+          return jsonData;
+        } else {
+          throw Exception(
+              'Favori ürünler alınamadı. Durum kodu: \\${response.statusCode}');
+        }
+      }
+    } else {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        return jsonData;
+      } else {
+        throw Exception(
+            'Favori ürünler alınamadı. Durum kodu: \\${response.statusCode}');
+      }
     }
   }
 }

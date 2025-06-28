@@ -8,6 +8,7 @@ import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imecehub/models/users.dart';
 import 'dart:async';
 
 import '../../core/widgets/showTemporarySnackBar.dart';
@@ -28,112 +29,96 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
   String accesToken = '';
-  bool isTimeout = false;
-  Timer? _timer;
+  bool? _lastLoginState;
+  User? _lastUser;
 
   @override
   void initState() {
     super.initState();
-    _loadAccessToken(force: true);
-    _startTimeout();
+    _loadAndCache();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
-    _loadAccessToken(force: true);
-  }
-
-  void _startTimeout() {
-    _timer?.cancel();
-    isTimeout = false;
-    _timer = Timer(const Duration(seconds: 5), () {
-      if (mounted && userAsyncIsLoading()) {
-        setState(() {
-          isTimeout = true;
-        });
-      }
-    });
-  }
-
-  bool userAsyncIsLoading() {
-    final user = ref.read(userProvider);
-    return user == null;
   }
 
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
-    _timer?.cancel();
     super.dispose();
   }
 
   @override
   void didPopNext() {
     // Geri dönülünce verileri yenile
-    _loadAccessToken(force: widget.refresh == true);
+    _loadAndCache();
     super.didPopNext();
   }
 
-  Future<void> _loadAccessToken({bool force = false}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accesToken') ?? '';
-    setState(() {
-      accesToken = token;
-    });
-    // Eğer force true ise veya provider'da kullanıcı yoksa API'den çek
-    if (accesToken.isNotEmpty && (force || ref.read(userProvider) == null)) {
-      await ref.read(userProvider.notifier).fetchUserMe(accesToken);
-      ref.read(loginStateProvider.notifier).state = true; // örnek olarak login
+  Future<void> _loadAndCache() async {
+    final isLoggedIn = await _checkLogin();
+    User? user = ref.read(userProvider);
+
+    // Eğer login ve user null ise, kullanıcıyı API'den çek
+    if (isLoggedIn && user == null) {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('accesToken') ?? '';
+      await ref.read(userProvider.notifier).fetchUserMe();
+      user = ref.read(userProvider);
     }
-    _startTimeout();
+
+    if (_lastLoginState != isLoggedIn || _lastUser != user) {
+      setState(() {
+        _lastLoginState = isLoggedIn;
+        _lastUser = user;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = ref.watch(loginStateProvider);
-    final user = ref.watch(userProvider);
-
-    // Güvenlik: accesToken yoksa veya boşsa, ya da loginState false ise ProfileNotLogin göster
-    if (accesToken.isEmpty || !isLoggedIn) {
+    // Ekranda eski veri varsa onu göster
+    if (_lastLoginState == null) {
+      // İlk yüklenme
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (!_lastLoginState!) {
       return Scaffold(
         backgroundColor: Colors.white,
         body: ProfileNotLogin(),
       );
     }
+    if (_lastUser == null) {
+      return ProfileNotLogin();
+    }
+    if (_lastUser!.aliciProfili == null && _lastUser!.saticiProfili != null) {
+      return SellerProfilScreen(
+        sellerProfil: _lastUser!,
+        myProfile: true,
+      );
+    } else if (_lastUser!.saticiProfili == null &&
+        _lastUser!.aliciProfili != null) {
+      return BuyerProfilScreen(buyerProfil: _lastUser!);
+    } else {
+      return Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showTemporarySnackBar(context, 'Profil bulunamadı.');
+          });
+          return ProfileNotLogin();
+        },
+      );
+    }
+  }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: RefreshIndicator(
-        onRefresh: _loadAccessToken,
-        child: Builder(
-          builder: (context) {
-            if (user == null) {
-              return ProfileNotLogin();
-            }
-            if (user.aliciProfili == null && user.saticiProfili != null) {
-              return SellerProfilScreen(
-                sellerProfil: user,
-                myProfile: isLoggedIn,
-              );
-            } else if (user.saticiProfili == null &&
-                user.aliciProfili != null) {
-              return BuyerProfilScreen(buyerProfil: user);
-            } else {
-              // Her iki profil de yoksa profil bulunamadı uyarı barı ve giriş ekranı
-              return Builder(
-                builder: (context) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    showTemporarySnackBar(context, 'Profil bulunamadı.');
-                  });
-                  return ProfileNotLogin();
-                },
-              );
-            }
-          },
-        ),
-      ),
-    );
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    return token.isNotEmpty;
   }
 }

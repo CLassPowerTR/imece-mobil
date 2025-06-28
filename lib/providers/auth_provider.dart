@@ -3,8 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:http/http.dart' as http;
 import 'package:imecehub/api/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-final loginStateProvider = StateProvider<bool>((ref) => false);
+// Giriş durumu her çağrıldığında otomatik kontrol edilir
+final loginStateProvider = FutureProvider<bool>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('accesToken') ?? '';
+  return token.isNotEmpty;
+});
 
 final userProvider =
     StateNotifierProvider<UserNotifier, User?>((ref) => UserNotifier());
@@ -20,7 +26,9 @@ class UserNotifier extends StateNotifier<User?> {
     state = null;
   }
 
-  Future<void> fetchUserMe(String accesToken) async {
+  Future<void> fetchUserMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accesToken = prefs.getString('accesToken') ?? '';
     try {
       // API konfigürasyon bilgilerini yükle.
       final config = await ApiConfig();

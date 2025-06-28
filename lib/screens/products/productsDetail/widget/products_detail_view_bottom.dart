@@ -11,6 +11,22 @@ class ProductsDetailViewBottom extends StatefulWidget {
 }
 
 class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
+  bool isLoggedIn = false;
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
+
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      this.isLoggedIn = token.isNotEmpty;
+    });
+    return isLoggedIn;
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeData = HomeStyle(context: context);
@@ -40,11 +56,15 @@ class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
   Expanded _sepeteEkleButton(BuildContext context) => Expanded(
           child: textButton(context, 'Sepete ekle', elevation: 4,
               onPressed: () async {
-        try {
-          await ApiService.fetchSepetEkle(1, widget.product.urunId ?? 0);
-        } catch (e) {
-          showTemporarySnackBar(
-              context, 'Sepete eklenirken bir hata oluştu: $e');
+        if (isLoggedIn) {
+          try {
+            await ApiService.fetchSepetEkle(1, widget.product.urunId ?? 0);
+          } catch (e) {
+            showTemporarySnackBar(
+                context, 'Sepete eklenirken bir hata oluştu: $e');
+          }
+        } else {
+          showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
         }
       }));
 

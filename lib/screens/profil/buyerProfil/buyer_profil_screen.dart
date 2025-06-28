@@ -12,6 +12,7 @@ import 'package:imecehub/screens/home/home_screen.dart';
 part 'buyer_profil_view_header.dart';
 part 'buyer_profil_view_body.dart';
 part 'buyer_profil_widgets_views.dart';
+part 'menu/favorite_screen.dart';
 
 class BuyerProfilScreen extends StatefulWidget {
   final User buyerProfil;
