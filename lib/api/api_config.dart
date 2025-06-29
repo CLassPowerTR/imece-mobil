@@ -18,6 +18,7 @@ class ApiConfig {
   final String urunYorumApiUrl = dotenv.env['URUN_YORUM_API_URL'] ?? '';
   final String sepetGetApiUrl = dotenv.env['SEPET_GET_API_URL'] ?? '';
   final String sepetEkleApiUrl = dotenv.env['SEPET_EKLE_API_URL'] ?? '';
+  final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';
 
   // Singleton pattern (isteğe bağlı)

@@ -1,13 +1,13 @@
 part of '../cart_screen.dart';
 
-class _CartViewBody extends StatefulWidget {
+class _CartViewBody extends ConsumerStatefulWidget {
   const _CartViewBody({super.key});
 
   @override
-  State<_CartViewBody> createState() => _CartViewBodyState();
+  ConsumerState<_CartViewBody> createState() => _CartViewBodyState();
 }
 
-class _CartViewBodyState extends State<_CartViewBody> {
+class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   bool _confirm = false;
   bool isChecked = false; // "Tüm alışveriş koşullarını onaylıyorum" için
   final TextEditingController _cardNumberController = TextEditingController();
@@ -469,48 +469,69 @@ class _CartViewBodyState extends State<_CartViewBody> {
       padding: EdgeInsets.all(12),
       margin: EdgeInsets.all(8),
       borderRadius: BorderRadius.circular(8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          richText(context,
-              fontWeight: FontWeight.w800,
-              fontSize: themeData.bodyMedium.fontSize,
-              textAlign: TextAlign.left,
-              children: [
-                TextSpan(
-                    text: 'Ara Toplam',
-                    style: TextStyle(
-                      fontSize: themeData.bodyLarge.fontSize,
-                    )),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
-                TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
-                TextSpan(
-                    text: '1 Adet',
-                    style: TextStyle(fontWeight: FontWeight.w400)),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                TextSpan(text: 'Ürünlerin Tutarı: '),
-                TextSpan(
-                    text: '${urunKg * 36 - 20} TL',
-                    style: TextStyle(fontWeight: FontWeight.w400)),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                TextSpan(text: 'Taşıma Ücreti: '),
-                TextSpan(
-                    text: '20 TL',
-                    style: TextStyle(fontWeight: FontWeight.w400)),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                TextSpan(text: 'Toplam: '),
-                TextSpan(
-                    text: '${urunKg * 36} TL ',
-                    style: TextStyle(fontWeight: FontWeight.w400)),
-                TextSpan(
-                    text: '(ek ücretler ve vergiler dahil)',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: themeData.primary.withOpacity(0.5)))
-              ]),
-        ],
-      ),
+      child: FutureBuilder<Map<String, dynamic>>(
+          future: ApiService.fetchSepetInfo(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Hata: ${snapshot.error}'));
+            }
+            if (snapshot.hasData) {
+              final data = snapshot.data!;
+              print(data);
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  richText(context,
+                      fontWeight: FontWeight.w800,
+                      fontSize: themeData.bodyMedium.fontSize,
+                      textAlign: TextAlign.left,
+                      children: [
+                        TextSpan(
+                            text: 'Ara Toplam',
+                            style: TextStyle(
+                              fontSize: themeData.bodyLarge.fontSize,
+                            )),
+                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
+                        TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
+                        TextSpan(
+                            text: '${data['adet']} Adet',
+                            style: TextStyle(fontWeight: FontWeight.w400)),
+                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                        TextSpan(text: 'Ürünlerin Tutarı: '),
+                        TextSpan(
+                            text: '${data['urun_toplam_tutari']} TL',
+                            style: TextStyle(fontWeight: FontWeight.w400)),
+                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                        TextSpan(text: 'Taşıma Ücreti: '),
+                        TextSpan(
+                            text: '${data['tasima_ucreti']} TL',
+                            style: TextStyle(fontWeight: FontWeight.w400)),
+                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                        TextSpan(text: 'Toplam: '),
+                        TextSpan(
+                            text: '${data['toplam_tutar']} TL ',
+                            style: TextStyle(fontWeight: FontWeight.w400)),
+                        TextSpan(
+                            text: '(ek ücretler ve vergiler dahil)',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                color: themeData.primary.withOpacity(0.5))),
+                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                        TextSpan(
+                          text: 'Son Teslim Tarihi: ',
+                        ),
+                        TextSpan(
+                            text: '${data['son_teslimat_tarihi']}',
+                            style: TextStyle(fontWeight: FontWeight.w400)),
+                      ]),
+                ],
+              );
+            }
+            return SizedBox();
+          }),
     );
   }
 
@@ -535,7 +556,12 @@ class _CartViewBodyState extends State<_CartViewBody> {
             fontSize: themeData.bodyLarge.fontSize,
             weight: FontWeight.bold,
             onPressed: () {
-              setState(() {});
+              setState(() {
+                ref.read(bottomNavIndexProvider.notifier).state = 1;
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/home', (route) => false,
+                    arguments: {'refresh': true});
+              });
             },
           )
         ],

@@ -1,7 +1,5 @@
 part of '../SignIn/sign_in_screen.dart';
 
-
-
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
@@ -97,7 +95,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     const SnackBar(content: Text('Kayıt başarılı!')),
                   );
                   ref.read(bottomNavIndexProvider.notifier).state = 3;
-                  Navigator.pushReplacementNamed(context, '/home');
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/home', (route) => false,
+                      arguments: {'refresh': true});
                 }
               } catch (e) {
                 setState(() {

@@ -365,6 +365,41 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> fetchSepetInfo() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.sepetInfoApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is Map<String, dynamic> && jsonData.containsKey('durum')) {
+        if (jsonData['durum'] == 'SEPET_DOLU') {
+          return jsonData;
+        } else if (jsonData['durum'] == 'BOS_SEPET') {
+          return {
+            'durum': 'BOS_SEPET',
+            'mesaj': jsonData['mesaj'] ?? 'Sepetinizde ürün bulunmamaktadır.'
+          };
+        } else {
+          throw Exception('Bilinmeyen sepet durumu: \\${jsonData['durum']}');
+        }
+      } else {
+        throw Exception('Sepet bilgisi alınamadı: Beklenen formatta değil.');
+      }
+    } else {
+      throw Exception(
+          'Sepet bilgisi alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
   static Future<List<dynamic>> fetchUserFavorites(
       int? id, int? userID, int? urunID) async {
     final accessToken = await getAccessToken();
