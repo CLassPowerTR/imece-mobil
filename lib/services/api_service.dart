@@ -90,13 +90,13 @@ class ApiService {
       headers: {
         'X-API-Key': config.apiKey,
         'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Type': 'application/json',
         'Allow': 'Get',
       },
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
+      List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
       return data.map((json) => Category.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -318,7 +318,8 @@ class ApiService {
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       final jsonData = json.decode(utf8.decode(response.bodyBytes));
       if (jsonData is Map && jsonData['status'] == 'success') {
-        return jsonData['message'];
+        print(jsonData);
+        return jsonData;
       } else {
         throw Exception(
             'Sepete ekleme başarısız: Durum kodu: ${response.statusCode} \n${jsonData['detail'] ?? 'Bilinmeyen hata'}');

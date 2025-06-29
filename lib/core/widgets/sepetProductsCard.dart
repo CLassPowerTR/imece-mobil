@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/services/api_service.dart';
 import 'package:intl/intl.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/core/widgets/text.dart';
@@ -7,12 +8,14 @@ class SepetProductsCard extends StatefulWidget {
   final Product product;
   final Map item;
   final BuildContext context;
+  final Function deleteFromCart;
 
   const SepetProductsCard({
     Key? key,
     required this.product,
     required this.item,
     required this.context,
+    required this.deleteFromCart,
   }) : super(key: key);
 
   @override
@@ -46,20 +49,30 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                   'Adet Fiyat: ${product.urunMinFiyat ?? '-'} TL', context),
               customText('Miktar: ${item['miktar'] ?? '-'} Adet', context),
               customText(
-                'Eklenme Tarihi: ' +
-                    (item['sepete_ekleme_tarihi'] != null
-                        ? DateFormat('yyyy-MM-dd HH:mm').format(
-                            DateTime.parse(item['sepete_ekleme_tarihi']))
-                        : '-'),
-                context,
-              ),
-              customText(
                 'Toplam Fiyat: ${_calculateTotalPrice(product.urunMinFiyat, item['miktar'])} TL',
                 context,
               ),
               customText(
                   'Maks. Miktar: ${product.stokDurumu ?? '-'} Adet', context),
+              customText(
+                  'Eklenme Tarihi: ' +
+                      (item['sepete_ekleme_tarihi'] != null
+                          ? DateFormat('yyyy-MM-dd HH:mm').format(
+                              DateTime.parse(item['sepete_ekleme_tarihi']))
+                          : '-'),
+                  context,
+                  maxLines: 2),
+              customText(
+                  'Tahmini Teslimat Tarihi: ${item['tahmini_teslimat_tarihi'] ?? 'Henüz Belirli Değil'}',
+                  context,
+                  maxLines: 2),
             ],
+          ),
+          trailing: IconButton(
+            onPressed: () {
+              widget.deleteFromCart();
+            },
+            icon: Icon(Icons.delete_outline, color: Colors.red),
           ),
         ),
       ),

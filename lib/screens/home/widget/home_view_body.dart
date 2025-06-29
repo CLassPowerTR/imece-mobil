@@ -655,7 +655,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             ),
           ),
         ),
-        customText(category.altKategoriAdi, context,
+        customText(category.altKategoriAdi.toString(), context,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             color: HomeStyle(context: context).primary,
