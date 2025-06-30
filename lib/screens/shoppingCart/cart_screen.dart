@@ -6,6 +6,7 @@ import 'package:imecehub/core/widgets/sepetProductsCard.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';

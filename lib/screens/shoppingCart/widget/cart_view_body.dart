@@ -33,6 +33,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
   int urunKg = 11;
   late Future<Map<String, dynamic>> _sepetFuture;
+  late Future<User> _sellerProfileFuture;
   final storage = FlutterSecureStorage();
   String? cardNumber;
   String? lateDate;
@@ -45,7 +46,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   String? selectedIban = "İban";
   TextEditingController couponController =
       TextEditingController(text: '000000');
-
   late Future<Map<String, dynamic>> _sepetInfoFuture;
 
   @override
@@ -57,7 +57,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     });
     _loadCardInfo();
     _fetchSepet();
-    _sepetInfoFuture = ApiService.fetchSepetInfo();
   }
 
   // Otomatik ve manuel yenileme için fonksiyon
@@ -96,147 +95,169 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return SafeArea(
-      child: FutureBuilder<Map<String, dynamic>>(
-        future: _sepetFuture,
-        builder: (context, snapshot) {
-          bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-          Widget mainContent;
-          if (snapshot.hasError) {
-            mainContent = Center(child: Text('Hata: \\${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            mainContent = Center(child: Text('Sepet verisi bulunamadı.'));
-          } else {
-            final data = snapshot.data!;
-            final durum = data['durum'];
-            if (durum == 'BOS_SEPET') {
-              mainContent = Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Center(
-                  child: Column(
-                    spacing: 10,
-                    children: [
-                      Text(data['mesaj'] ?? 'Sepetinizde ürün yok.'),
-                      _urunEkleButton(themeData),
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              final sepetList = data['sepet'] as List?;
-              mainContent = SingleChildScrollView(
+      child: _getSepetItems(themeData, width, height),
+    );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getSepetItems(
+      HomeStyle themeData, double width, double height) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _sepetFuture,
+      builder: (context, snapshot) {
+        bool isLoading = snapshot.connectionState == ConnectionState.waiting;
+        Widget mainContent;
+        if (snapshot.hasError) {
+          mainContent = Center(child: Text('Hata: \\${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          mainContent = Center(child: Text('Sepet verisi bulunamadı.'));
+        } else {
+          final data = snapshot.data!;
+          final durum = data['durum'];
+          if (durum == 'BOS_SEPET') {
+            mainContent = Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Center(
                 child: Column(
+                  spacing: 10,
                   children: [
+                    Text(data['mesaj'] ?? 'Sepetinizde ürün yok.'),
+                    _urunEkleButton(themeData),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            final sepetList = data['sepet'] as List?;
+            mainContent = SingleChildScrollView(
+              child: Column(
+                children: [
+                  container(
+                    context,
+                    color: themeData.surfaceContainer,
+                    width: width,
+                    isBoxShadow: true,
+                    margin: EdgeInsets.all(8),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Column(
+                      children: [
+                        _siparisKonum(context),
+                        _teslimatBilgi(context, themeData),
+                        _sepetUrunleriContainer(themeData),
+                      ],
+                    ),
+                  ),
+                  if (sepetList != null && sepetList.isNotEmpty)
                     container(
                       context,
                       color: themeData.surfaceContainer,
-                      width: width,
-                      isBoxShadow: true,
-                      margin: EdgeInsets.all(8),
                       borderRadius: BorderRadius.circular(8),
+                      margin: EdgeInsets.all(8),
+                      padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
                       child: Column(
+                        spacing: 10,
                         children: [
-                          _siparisKonum(context),
-                          _teslimatBilgi(context, themeData),
+                          Text('Sepetinizdeki Ürünler:',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          ...sepetList.map<Widget>((item) {
+                            return FutureBuilder<Product>(
+                              future: ApiService.fetchProduct(item['urun']),
+                              builder: (context, productSnapshot) {
+                                if (productSnapshot.hasError) {
+                                  return Text(
+                                      'Ürün verisi alınamadı: \\${productSnapshot.error}');
+                                } else if (productSnapshot.hasData) {
+                                  final product = productSnapshot.data!;
+                                  return FutureBuilder<User>(
+                                    future:
+                                        ApiService.fetchUserId(product.satici),
+                                    builder: (context, sellerSnapshot) {
+                                      if (sellerSnapshot.hasError) {
+                                        return Text(
+                                            'Satıcı verisi alınamadı: \\${sellerSnapshot.error}');
+                                      } else if (sellerSnapshot.hasData) {
+                                        final seller = sellerSnapshot.data!;
+                                        return SepetProductsCard(
+                                          sellerProfile: seller,
+                                          product: product,
+                                          item: item,
+                                          context: context,
+                                          deleteFromCart: () {
+                                            setState(() async {
+                                              try {
+                                                await ApiService.fetchSepetEkle(
+                                                    0, product.urunId!);
+                                              } catch (e) {
+                                                showTemporarySnackBar(
+                                                    context, e.toString());
+                                              } finally {
+                                                setState(() {
+                                                  _fetchSepet();
+                                                });
+                                              }
+                                            });
+                                          },
+                                        );
+                                      } else {
+                                        return Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                }
+                              },
+                            );
+                          }).toList(),
+                          textButton(
+                            context,
+                            '+ Ürün ekle',
+                            elevation: 6,
+                            shadowColor: themeData.secondary,
+                            fontSize: themeData.bodyLarge.fontSize,
+                            weight: FontWeight.bold,
+                            onPressed: () {
+                              setState(() {
+                                ref
+                                    .read(bottomNavIndexProvider.notifier)
+                                    .state = 1;
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/home',
+                                  (route) => false,
+                                  arguments: {'refresh': true},
+                                );
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    if (sepetList != null && sepetList.isNotEmpty)
-                      container(
-                        context,
-                        color: themeData.surfaceContainer,
-                        borderRadius: BorderRadius.circular(8),
-                        margin: EdgeInsets.all(8),
-                        padding:
-                            EdgeInsets.only(left: 12, right: 12, bottom: 12),
-                        child: Column(
-                          spacing: 10,
-                          children: [
-                            Text('Sepetinizdeki Ürünler:',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            ...sepetList.map<Widget>((item) {
-                              return FutureBuilder<Product>(
-                                future: ApiService.fetchProduct(item['urun']),
-                                builder: (context, productSnapshot) {
-                                  if (productSnapshot.hasError) {
-                                    return Text(
-                                        'Ürün verisi alınamadı: \\${productSnapshot.error}');
-                                  } else if (productSnapshot.hasData) {
-                                    final product = productSnapshot.data!;
-                                    return SepetProductsCard(
-                                      product: product,
-                                      item: item,
-                                      context: context,
-                                      deleteFromCart: () {
-                                        setState(() async {
-                                          try {
-                                            await ApiService.fetchSepetEkle(
-                                                0, product.urunId!);
-                                          } catch (e) {
-                                            showTemporarySnackBar(
-                                                context, e.toString());
-                                          } finally {
-                                            setState(() {
-                                              _fetchSepet();
-                                            });
-                                          }
-                                        });
-                                      },
-                                    );
-                                  } else {
-                                    return Text('Ürün verisi bulunamadı.');
-                                  }
-                                },
-                              );
-                            }).toList(),
-                            textButton(
-                              context,
-                              '+ Ürün ekle',
-                              elevation: 6,
-                              shadowColor: themeData.secondary,
-                              fontSize: themeData.bodyLarge.fontSize,
-                              weight: FontWeight.bold,
-                              onPressed: () {
-                                setState(() {
-                                  ref
-                                      .read(bottomNavIndexProvider.notifier)
-                                      .state = 1;
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    '/home',
-                                    (route) => false,
-                                    arguments: {'refresh': true},
-                                  );
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    _fiyatDetay(themeData, width),
-                    _odemeSecenegi(context, themeData, width),
-                    _satinAlim(context, themeData),
-                    SizedBox(height: height * 0.15),
-                  ],
-                ),
-              );
-            }
+                  _fiyatDetay(themeData, width),
+                  _odemeSecenegi(context, themeData, width),
+                  _satinAlim(context, themeData),
+                  SizedBox(height: height * 0.15),
+                ],
+              ),
+            );
           }
-          return Stack(
-            children: [
-              mainContent,
-              if (isLoading)
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.3),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+        }
+        return Stack(
+          children: [
+            mainContent,
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
-            ],
-          );
-        },
-      ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -614,7 +635,11 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 8,
             children: [
-              Image.network('ic_mandalina'),
+              Image.network(
+                'https://st4.depositphotos.com/16122460/38897/i/450/depositphotos_388975100-stock-photo-delicious-fresh-ripe-tangerines-background.jpg',
+                width: 100,
+                height: 100,
+              ),
               Expanded(
                 child: richText(context,
                     maxLines: 6,
@@ -892,81 +917,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           ),
         ],
       ),
-    );
-  }
-
-  FutureBuilder<Map<String, dynamic>> _sepetItemsGet(context, themeData) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _sepetFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showTemporarySnackBar(context, snapshot.error.toString());
-          });
-          return Text('Sepet verisi alınamadı.');
-        } else if (snapshot.hasData) {
-          final data = snapshot.data!;
-          // cartEmpty burada güncellenmiyor, _fetchSepet ile güncelleniyor
-          if (data['durum'] == 'SEPET_DOLU' && data['sepet'] is List) {
-            final sepetList = data['sepet'] as List;
-            // Sepet dolu ise, ürünleri listele
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Sepetinizdeki Ürünler:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                ...sepetList.map<Widget>((item) {
-                  return FutureBuilder<Product>(
-                    future: ApiService.fetchProduct(item['urun']),
-                    builder: (context, productSnapshot) {
-                      if (productSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      } else if (productSnapshot.hasError) {
-                        return Text(
-                            'Ürün verisi alınamadı: \\${productSnapshot.error}');
-                      } else if (productSnapshot.hasData) {
-                        final product = productSnapshot.data!;
-                        return SepetProductsCard(
-                          product: product,
-                          item: item,
-                          context: context,
-                          deleteFromCart: () {
-                            setState(() async {
-                              try {
-                                await ApiService.fetchSepetEkle(
-                                    0, product.urunId!);
-                              } catch (e) {
-                                showTemporarySnackBar(context, e.toString());
-                              }
-                              _fetchSepet();
-                            });
-                          },
-                        );
-                      } else {
-                        return Text('Ürün verisi bulunamadı.');
-                      }
-                    },
-                  );
-                }).toList(),
-              ],
-            );
-          } else if (data['durum'] == 'BOS_SEPET') {
-            return Column(
-              children: [
-                Text(data['mesaj'] ?? 'Sepetinizde ürün bulunmamaktadır.'),
-                _urunEkleButton(themeData),
-              ],
-            );
-          } else {
-            return Text('Bilinmeyen sepet durumu.');
-          }
-        } else {
-          return Text('Sepet verisi bulunamadı.');
-        }
-      },
     );
   }
 }

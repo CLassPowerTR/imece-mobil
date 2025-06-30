@@ -60,6 +60,27 @@ class ApiService {
     }
   }
 
+  static Future<User> fetchSellerProfile(int? id) async {
+    // HTTP GET isteği gönderilirken header'a API key eklenir.
+    final response = await http.get(
+      Uri.parse('${config.sellerProfileApiUrl}$id/'),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Allow': 'Get',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return User.fromJson(jsonData);
+    } else {
+      throw Exception(
+          'User verisi alınamadı. Durum kodu: ${response.statusCode}');
+    }
+  }
+
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchProducts({String? id}) async {
     // HTTP GET isteği gönderilirken header'a API key eklenir.
