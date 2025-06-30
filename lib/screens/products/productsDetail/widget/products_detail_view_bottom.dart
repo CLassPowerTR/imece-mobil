@@ -1,30 +1,29 @@
 part of '../products_detail_screen.dart';
 
-class ProductsDetailViewBottom extends StatefulWidget {
+class ProductsDetailViewBottom extends ConsumerStatefulWidget {
   final Product product;
+  final bool isLoggedIn;
+  final List<int> sepetUrunIdList;
+  final Future<void> Function()? sepeteEkle;
 
-  const ProductsDetailViewBottom({super.key, required this.product});
+  const ProductsDetailViewBottom(
+      {super.key,
+      required this.product,
+      required this.isLoggedIn,
+      required this.sepetUrunIdList,
+      required this.sepeteEkle});
 
   @override
-  State<ProductsDetailViewBottom> createState() =>
+  ConsumerState<ProductsDetailViewBottom> createState() =>
       _ProductsDetailViewBottomState();
 }
 
-class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
+class _ProductsDetailViewBottomState
+    extends ConsumerState<ProductsDetailViewBottom> {
   bool isLoggedIn = false;
   @override
   void initState() {
     super.initState();
-    _checkLogin();
-  }
-
-  Future<bool> _checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accesToken') ?? '';
-    setState(() {
-      this.isLoggedIn = token.isNotEmpty;
-    });
-    return isLoggedIn;
   }
 
   @override
@@ -53,20 +52,18 @@ class _ProductsDetailViewBottomState extends State<ProductsDetailViewBottom> {
             buttonColor: Colors.orange, elevation: 4));
   }
 
-  Expanded _sepeteEkleButton(BuildContext context) => Expanded(
-          child: textButton(context, 'Sepete ekle', elevation: 4,
-              onPressed: () async {
-        if (isLoggedIn) {
-          try {
-            await ApiService.fetchSepetEkle(1, widget.product.urunId ?? 0);
-          } catch (e) {
-            showTemporarySnackBar(
-                context, 'Sepete eklenirken bir hata oluştu: $e');
-          }
-        } else {
-          showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
-        }
-      }));
+  Expanded _sepeteEkleButton(BuildContext context) {
+    final isInSepet = widget.sepetUrunIdList.contains(widget.product.urunId);
+    return Expanded(
+      child: textButton(
+        context,
+        isInSepet ? 'Sepete Git' : 'Sepete ekle',
+        elevation: 4,
+        buttonColor: isInSepet ? Colors.orangeAccent : null,
+        onPressed: widget.sepeteEkle,
+      ),
+    );
+  }
 
   Expanded _fiyatStokText(HomeStyle themeData) {
     return Expanded(

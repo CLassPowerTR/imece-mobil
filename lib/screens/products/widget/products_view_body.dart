@@ -1,15 +1,16 @@
 part of '../products_screen.dart';
 
-class ProductsScreenBodyView extends StatefulWidget {
+class ProductsScreenBodyView extends ConsumerStatefulWidget {
   final String? categoryId;
 
   const ProductsScreenBodyView({super.key, this.categoryId});
 
   @override
-  State<ProductsScreenBodyView> createState() => _ProductsScreenBodyView();
+  ConsumerState<ProductsScreenBodyView> createState() =>
+      _ProductsScreenBodyView();
 }
 
-class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
+class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     with AutomaticKeepAliveClientMixin {
   List<dynamic> productCategories = [
     {'name': 'Sırala', 'icon': Icon(Icons.compare_arrows_outlined)},
@@ -22,6 +23,9 @@ class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
 
   static List<Product>? cachedProducts;
   late Future<List<Product>> _futureProducts;
+  static List<int> sepetUrunIdList = [];
+  bool isLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,13 +35,44 @@ class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
       // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
       _futureProducts = Future.value(cachedProducts);
     } else {
-      // İlk açılışta veya cache boşsa API’den verileri çek
+      // İlk açılışta veya cache boşsa API'den verileri çek
       _futureProducts = ApiService.fetchProducts(id: widget.categoryId)
           as Future<List<Product>>;
       _futureProducts.then((products) {
         // Gelen veriyi cache'e atıyoruz.
         cachedProducts = products;
       });
+    }
+    _checkLogin();
+    _checkGetSepet();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkGetSepet().then((_) {
+      setState(() {});
+    });
+  }
+
+  Future<bool> _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+    setState(() {
+      this.isLoggedIn = token.isNotEmpty;
+    });
+    return isLoggedIn;
+  }
+
+  Future<void> _checkGetSepet() async {
+    final sepet = await ApiService.fetchSepetGet();
+    // Sepet doluysa ürün id'lerini static listeye ata
+    if (sepet['durum'] == 'SEPET_DOLU' && sepet['sepet'] is List) {
+      sepetUrunIdList = (sepet['sepet'] as List)
+          .map<int>((item) => item['urun'] as int)
+          .toList();
+    } else {
+      sepetUrunIdList = [];
     }
   }
 
@@ -54,7 +89,7 @@ class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
 
   @override
   bool get wantKeepAlive =>
-      true; // Ekran arası geçişte state’in korunmasını sağlar
+      true; // Ekran arası geçişte state'in korunmasını sağlar
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +165,58 @@ class _ProductsScreenBodyView extends State<ProductsScreenBodyView>
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
+          // Ürün id'si sepet listesinde var mı kontrol et
+          int? urunId = products[index].urunId ?? products[index]['urun_id'];
+          bool isInSepet = urunId != null && sepetUrunIdList.contains(urunId);
+          bool favoriteProduct = false;
           return productsCard(
+              sepeteEkle: () async {
+                if (isLoggedIn) {
+                  if (isInSepet) {
+                    ref.read(bottomNavIndexProvider.notifier).state = 2;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/home', (route) => false,
+                        arguments: {'refresh': true});
+                  } else {
+                    try {
+                      await ApiService.fetchSepetEkle(
+                          1, products[index].urunId ?? 0);
+                      showTemporarySnackBar(context, 'Sepete eklendi');
+                    } catch (e) {
+                      showTemporarySnackBar(
+                          context, 'Sepete eklenirken bir hata oluştu: $e');
+                    } finally {
+                      await _checkGetSepet();
+                      setState(() {});
+                    }
+                  }
+                } else {
+                  showTemporarySnackBar(context, 'Lütfen giriş yapınız');
+                }
+              },
+              favoriEkle: () {
+                setState(() async {
+                  if (isLoggedIn) {
+                    final user = ref.read(userProvider);
+                    try {
+                      await ApiService.fetchUserFavorites(
+                          null,
+                          user!.aliciProfili?.id ?? null,
+                          products[index].urunId);
+                      showTemporarySnackBar(context, 'Favoriye eklendi');
+                    } catch (e) {
+                      showTemporarySnackBar(context, 'Hata: $e');
+                    }
+                    setState(() {
+                      favoriteProduct = !favoriteProduct;
+                    });
+                  } else {
+                    showTemporarySnackBar(context, 'Lütfen giriş yapınız');
+                  }
+                });
+              },
+              isSepet: isInSepet,
+              isFavorite: favoriteProduct,
               product: products[index],
               width: width,
               context: context,

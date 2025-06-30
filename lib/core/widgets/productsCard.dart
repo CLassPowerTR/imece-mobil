@@ -11,44 +11,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class productsCard extends ConsumerStatefulWidget {
   final Product product;
-
   final double width;
-
   final BuildContext context;
-
   final double height;
-
+  final bool isSepet;
+  final bool isFavorite;
+  final VoidCallback? sepeteEkle;
+  final VoidCallback? favoriEkle;
   const productsCard(
       {super.key,
       required this.product,
       required this.width,
       required this.context,
-      required this.height});
+      required this.height,
+      required this.isSepet,
+      required this.sepeteEkle,
+      required this.favoriEkle,
+      required this.isFavorite});
 
   @override
   ConsumerState<productsCard> createState() => _productsCardState();
 }
 
 class _productsCardState extends ConsumerState<productsCard> {
-  bool favoriteProduct = false;
   String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
   bool cokluGorsel = false;
-  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    _checkLogin();
-  }
-
-  Future<bool> _checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accesToken') ?? '';
-    setState(() {
-      this.isLoggedIn = token.isNotEmpty;
-    });
-    print(isLoggedIn);
-    return isLoggedIn;
   }
 
   @override
@@ -188,28 +179,22 @@ class _productsCardState extends ConsumerState<productsCard> {
                 children: [
                   Expanded(
                     flex: 4,
-                    child: GestureDetector(
-                      onTap: () async {
-                        if (isLoggedIn) {
-                          try {
-                            await ApiService.fetchSepetEkle(
-                                1, widget.product.urunId ?? 0);
-                          } catch (e) {
-                            showTemporarySnackBar(context,
-                                'Sepete eklenirken bir hata oluştu: $e');
-                          }
-                        } else {
-                          showTemporarySnackBar(
-                              context, 'Lütfen giriş yapınız');
-                        }
-                      },
-                      child: Container(
-                        height: 30,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
+                    child: SizedBox(
+                      height: 30,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: widget.isSepet
+                              ? Colors.orangeAccent[200]
+                              : HomeStyle(context: context).secondary,
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
-                            color: HomeStyle(context: context).secondary),
-                        child: customText('Sepete Ekle', context,
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: widget.sepeteEkle,
+                        child: customText(
+                            widget.isSepet ? 'Sepete Git' : 'Sepete Ekle',
+                            context,
                             color: Colors.white,
                             weight: FontWeight.bold,
                             size:
@@ -220,29 +205,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                   Expanded(
                     flex: 1,
                     child: GestureDetector(
-                      onTap: () {
-                        setState(() async {
-                          if (isLoggedIn) {
-                            final user = ref.read(userProvider);
-                            try {
-                              await ApiService.fetchUserFavorites(
-                                  null,
-                                  user!.aliciProfili?.id ?? null,
-                                  widget.product.urunId);
-                              showTemporarySnackBar(
-                                  context, 'Favoriye eklendi');
-                            } catch (e) {
-                              showTemporarySnackBar(context, 'Hata: $e');
-                            }
-                            setState(() {
-                              favoriteProduct = !favoriteProduct;
-                            });
-                          } else {
-                            showTemporarySnackBar(
-                                context, 'Lütfen giriş yapınız');
-                          }
-                        });
-                      },
+                      onTap: widget.favoriEkle,
                       child: Container(
                         height: 30,
                         decoration: BoxDecoration(
@@ -250,10 +213,10 @@ class _productsCardState extends ConsumerState<productsCard> {
                           color: Colors.grey[200],
                         ),
                         child: Icon(
-                          favoriteProduct
+                          widget.isFavorite
                               ? Icons.favorite
                               : Icons.favorite_border,
-                          color: favoriteProduct ? Colors.red : Colors.grey,
+                          color: widget.isFavorite ? Colors.red : Colors.grey,
                         ),
                       ),
                     ),

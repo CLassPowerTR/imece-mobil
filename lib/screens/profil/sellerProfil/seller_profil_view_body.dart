@@ -121,7 +121,14 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
         itemBuilder: (context, index) {
           final product = products[index];
           return productsCard(
-              product: product, width: width, context: context, height: height);
+              sepeteEkle: () {},
+              favoriEkle: () {},
+              isFavorite: false,
+              isSepet: false,
+              product: product,
+              width: width,
+              context: context,
+              height: height);
         });
   }
 

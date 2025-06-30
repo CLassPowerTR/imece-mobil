@@ -2,8 +2,10 @@ part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBody extends ConsumerStatefulWidget {
   final Product product;
+  final bool isLoggedIn;
 
-  const ProductsDetailViewBody({super.key, required this.product});
+  const ProductsDetailViewBody(
+      {super.key, required this.product, required this.isLoggedIn});
 
   @override
   ConsumerState<ProductsDetailViewBody> createState() =>
@@ -28,7 +30,6 @@ class _ProductsDetailViewBodyState
   };
   late Future<User> _futureUser;
   late Future<List<UrunYorum>> _futureUrunYorumlar;
-  bool isLoggedIn = false;
 
   @override
   void initState() {
@@ -36,17 +37,6 @@ class _ProductsDetailViewBodyState
     _futureUser = ApiService.fetchUserId(widget.product.satici) as Future<User>;
     _futureUrunYorumlar =
         ApiService.fetchUrunYorumlar(urunId: widget.product.urunId);
-    _checkLogin();
-  }
-
-  Future<bool> _checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accesToken') ?? '';
-    setState(() {
-      this.isLoggedIn = token.isNotEmpty;
-    });
-    print(isLoggedIn);
-    return isLoggedIn;
   }
 
   @override
@@ -502,7 +492,7 @@ class _ProductsDetailViewBodyState
               })),
             )),
         Builder(builder: (context) {
-          return isLoggedIn
+          return widget.isLoggedIn
               ? Positioned(
                   width: 40,
                   height: 40,
@@ -514,7 +504,7 @@ class _ProductsDetailViewBodyState
                           color: themeData.surfaceContainer,
                           borderRadius: BorderRadius.circular(6)),
                       child: favoriIconButton(context, () async {
-                        if (isLoggedIn) {
+                        if (widget.isLoggedIn) {
                           final user = ref.read(userProvider);
                           try {
                             await ApiService.fetchUserFavorites(
