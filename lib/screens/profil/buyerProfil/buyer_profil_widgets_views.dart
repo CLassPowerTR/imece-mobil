@@ -189,10 +189,9 @@ class _userMenu extends StatelessWidget {
                     showTemporarySnackBar(context, 'Adres Bilgilerim');
                     break;
                   case 5:
-                    showTemporarySnackBar(context, 'Kartlarım');
+                    Navigator.pushNamed(context, '/profil/cards');
                     break;
                   default:
-                    showTemporarySnackBar(context, 'Favorilerim');
                     Navigator.pushNamed(context, '/profil/favorite');
                     break;
                 }

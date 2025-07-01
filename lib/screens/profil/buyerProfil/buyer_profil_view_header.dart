@@ -7,21 +7,30 @@ class BuyerProfilViewHeader extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Text('Hesabım'),
-      centerTitle: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.notification_add),
-          onPressed: () {},
-          // TODO: Navigator.pushNamed(context, '/profil/notification')
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppBar(
+          title: customText('Hesabım', context,
+              size: HomeStyle(context: context).bodyLarge.fontSize,
+              weight: FontWeight.w600),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 4,
+          automaticallyImplyLeading: false,
+          shadowColor: Colors.grey[300],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.notification_add),
+              onPressed: () {},
+              // TODO: Navigator.pushNamed(context, '/profil/notification')
+            ),
+          ],
         ),
       ],
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + 8);
 }

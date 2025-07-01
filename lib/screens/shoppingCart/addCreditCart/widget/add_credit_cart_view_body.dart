@@ -89,30 +89,11 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
         child: Column(
           spacing: 15,
           children: [
-            CreditCardUi(
-              cardHolderFullName: cardUserName == ''
-                  ? 'Kart sahibinin adı'
-                  : cardUserName ?? 'Kart sahibinin adı',
-              cardNumber: cardNumber == ''
-                  ? '0000 0000 0000 0000'
-                  : cardNumber ?? '0000 0000 0000 0000',
-              validFrom: '00/00',
-              validThru:
-                  cardLateUseDate == '' ? '00/00' : cardLateUseDate ?? '00/00',
-              topLeftColor: Colors.blue,
-              doesSupportNfc: true,
-              placeNfcIconAtTheEnd: true,
-              bottomRightColor: Colors.purple,
-
-              cardType: CardType.debit,
-              //cardProviderLogo: FlutterLogo(),
-              cardProviderLogoPosition: CardProviderLogoPosition.right,
-              autoHideBalance: true,
-              enableFlipping: true, // 👈 Enables the flipping
-              cvvNumber: cardCvv == ''
-                  ? '000'
-                  : cardCvv ??
-                      '000', // 👈 CVV number to be shown on the back of the card
+            CreditCartWidget(
+              cardUserName: cardUserName ?? 'Kart sahibinin adı',
+              cardNumber: cardNumber ?? '0000 0000 0000 0000',
+              cardLateUseDate: cardLateUseDate ?? '00/00',
+              cardCvv: cardCvv ?? '000',
             ),
             Column(
               spacing: 5,

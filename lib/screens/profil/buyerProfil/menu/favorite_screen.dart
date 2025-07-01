@@ -7,23 +7,44 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 4,
+          shadowColor: Colors.grey[300],
+          leadingWidth: MediaQuery.of(context).size.width * 0.3,
+          title: customText('Favorilerim', context,
+              size: HomeStyle(context: context).bodyLarge.fontSize,
+              weight: FontWeight.w600),
+          leading: TextButton.icon(
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, kToolbarHeight),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              size: 20,
+              color: HomeStyle(context: context).secondary,
+            ),
+            label: customText(
+              'Geri Dön',
+              context,
+              weight: FontWeight.w600,
+              color: HomeStyle(context: context).secondary,
+              size: 14,
+            ),
+          ),
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Geri Dön Butonu
-              TextButton.icon(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.arrow_back),
-                label: customText('Geri Dön', context),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 16),
               // Favori verilerini çek ve göster
               Expanded(
                 child: FutureBuilder<List<dynamic>>(

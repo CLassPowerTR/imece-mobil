@@ -105,16 +105,15 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       future: _sepetFuture,
       builder: (context, snapshot) {
         bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-        Widget mainContent;
         if (snapshot.hasError) {
-          mainContent = Center(child: Text('Hata: \\${snapshot.error}'));
+          return Center(child: Text('Hata: ${snapshot.error}'));
         } else if (!snapshot.hasData) {
-          mainContent = Center(child: Text('Sepet verisi bulunamadı.'));
+          return Center(child: CircularProgressIndicator());
         } else {
           final data = snapshot.data!;
           final durum = data['durum'];
           if (durum == 'BOS_SEPET') {
-            mainContent = Padding(
+            return Padding(
               padding: const EdgeInsets.all(32.0),
               child: Center(
                 child: Column(
@@ -128,124 +127,175 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             );
           } else {
             final sepetList = data['sepet'] as List?;
-            mainContent = SingleChildScrollView(
-              child: Column(
-                children: [
-                  container(
-                    context,
-                    color: themeData.surfaceContainer,
-                    width: width,
-                    isBoxShadow: true,
-                    margin: EdgeInsets.all(8),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Column(
-                      children: [
-                        _siparisKonum(context),
-                        _teslimatBilgi(context, themeData),
-                        _sepetUrunleriContainer(themeData),
-                      ],
-                    ),
-                  ),
-                  if (sepetList != null && sepetList.isNotEmpty)
-                    container(
-                      context,
-                      color: themeData.surfaceContainer,
-                      borderRadius: BorderRadius.circular(8),
-                      margin: EdgeInsets.all(8),
-                      padding: EdgeInsets.only(left: 12, right: 12, bottom: 12),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Text('Sepetinizdeki Ürünler:',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          ...sepetList.map<Widget>((item) {
-                            return FutureBuilder<Product>(
-                              future: ApiService.fetchProduct(item['urun']),
-                              builder: (context, productSnapshot) {
-                                if (productSnapshot.hasError) {
-                                  return Text(
-                                      'Ürün verisi alınamadı: \\${productSnapshot.error}');
-                                } else if (productSnapshot.hasData) {
-                                  final product = productSnapshot.data!;
-                                  return FutureBuilder<User>(
-                                    future:
-                                        ApiService.fetchUserId(product.satici),
-                                    builder: (context, sellerSnapshot) {
-                                      if (sellerSnapshot.hasError) {
-                                        return Text(
-                                            'Satıcı verisi alınamadı: \\${sellerSnapshot.error}');
-                                      } else if (sellerSnapshot.hasData) {
-                                        final seller = sellerSnapshot.data!;
-                                        return SepetProductsCard(
-                                          sellerProfile: seller,
-                                          product: product,
-                                          item: item,
-                                          context: context,
-                                          deleteFromCart: () {
-                                            setState(() async {
-                                              try {
-                                                await ApiService.fetchSepetEkle(
-                                                    0, product.urunId!);
-                                              } catch (e) {
-                                                showTemporarySnackBar(
-                                                    context, e.toString());
-                                              } finally {
-                                                setState(() {
-                                                  _fetchSepet();
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      container(
+                        context,
+                        color: themeData.surfaceContainer,
+                        width: width,
+                        isBoxShadow: true,
+                        margin: EdgeInsets.all(8),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Column(
+                          children: [
+                            _siparisKonum(context),
+                            _teslimatBilgi(context, themeData),
+                            //_sepetUrunleriContainer(themeData),
+                          ],
+                        ),
+                      ),
+                      if (sepetList != null && sepetList.isNotEmpty)
+                        container(
+                          context,
+                          color: themeData.surfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          margin: EdgeInsets.all(8),
+                          padding:
+                              EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                          child: Column(
+                            spacing: 10,
+                            children: [
+                              Text('Sepetinizdeki Ürünler:',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              ...sepetList.map<Widget>((item) {
+                                return FutureBuilder<Product>(
+                                  future: ApiService.fetchProduct(item['urun']),
+                                  builder: (context, productSnapshot) {
+                                    if (productSnapshot.hasError) {
+                                      return Text(
+                                          'Ürün verisi alınamadı: ${productSnapshot.error}');
+                                    } else if (productSnapshot.hasData) {
+                                      final product = productSnapshot.data!;
+                                      return FutureBuilder<User>(
+                                        future: ApiService.fetchUserId(
+                                            product.satici),
+                                        builder: (context, sellerSnapshot) {
+                                          if (sellerSnapshot.hasError) {
+                                            return Text(
+                                                'Satıcı verisi alınamadı: ${sellerSnapshot.error}');
+                                          } else if (sellerSnapshot.hasData) {
+                                            final seller = sellerSnapshot.data!;
+                                            return SepetProductsCard(
+                                              sellerProfile: seller,
+                                              product: product,
+                                              item: item,
+                                              context: context,
+                                              removeCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService
+                                                        .fetchSepetEkle(
+                                                            item['miktar'] - 1,
+                                                            product.urunId!);
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                        context, e.toString());
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
                                                 });
-                                              }
-                                            });
-                                          },
-                                        );
-                                      } else {
-                                        return Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                    },
-                                  );
-                                } else {
-                                  return Center(
-                                      child: CircularProgressIndicator());
-                                }
-                              },
-                            );
-                          }).toList(),
-                          textButton(
-                            context,
-                            '+ Ürün ekle',
-                            elevation: 6,
-                            shadowColor: themeData.secondary,
-                            fontSize: themeData.bodyLarge.fontSize,
-                            weight: FontWeight.bold,
-                            onPressed: () {
-                              setState(() {
-                                ref
-                                    .read(bottomNavIndexProvider.notifier)
-                                    .state = 1;
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/home',
-                                  (route) => false,
-                                  arguments: {'refresh': true},
+                                              },
+                                              updateCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService
+                                                        .fetchSepetEkle(
+                                                            item['miktar'] + 1,
+                                                            product.urunId!);
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                        context, e.toString());
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                              deleteFromCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService
+                                                        .fetchSepetEkle(
+                                                            0, product.urunId!);
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                        context, e.toString());
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                            );
+                                          } else {
+                                            return Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          }
+                                        },
+                                      );
+                                    } else {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                  },
                                 );
-                              });
-                            },
+                              }).toList(),
+                              textButton(
+                                context,
+                                '+ Ürün ekle',
+                                elevation: 6,
+                                shadowColor: themeData.secondary,
+                                fontSize: themeData.bodyLarge.fontSize,
+                                weight: FontWeight.bold,
+                                onPressed: () {
+                                  setState(() {
+                                    ref
+                                        .read(bottomNavIndexProvider.notifier)
+                                        .state = 1;
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      '/home',
+                                      (route) => false,
+                                      arguments: {'refresh': true},
+                                    );
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      _fiyatDetay(themeData, width),
+                      _odemeSecenegi(context, themeData, width),
+                      _satinAlim(context, themeData),
+                      SizedBox(height: height * 0.15),
+                    ],
+                  ),
+                ),
+                if (isLoading)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.3),
+                      child: Center(
+                        child: CircularProgressIndicator(),
                       ),
                     ),
-                  _fiyatDetay(themeData, width),
-                  _odemeSecenegi(context, themeData, width),
-                  _satinAlim(context, themeData),
-                  SizedBox(height: height * 0.15),
-                ],
-              ),
+                  ),
+              ],
             );
           }
         }
         return Stack(
           children: [
-            mainContent,
+            Center(child: Text('Hata: \\${snapshot.error}')),
             if (isLoading)
               Positioned.fill(
                 child: Container(
