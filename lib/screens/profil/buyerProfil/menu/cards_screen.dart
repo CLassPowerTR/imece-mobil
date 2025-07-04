@@ -1,10 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:imecehub/core/widgets/creditCart.dart';
-import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
-import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
+part of '../buyer_profil_screen.dart';
 
 class CardsScreen extends StatefulWidget {
   const CardsScreen({Key? key}) : super(key: key);
@@ -86,7 +80,11 @@ class _CardsScreenState extends State<CardsScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Stack(
+              children: [
+                Center(child: CircularProgressIndicator()),
+              ],
+            )
           : cardNumber == null || cardNumber!.isEmpty
               ? Center(
                   child: Padding(

@@ -477,4 +477,70 @@ class ApiService {
       }
     }
   }
+
+  static Future<List<dynamic>> fetchUserAdress() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.userAdressApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData;
+    } else {
+      throw Exception(
+          'Adresler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<List<dynamic>> fetchUserFollow() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.userFollowApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData;
+    } else {
+      throw Exception(
+          'Takip edilenler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<List<dynamic>> fetchUserCoupons() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.userCouponsApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData;
+    } else {
+      throw Exception(
+          'Kuponlar alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
 }

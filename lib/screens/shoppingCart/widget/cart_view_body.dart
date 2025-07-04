@@ -161,94 +161,108 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                               Text('Sepetinizdeki Ürünler:',
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
-                              ...sepetList.map<Widget>((item) {
-                                return FutureBuilder<Product>(
-                                  future: ApiService.fetchProduct(item['urun']),
-                                  builder: (context, productSnapshot) {
-                                    if (productSnapshot.hasError) {
-                                      return Text(
-                                          'Ürün verisi alınamadı: ${productSnapshot.error}');
-                                    } else if (productSnapshot.hasData) {
-                                      final product = productSnapshot.data!;
-                                      return FutureBuilder<User>(
-                                        future: ApiService.fetchUserId(
-                                            product.satici),
-                                        builder: (context, sellerSnapshot) {
-                                          if (sellerSnapshot.hasError) {
-                                            return Text(
-                                                'Satıcı verisi alınamadı: ${sellerSnapshot.error}');
-                                          } else if (sellerSnapshot.hasData) {
-                                            final seller = sellerSnapshot.data!;
-                                            return SepetProductsCard(
-                                              sellerProfile: seller,
-                                              product: product,
-                                              item: item,
-                                              context: context,
-                                              removeCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService
-                                                        .fetchSepetEkle(
-                                                            item['miktar'] - 1,
-                                                            product.urunId!);
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                        context, e.toString());
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                              updateCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService
-                                                        .fetchSepetEkle(
-                                                            item['miktar'] + 1,
-                                                            product.urunId!);
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                        context, e.toString());
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                              deleteFromCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService
-                                                        .fetchSepetEkle(
-                                                            0, product.urunId!);
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                        context, e.toString());
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                            );
-                                          } else {
-                                            return Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          }
-                                        },
-                                      );
-                                    } else {
-                                      return Center(
-                                          child: CircularProgressIndicator());
-                                    }
-                                  },
-                                );
-                              }).toList(),
+                              ...(() {
+                                // Ürünleri product id'ye göre sıralıyoruz
+                                final sortedList =
+                                    List<Map<String, dynamic>>.from(sepetList);
+                                sortedList.sort((a, b) => (a['urun'] as int)
+                                    .compareTo(b['urun'] as int));
+                                return sortedList.map<Widget>((item) {
+                                  return FutureBuilder<Product>(
+                                    future:
+                                        ApiService.fetchProduct(item['urun']),
+                                    builder: (context, productSnapshot) {
+                                      if (productSnapshot.hasError) {
+                                        return Text(
+                                            'Ürün verisi alınamadı: \\${productSnapshot.error}');
+                                      } else if (productSnapshot.hasData) {
+                                        final product = productSnapshot.data!;
+                                        return FutureBuilder<User>(
+                                          future: ApiService.fetchUserId(
+                                              product.satici),
+                                          builder: (context, sellerSnapshot) {
+                                            if (sellerSnapshot.hasError) {
+                                              return Text(
+                                                  'Satıcı verisi alınamadı: \\${sellerSnapshot.error}');
+                                            } else if (sellerSnapshot.hasData) {
+                                              final seller =
+                                                  sellerSnapshot.data!;
+                                              return SepetProductsCard(
+                                                sellerProfile: seller,
+                                                product: product,
+                                                item: item,
+                                                context: context,
+                                                removeCart: () {
+                                                  setState(() async {
+                                                    try {
+                                                      await ApiService
+                                                          .fetchSepetEkle(
+                                                              item['miktar'] -
+                                                                  1,
+                                                              product.urunId!);
+                                                    } catch (e) {
+                                                      showTemporarySnackBar(
+                                                          context,
+                                                          e.toString());
+                                                    } finally {
+                                                      setState(() {
+                                                        _fetchSepet();
+                                                      });
+                                                    }
+                                                  });
+                                                },
+                                                updateCart: () {
+                                                  setState(() async {
+                                                    try {
+                                                      await ApiService
+                                                          .fetchSepetEkle(
+                                                              item['miktar'] +
+                                                                  1,
+                                                              product.urunId!);
+                                                    } catch (e) {
+                                                      showTemporarySnackBar(
+                                                          context,
+                                                          e.toString());
+                                                    } finally {
+                                                      setState(() {
+                                                        _fetchSepet();
+                                                      });
+                                                    }
+                                                  });
+                                                },
+                                                deleteFromCart: () {
+                                                  setState(() async {
+                                                    try {
+                                                      await ApiService
+                                                          .fetchSepetEkle(0,
+                                                              product.urunId!);
+                                                    } catch (e) {
+                                                      showTemporarySnackBar(
+                                                          context,
+                                                          e.toString());
+                                                    } finally {
+                                                      setState(() {
+                                                        _fetchSepet();
+                                                      });
+                                                    }
+                                                  });
+                                                },
+                                              );
+                                            } else {
+                                              return Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            }
+                                          },
+                                        );
+                                      } else {
+                                        return Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                    },
+                                  );
+                                }).toList();
+                              })(),
                               textButton(
                                 context,
                                 '+ Ürün ekle',

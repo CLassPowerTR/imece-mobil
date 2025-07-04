@@ -8,7 +8,6 @@ import 'package:imecehub/screens/products/productsDetail/products_detail_screen.
 import 'package:imecehub/screens/profil/SignIn/sign_in_screen.dart';
 import 'package:imecehub/screens/profil/addPost/add_post_screen.dart';
 import 'package:imecehub/screens/profil/buyerProfil/buyer_profil_screen.dart';
-import 'package:imecehub/screens/profil/buyerProfil/menu/cards_screen.dart';
 import 'package:imecehub/screens/profil/messaging/messaging_view.dart';
 import 'package:imecehub/screens/profil/messaging/private/messaging_private_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
@@ -65,6 +64,11 @@ final Map<String, WidgetBuilder> appRoutes = {
   },
   '/profil/favorite': (context) => FavoriteScreen(),
   '/profil/cards': (context) => CardsScreen(),
+  '/profil/orders': (context) => OrdersScreen(),
+  '/profil/follow': (context) => FollowScreen(),
+  '/profil/coupons': (context) => CouponsScreen(),
+  '/profil/comments': (context) => CommentsScreen(),
+  '/profil/adress': (context) => AdressScreen(),
   '/products/productsDetail': (context) {
     return ProductsDetailScreen(
       product: ModalRoute.of(context)!.settings.arguments as Product,

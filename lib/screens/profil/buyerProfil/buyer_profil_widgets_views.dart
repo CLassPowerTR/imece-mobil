@@ -174,19 +174,19 @@ class _userMenu extends StatelessWidget {
               onPressed: () {
                 switch (i) {
                   case 0:
-                    showTemporarySnackBar(context, 'Siparişlerim');
+                    Navigator.pushNamed(context, '/profil/orders');
                     break;
                   case 1:
-                    showTemporarySnackBar(context, 'Değerlendirmelerim');
+                    Navigator.pushNamed(context, '/profil/comments');
                     break;
                   case 2:
-                    showTemporarySnackBar(context, 'İndirim Kuponlarım');
+                    Navigator.pushNamed(context, '/profil/coupons');
                     break;
                   case 3:
-                    showTemporarySnackBar(context, 'Takip ettiklerim');
+                    Navigator.pushNamed(context, '/profil/follow');
                     break;
                   case 4:
-                    showTemporarySnackBar(context, 'Adres Bilgilerim');
+                    Navigator.pushNamed(context, '/profil/adress');
                     break;
                   case 5:
                     Navigator.pushNamed(context, '/profil/cards');

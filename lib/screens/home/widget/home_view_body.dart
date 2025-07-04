@@ -491,7 +491,16 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             padding: EdgeInsets.only(
               right: index == kampanyalar.length - 1 ? 0 : 8,
             ),
-            child: _kampanyalar(kampanyalar[index], width, height),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  showTemporarySnackBar(
+                      context, 'onPressed ${kampanyalar[index]}',
+                      type: SnackBarType.warning);
+                });
+              },
+              child: _kampanyalar(kampanyalar[index], width, height),
+            ),
           );
         },
       ),
