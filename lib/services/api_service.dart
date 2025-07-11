@@ -191,7 +191,7 @@ class ApiService {
       return data.map((json) => UrunYorum.fromJson(json)).toList();
     } else {
       throw Exception(
-          'Ürün yorumları alınamadı. Durum kodu: [31m[1m${response.statusCode}[0m');
+          'Ürün yorumları alınamadı. Durum kodu:  [31m [1m${response.statusCode} [0m');
     }
   }
 
@@ -336,10 +336,14 @@ class ApiService {
         'Allow': 'Post',
       },
     );
-    if (response.statusCode == 200 && response.body.isNotEmpty) {
+    if (response.statusCode == 200) {
+      if (response.body.isEmpty) {
+        // Başarılı, body yoksa hata fırlatma
+        return {};
+      }
       final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      if (jsonData is Map && jsonData['status'] == 'success') {
-        print(jsonData);
+      if (jsonData is Map &&
+          (jsonData['status'] == null || jsonData['status'] == 'success')) {
         return jsonData;
       } else {
         throw Exception(
@@ -382,6 +386,16 @@ class ApiService {
         throw Exception('Sepet verisi alınamadı: Beklenen formatta değil.');
       }
     } else {
+      // Hata kontrolü burada
+      if (response.statusCode == 401 && response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        if (jsonData is Map<String, dynamic> &&
+            jsonData['code'] == 'user_not_found') {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('accesToken');
+          await prefs.remove('refreshToken');
+        }
+      }
       throw Exception(
           'Sepet verisi alınamadı. Durum kodu: \\${response.statusCode} \\n\\${response.body}');
     }
@@ -497,6 +511,126 @@ class ApiService {
     } else {
       throw Exception(
           'Adresler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> postUserAdress(
+      String ulke,
+      String il,
+      String ilce,
+      String mahalle,
+      String postaKodu,
+      String adresSatiri1,
+      String adresSatiri2,
+      String baslik,
+      String adresTipi,
+      bool? varsayilanAdres,
+      int kullanici) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.post(
+      Uri.parse(config.userAdressApiUrl),
+      body: json.encode({
+        'ulke': ulke,
+        'il': il,
+        'ilce': ilce,
+        'mahalle': mahalle,
+        'posta_kodu': postaKodu,
+        'adres_satiri_1': adresSatiri1,
+        'adres_satiri_2': adresSatiri2,
+        'baslik': baslik,
+        'adres_tipi': adresTipi,
+        'varsayilan_adres': varsayilanAdres ?? false,
+        'kullanici': kullanici,
+      }),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 201) {
+      if (response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        return jsonData as Map<String, dynamic>;
+      } else {
+        return {};
+      }
+    } else {
+      throw Exception(
+          'Adresler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteUserAdress(int id) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.delete(
+      Uri.parse('${config.userAdressApiUrl}$id/'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 204) {
+      return {};
+    } else {
+      throw Exception(
+          'Adres silinirken bir hata oluştu. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateUserAdress(
+      int id,
+      String ulke,
+      String il,
+      String ilce,
+      String mahalle,
+      String postaKodu,
+      String adresSatiri1,
+      String adresSatiri2,
+      String baslik,
+      String adresTipi,
+      bool? varsayilanAdres,
+      int kullanici) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.patch(
+      Uri.parse('${config.userAdressApiUrl}$id/'),
+      body: json.encode({
+        'ulke': ulke,
+        'il': il,
+        'ilce': ilce,
+        'mahalle': mahalle,
+        'posta_kodu': postaKodu,
+        'adres_satiri_1': adresSatiri1,
+        'adres_satiri_2': adresSatiri2,
+        'baslik': baslik,
+        'adres_tipi': adresTipi,
+      }),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        return jsonData as Map<String, dynamic>;
+      } else {
+        return {};
+      }
+    } else {
+      throw Exception(
+          'Adres güncellenirken bir hata oluştu. Durum kodu: \\${response.statusCode}');
     }
   }
 

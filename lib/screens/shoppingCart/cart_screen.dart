@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:u_credit_card/u_credit_card.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 
 part 'widget/cart_view_header.dart';
 part 'widget/cart_view_body.dart';
@@ -32,8 +33,15 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       future: _checkLogin(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            body: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                buildLoadingBar(context),
+                SizedBox(height: 16),
+              ],
+            ),
+          );
         } else if (snapshot.hasError) {
           return Scaffold(
               body: Center(child: Text('Hata: \\${snapshot.error}')));

@@ -23,6 +23,9 @@ TextField textField(
   bool expands = false, // Yeni parametre ekledik.
   TextAlignVertical? textAlignVertical,
   List<TextInputFormatter>? inputFormatters,
+  FocusNode? focusNode,
+  TextInputAction? textInputAction,
+  void Function(String)? onFieldSubmitted,
 }) {
   // Eğer şifre alanı ise, minLines ve maxLines 1 olmalı
   final effectiveMinLines = obscureText ? 1 : (expands ? null : minLines);
@@ -42,6 +45,9 @@ TextField textField(
     ),
     keyboardType:
         keyboardType ?? TextInputType.emailAddress, // Klavye tipi e-posta için
+    focusNode: focusNode,
+    textInputAction: textInputAction,
+    onSubmitted: onFieldSubmitted,
     decoration: InputDecoration(
       alignLabelWithHint: true,
       isDense: true,

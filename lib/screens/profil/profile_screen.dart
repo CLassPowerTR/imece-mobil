@@ -12,6 +12,7 @@ import 'package:imecehub/models/users.dart';
 import 'dart:async';
 
 import '../../core/widgets/showTemporarySnackBar.dart';
+import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 part 'profileNotLogin.dart';
 
 part 'SignUp/sign_up_view_header.dart';
@@ -82,9 +83,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
     // Ekranda eski veri varsa onu göster
     if (_lastLoginState == null) {
       // İlk yüklenme
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            buildLoadingBar(context),
+            SizedBox(height: 16),
+          ],
+        ),
       );
     }
     if (!_lastLoginState!) {

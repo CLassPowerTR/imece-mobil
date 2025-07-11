@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
@@ -23,14 +24,20 @@ class DotenvLoaderApp extends StatelessWidget {
     return FutureBuilder(
       future: dotenv.load(fileName: ".env"),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return const MyApp();
+        if (snapshot.connectionState != ConnectionState.done) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildLoadingBar(context),
+                  SizedBox(height: 16),
+                ],
+              ),
+            ),
+          );
         }
-        return const MaterialApp(
-          home: Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-        );
+        return const MyApp();
       },
     );
   }

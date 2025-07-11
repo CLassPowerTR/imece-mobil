@@ -121,9 +121,8 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                     isLoading = false;
                   });
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Giriş başarılı!')),
-                    );
+                    showTemporarySnackBar(context, 'Giriş başarılı!',
+                        type: SnackBarType.success);
 
                     ref.read(bottomNavIndexProvider.notifier).state = 3;
                     Navigator.pushNamedAndRemoveUntil(

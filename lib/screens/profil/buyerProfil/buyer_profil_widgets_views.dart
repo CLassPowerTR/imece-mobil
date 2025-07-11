@@ -132,7 +132,8 @@ class _logoutButton extends StatelessWidget {
 }
 
 class _userMenu extends StatelessWidget {
-  const _userMenu({super.key});
+  final User buyerProfil;
+  const _userMenu({super.key, required this.buyerProfil});
 
   static const List<String> menuItems = [
     'Siparişlerim',
@@ -186,7 +187,8 @@ class _userMenu extends StatelessWidget {
                     Navigator.pushNamed(context, '/profil/follow');
                     break;
                   case 4:
-                    Navigator.pushNamed(context, '/profil/adress');
+                    Navigator.pushNamed(context, '/profil/adress',
+                        arguments: {'buyerProfil': buyerProfil});
                     break;
                   case 5:
                     Navigator.pushNamed(context, '/profil/cards');

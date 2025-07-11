@@ -126,10 +126,13 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       future: _futureProducts,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Veri bekleniyor, yükleniyor göstergesi göster
-          return Container(
-              margin: EdgeInsets.only(top: height * 0.5),
-              color: Colors.transparent);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildLoadingBar(context),
+              const SizedBox(height: 16),
+            ],
+          );
         } else if (snapshot.hasError) {
           // Hata durumu
           return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
@@ -181,17 +184,20 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                     try {
                       await ApiService.fetchSepetEkle(
                           1, products[index].urunId ?? 0);
-                      showTemporarySnackBar(context, 'Sepete eklendi');
+                      showTemporarySnackBar(context, 'Sepete eklendi',
+                          type: SnackBarType.success);
                     } catch (e) {
                       showTemporarySnackBar(
-                          context, 'Sepete eklenirken bir hata oluştu: $e');
+                          context, 'Sepete eklenirken bir hata oluştu: $e',
+                          type: SnackBarType.error);
                     } finally {
                       await _checkGetSepet();
                       setState(() {});
                     }
                   }
                 } else {
-                  showTemporarySnackBar(context, 'Lütfen giriş yapınız');
+                  showTemporarySnackBar(context, 'Lütfen giriş yapınız',
+                      type: SnackBarType.info);
                 }
               },
               favoriEkle: () {
@@ -203,15 +209,18 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                           null,
                           user!.aliciProfili?.id ?? null,
                           products[index].urunId);
-                      showTemporarySnackBar(context, 'Favoriye eklendi');
+                      showTemporarySnackBar(context, 'Favoriye eklendi',
+                          type: SnackBarType.success);
                     } catch (e) {
-                      showTemporarySnackBar(context, 'Hata: $e');
+                      showTemporarySnackBar(context, 'Hata: $e',
+                          type: SnackBarType.error);
                     }
                     setState(() {
                       favoriteProduct = !favoriteProduct;
                     });
                   } else {
-                    showTemporarySnackBar(context, 'Lütfen giriş yapınız');
+                    showTemporarySnackBar(context, 'Lütfen giriş yapınız',
+                        type: SnackBarType.info);
                   }
                 });
               },

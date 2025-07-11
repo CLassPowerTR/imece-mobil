@@ -1,5 +1,6 @@
 part of '../products_detail_screen.dart';
 
+
 class ProductsDetailViewBody extends ConsumerStatefulWidget {
   final Product product;
   final bool isLoggedIn;
@@ -111,7 +112,13 @@ class _ProductsDetailViewBodyState
       future: _futureUser,
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildLoadingBar(context),
+              const SizedBox(height: 16),
+            ],
+          );
         } else if (userSnapshot.hasError) {
           return Center(
               child: Text('Satıcı verisi alınamadı: ${userSnapshot.error}'));
@@ -124,7 +131,13 @@ class _ProductsDetailViewBodyState
           future: _futureUrunYorumlar,
           builder: (context, yorumSnapshot) {
             if (yorumSnapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildLoadingBar(context),
+                  const SizedBox(height: 16),
+                ],
+              );
             } else if (yorumSnapshot.hasError) {
               return Center(
                   child: Text('Yorumlar alınamadı: ${yorumSnapshot.error}'));
@@ -247,9 +260,12 @@ class _ProductsDetailViewBodyState
       future: _futureUser,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Veri bekleniyor, yükleniyor göstergesi göster
-          return Center(
-            child: CircularProgressIndicator(),
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildLoadingBar(context),
+              const SizedBox(height: 16),
+            ],
           );
         } else if (snapshot.hasError) {
           // Hata durumu

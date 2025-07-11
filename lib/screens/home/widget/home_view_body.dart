@@ -111,9 +111,13 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
           future: _futurePopulerProducts,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                  //margin: EdgeInsets.only(top: height * 0.5),
-                  color: Colors.transparent);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildLoadingBar(context),
+                  const SizedBox(height: 16),
+                ],
+              );
             } else if (snapshot.hasError) {
               return Text("Hata oluştu: ${snapshot.error}");
             } else if (snapshot.hasData) {
@@ -228,9 +232,13 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             future: _futureCategory,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                    //margin: EdgeInsets.only(top: height * 0.5),
-                    color: Colors.transparent);
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    buildLoadingBar(context),
+                    const SizedBox(height: 16),
+                  ],
+                );
               } else if (snapshot.hasError) {
                 return Text("Hata oluştu: ${snapshot.error}");
               } else if (snapshot.hasData) {

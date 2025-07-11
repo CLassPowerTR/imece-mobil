@@ -29,7 +29,9 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
             width: width,
           ),
           SizedBox(height: 32),
-          _userMenu(),
+          _userMenu(
+            buyerProfil: widget.buyerProfil,
+          ),
           SizedBox(height: 32),
           _logoutButton(
             onLogout: () {

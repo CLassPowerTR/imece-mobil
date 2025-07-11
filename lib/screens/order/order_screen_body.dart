@@ -1,5 +1,6 @@
 part of 'order_screen.dart';
 
+
 class OrderScreenBody extends StatefulWidget {
   final String? selectedCard;
   final ValueChanged<String?> onCardChanged;
@@ -647,9 +648,14 @@ class _OrderScreenBodyState extends State<OrderScreenBody> {
                     FutureBuilder<Map<String, dynamic>>(
                       future: _sepetFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              buildLoadingBar(context),
+                              const SizedBox(height: 16),
+                            ],
+                          );
                         } else if (snapshot.hasError) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             showTemporarySnackBar(

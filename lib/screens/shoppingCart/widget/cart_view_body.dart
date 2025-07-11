@@ -108,7 +108,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
         if (snapshot.hasError) {
           return Center(child: Text('Hata: ${snapshot.error}'));
         } else if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: buildLoadingBar(context));
         } else {
           final data = snapshot.data!;
           final durum = data['durum'];
@@ -143,7 +143,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                           children: [
                             _siparisKonum(context),
                             _teslimatBilgi(context, themeData),
-                            //_sepetUrunleriContainer(themeData),
                           ],
                         ),
                       ),
@@ -162,7 +161,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                               ...(() {
-                                // Ürünleri product id'ye göre sıralıyoruz
                                 final sortedList =
                                     List<Map<String, dynamic>>.from(sepetList);
                                 sortedList.sort((a, b) => (a['urun'] as int)
@@ -174,7 +172,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                     builder: (context, productSnapshot) {
                                       if (productSnapshot.hasError) {
                                         return Text(
-                                            'Ürün verisi alınamadı: \\${productSnapshot.error}');
+                                            'Ürün verisi alınamadı: ${productSnapshot.error}');
                                       } else if (productSnapshot.hasData) {
                                         final product = productSnapshot.data!;
                                         return FutureBuilder<User>(
@@ -183,7 +181,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                           builder: (context, sellerSnapshot) {
                                             if (sellerSnapshot.hasError) {
                                               return Text(
-                                                  'Satıcı verisi alınamadı: \\${sellerSnapshot.error}');
+                                                  'Satıcı verisi alınamadı: ${sellerSnapshot.error}');
                                             } else if (sellerSnapshot.hasData) {
                                               final seller =
                                                   sellerSnapshot.data!;
@@ -251,13 +249,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                             } else {
                                               return Center(
                                                   child:
-                                                      CircularProgressIndicator());
+                                                      buildLoadingBar(context));
                                             }
                                           },
                                         );
                                       } else {
                                         return Center(
-                                            child: CircularProgressIndicator());
+                                            child: buildLoadingBar(context));
                                       }
                                     },
                                   );
@@ -299,7 +297,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                     child: Container(
                       color: Colors.black.withOpacity(0.3),
                       child: Center(
-                        child: CircularProgressIndicator(),
+                        child: buildLoadingBar(context),
                       ),
                     ),
                   ),
@@ -307,20 +305,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             );
           }
         }
-        return Stack(
-          children: [
-            Center(child: Text('Hata: \\${snapshot.error}')),
-            if (isLoading)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0.3),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              ),
-          ],
-        );
       },
     );
   }

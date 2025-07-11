@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/widgets/adressCard.dart';
+import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/creditCart.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
@@ -24,7 +25,7 @@ part 'menu/orders_screen.dart';
 part 'menu/follow_screen.dart';
 part 'menu/coupons_screen.dart';
 part 'menu/comments_screen.dart';
-part 'menu/adress_screen.dart';
+part 'menu/adress/adress_screen.dart';
 part 'menu/cards_screen.dart';
 
 class BuyerProfilScreen extends StatefulWidget {
