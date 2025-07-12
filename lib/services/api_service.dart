@@ -656,6 +656,58 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> postUserFollow(
+      int sellerID, int userID) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.post(
+      Uri.parse(config.userFollowApiUrl),
+      body: json.encode({
+        'satici': sellerID,
+        'kullanici': userID,
+      }),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 201) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData as Map<String, dynamic>;
+    } else {
+      throw Exception(
+          'Takip Ederken bir hata oluştu. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteUserFollow(int id) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.delete(
+      Uri.parse('${config.userFollowApiUrl}$id/'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 204) {
+      // 204 No Content: Başarılı, body yok
+      return {};
+    } else if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return jsonData as Map<String, dynamic>;
+    } else {
+      throw Exception(
+          'Takipten çıkarken bir hata oluştu. Durum kodu: ${response.statusCode}');
+    }
+  }
+
   static Future<List<dynamic>> fetchUserCoupons() async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {

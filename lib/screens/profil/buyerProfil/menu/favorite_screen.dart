@@ -19,26 +19,26 @@ class FavoriteScreen extends StatelessWidget {
               weight: FontWeight.w600),
           leading: TurnBackTextIcon(),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Favori verilerini çek ve göster
-              Expanded(
-                child: FutureBuilder<List<dynamic>>(
-                  future: ApiService.fetchUserFavorites(null, null, null),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Hata: \\${snapshot.error}'));
-                    } else if (snapshot.hasData) {
-                      final favList = snapshot.data!;
-                      if (favList.isEmpty) {
-                        return Center(child: Text('Favori ürün bulunamadı!'));
-                      }
-                      return ListView.builder(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Favori verilerini çek ve göster
+            Expanded(
+              child: FutureBuilder<List<dynamic>>(
+                future: ApiService.fetchUserFavorites(null, null, null),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Scaffold(body: buildLoadingBar(context));
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Hata: \\${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    final favList = snapshot.data!;
+                    if (favList.isEmpty) {
+                      return Center(child: Text('Favori ürün bulunamadı!'));
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ListView.builder(
                         itemCount: favList.length,
                         itemBuilder: (context, index) {
                           final item = favList[index];
@@ -50,15 +50,15 @@ class FavoriteScreen extends StatelessWidget {
                             ),
                           );
                         },
-                      );
-                    } else {
-                      return Center(child: Text('Veri bulunamadı.'));
-                    }
-                  },
-                ),
+                      ),
+                    );
+                  } else {
+                    return Center(child: Text('Veri bulunamadı.'));
+                  }
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

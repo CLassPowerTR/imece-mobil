@@ -108,7 +108,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
         if (snapshot.hasError) {
           return Center(child: Text('Hata: ${snapshot.error}'));
         } else if (!snapshot.hasData) {
-          return Center(child: buildLoadingBar(context));
+          return Scaffold(body: buildLoadingBar(context));
         } else {
           final data = snapshot.data!;
           final durum = data['durum'];

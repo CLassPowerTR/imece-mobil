@@ -34,13 +34,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            body: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                buildLoadingBar(context),
-                SizedBox(height: 16),
-              ],
-            ),
+            body: buildLoadingBar(context),
           );
         } else if (snapshot.hasError) {
           return Scaffold(

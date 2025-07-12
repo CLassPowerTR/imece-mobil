@@ -1,6 +1,6 @@
 part of 'seller_profil_screen.dart';
 
-class SellerProfilBody extends StatefulWidget {
+class SellerProfilBody extends ConsumerStatefulWidget {
   final User sellerProfil;
 
   final bool myProfile;
@@ -9,16 +9,16 @@ class SellerProfilBody extends StatefulWidget {
       {super.key, required this.sellerProfil, required this.myProfile});
 
   @override
-  State<SellerProfilBody> createState() => _sellerProfilBodyState();
+  ConsumerState<SellerProfilBody> createState() => _SellerProfilBodyState();
 }
 
-class _sellerProfilBodyState extends State<SellerProfilBody> {
+class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   double coverHeight = 111; // Kapak fotoğrafının yüksekliği
   double profileSize = 81; // Profil resminin boyutları
   String sonKullanimTarihi = "2025/09/29";
   String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
   String hakkinda =
-      "Ben, Anadolu'nun bereketli topraklarında doğmuş, ömrünü bu topraklara adamış bir çiftçiyim. Yıllar önce babamın nasihatleriyle başladığım bu yolda, hem tohum ektim hem de hayatın türlü zorluklarıyla mücadele ettim. Tarla sürmekten hasat toplamaya, hayvan yetiştirmekten kışa hazırlık yapmaya kadar her işte emeğimi verdim. Bu topraklar bana hem geçimimi sağladı hem de sabrın, çalışkanlığın ne demek olduğunu öğretti. Şimdi ise, yılların birikimiyle, bilgimi ve tecrübemi sizin damağınızı şenlik ettirecek meyveler için kullanacağım.";
+      "Ben, Anadolu'nın bereketli topraklarında doğmuş, ömrünü bu topraklara adamış bir çiftçiyim. Yıllar önce babamın nasihatleriyle başladığım bu yolda, hem tohum ektim hem de hayatın türlü zorluklarıyla mücadele ettim. Tarla sürmekten hasat toplamaya, hayvan yetiştirmekten kışa hazırlık yapmaya kadar her işte emeğimi verdim. Bu topraklar bana hem geçimimi sağladı hem de sabrın, çalışkanlığın ne demek olduğunu öğretti. Şimdi ise, yılların birikimiyle, bilgimi ve tecrübemi sizin damağınızı şenlik ettirecek meyveler için kullanacağım.";
   Map<dynamic, dynamic> profil = {
     'profilImage':
         'https://raw.githubusercontent.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/refs/heads/main/imece/src/assets/images/profil_photo.png'
@@ -68,6 +68,12 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
     }
   ];
 
+  Future<List<int>> _getFollowedSellerIds() async {
+    final followList = await ApiService.fetchUserFollow();
+    // Sadece satıcı id'lerini topla
+    return followList.map<int>((item) => item['satici'] as int).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -101,7 +107,7 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
               return SizedBox();
             }
           },
-        )
+        ),
       ]),
     );
   }
@@ -384,28 +390,86 @@ class _sellerProfilBodyState extends State<SellerProfilBody> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(
-                        flex: 1,
-                        child: widget.myProfile
-                            ? textButton(
-                                context,
-                                'Profili Düzenle',
-                                minSizeHeight: 32,
-                                elevation: 5,
-                                onPressed: () {
-                                  showTemporarySnackBar(context,
-                                      'Profili Düzenle Button (){onPressed}');
-                                },
-                              )
-                            : textButton(
-                                context,
-                                'Takip Et',
-                                minSizeHeight: 32,
-                                elevation: 5,
-                                onPressed: () {
-                                  showTemporarySnackBar(
-                                      context, 'Takip Et Button (){onPressed}');
-                                },
-                              )),
+                      flex: 1,
+                      child: widget.myProfile
+                          ? textButton(
+                              context,
+                              'Profili Düzenle',
+                              minSizeHeight: 32,
+                              elevation: 5,
+                              onPressed: () {
+                                showTemporarySnackBar(context,
+                                    'Profili Düzenle Button (){onPressed}');
+                              },
+                            )
+                          : FutureBuilder<List<dynamic>>(
+                              future: ApiService.fetchUserFollow(),
+                              builder: (context, snapshot) {
+                                final kullanici = ref.read(userProvider);
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                      child: buildLoadingBar(context));
+                                } else if (snapshot.hasError) {
+                                  return Text('Takip durumu alınamadı');
+                                } else {
+                                  final takipEdilenler = snapshot.data ?? [];
+                                  // Takip edilenler arasında bu satıcı var mı?
+                                  final takipItem = takipEdilenler.firstWhere(
+                                    (item) =>
+                                        item['satici'] ==
+                                        widget.sellerProfil.id,
+                                    orElse: () => null,
+                                  );
+                                  final isFollowed = takipItem != null;
+                                  return textButton(
+                                    context,
+                                    isFollowed ? 'Takipten Çık' : 'Takip Et',
+                                    minSizeHeight: 32,
+                                    elevation: 5,
+                                    buttonColor: isFollowed
+                                        ? Colors.orange[500]
+                                        : HomeStyle(context: context).secondary,
+                                    onPressed: () async {
+                                      if (isFollowed) {
+                                        // Takipten çık fonksiyonu (unfollow)
+                                        try {
+                                          await ApiService.deleteUserFollow(
+                                              takipItem['id']);
+                                          showTemporarySnackBar(
+                                              context, 'Takipten çıkarıldı',
+                                              type: SnackBarType.success);
+                                          setState(
+                                              () {}); // Takip durumu güncellensin
+                                        } catch (e) {
+                                          print(e);
+                                          showTemporarySnackBar(context,
+                                              'Takipten çıkarken hata oluştu: $e',
+                                              type: SnackBarType.error);
+                                        }
+                                      } else {
+                                        // Takip et fonksiyonu
+                                        try {
+                                          await ApiService.postUserFollow(
+                                              widget.sellerProfil.id,
+                                              kullanici!.id);
+                                          showTemporarySnackBar(
+                                              context, 'Takip Edildi',
+                                              type: SnackBarType.success);
+                                          setState(
+                                              () {}); // Takip durumu güncellensin
+                                        } catch (e) {
+                                          showTemporarySnackBar(context,
+                                              'Takip ederken hata oluştu: $e',
+                                              type: SnackBarType.error);
+                                        }
+                                      }
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                    ),
                     Expanded(
                       flex: 1,
                       child: widget.myProfile
