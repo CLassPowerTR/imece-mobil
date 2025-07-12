@@ -17,16 +17,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 part 'buyer_profil_view_header.dart';
 part 'buyer_profil_view_body.dart';
 part 'buyer_profil_widgets_views.dart';
 part 'menu/favorite_screen.dart';
-part 'menu/orders_screen.dart';
+part 'menu/orders/orders_screen.dart';
 part 'menu/follow_screen.dart';
 part 'menu/coupons_screen.dart';
 part 'menu/adress/adress_screen.dart';
 part 'menu/cards_screen.dart';
+part 'menu/orders/order_screen_body.dart';
 
 class BuyerProfilScreen extends StatefulWidget {
   final User buyerProfil;

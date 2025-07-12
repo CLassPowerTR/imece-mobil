@@ -23,6 +23,7 @@ class ApiConfig {
   final String sepetEkleApiUrl = dotenv.env['SEPET_EKLE_API_URL'] ?? '';
   final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String sellerProfileApiUrl = dotenv.env['SELLER_PROFILE_API_URL'] ?? '';
+  final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';
 
   // Singleton pattern (isteğe bağlı)
