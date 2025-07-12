@@ -26,6 +26,12 @@ class UserCoupon {
     );
   }
 
+  static List<UserCoupon> fromList(List<dynamic> list) {
+    return list
+        .map((item) => UserCoupon.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

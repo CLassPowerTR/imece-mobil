@@ -52,12 +52,17 @@ class _FollowScreenState extends State<FollowScreen> {
                     } else {
                       final user = userSnapshot.data!;
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/profil/sellerProfile',
-                            arguments: [user, false],
-                          );
+                        onTap: () async {
+                          setState(() async {
+                            await Navigator.pushNamed(
+                              context,
+                              '/profil/sellerProfile',
+                              arguments: [user, false],
+                            );
+                            setState(() {
+                              _followFuture = ApiService.fetchUserFollow();
+                            });
+                          });
                         },
                         child: ListTile(
                           leading: CircleAvatar(

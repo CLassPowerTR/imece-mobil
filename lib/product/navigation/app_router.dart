@@ -10,6 +10,7 @@ import 'package:imecehub/screens/profil/SignIn/sign_in_screen.dart';
 import 'package:imecehub/screens/profil/addPost/add_post_screen.dart';
 import 'package:imecehub/screens/profil/buyerProfil/buyer_profil_screen.dart';
 import 'package:imecehub/screens/profil/buyerProfil/menu/adress/adress_add_screen.dart';
+import 'package:imecehub/screens/profil/buyerProfil/menu/comments/comments_screen.dart';
 import 'package:imecehub/screens/profil/messaging/messaging_view.dart';
 import 'package:imecehub/screens/profil/messaging/private/messaging_private_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';

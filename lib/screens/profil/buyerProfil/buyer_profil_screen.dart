@@ -8,6 +8,7 @@ import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/turnBackTextIcon.dart';
 import 'package:imecehub/models/userAdress.dart';
+import 'package:imecehub/models/userCoupons.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
@@ -24,7 +25,6 @@ part 'menu/favorite_screen.dart';
 part 'menu/orders_screen.dart';
 part 'menu/follow_screen.dart';
 part 'menu/coupons_screen.dart';
-part 'menu/comments_screen.dart';
 part 'menu/adress/adress_screen.dart';
 part 'menu/cards_screen.dart';
 

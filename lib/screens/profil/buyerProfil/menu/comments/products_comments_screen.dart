@@ -1,0 +1,32 @@
+part of 'comments_screen.dart';
+
+class ProductsCommentsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: ApiService.fetchProductsComments(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(body: buildLoadingBar(context));
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Hata: \\${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Ürün Yorum bulunamadı.'));
+        } else {
+          final yorumlar = snapshot.data!;
+          return ListView.builder(
+            itemCount: yorumlar.length,
+            itemBuilder: (context, index) {
+              final item = yorumlar[index];
+              return ListTile(
+                leading: const Icon(Icons.reviews),
+                title: Text(item['yorum']?.toString() ?? 'Yorum'),
+                subtitle: Text('Puan: \\${item['puan'] ?? '-'}'),
+              );
+            },
+          );
+        }
+      },
+    );
+  }
+}
