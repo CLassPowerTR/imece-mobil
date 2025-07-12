@@ -20,6 +20,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: TurnBackTextIcon(),
         title: const Text('Kuponlarım'),
         actions: [
           TextButton(

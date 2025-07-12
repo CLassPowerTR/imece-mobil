@@ -56,28 +56,7 @@ class _CardsScreenState extends State<CardsScreen> {
         shadowColor: Colors.grey[300],
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         title: const Text('Kartlarım'),
-        leading: TextButton.icon(
-          style: TextButton.styleFrom(
-            minimumSize: const Size(0, kToolbarHeight),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back,
-            size: 20,
-            color: HomeStyle(context: context).secondary,
-          ),
-          label: customText(
-            'Geri Dön',
-            context,
-            weight: FontWeight.w600,
-            color: HomeStyle(context: context).secondary,
-            size: 14,
-          ),
-        ),
+        leading: TurnBackTextIcon(),
       ),
       body: isLoading
           ? const Stack(

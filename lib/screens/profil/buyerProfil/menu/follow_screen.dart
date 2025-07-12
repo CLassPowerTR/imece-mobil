@@ -20,6 +20,7 @@ class _FollowScreenState extends State<FollowScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: TurnBackTextIcon(),
         title: const Text('Takip Ettiklerim'),
       ),
       body: FutureBuilder<List<dynamic>>(
