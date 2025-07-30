@@ -24,8 +24,8 @@ class FavoriteScreen extends StatelessWidget {
           children: [
             // Favori verilerini çek ve göster
             Expanded(
-              child: FutureBuilder<List<dynamic>>(
-                future: ApiService.fetchUserFavorites(null, null, null),
+              child: FutureBuilder<dynamic>(
+                future: ApiService.fetchUserFavorites(null, null, null, null),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Scaffold(body: buildLoadingBar(context));

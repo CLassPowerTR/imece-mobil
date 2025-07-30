@@ -30,13 +30,42 @@ class _ProductsDetailViewBodyState
   };
   late Future<User> _futureUser;
   late Future<List<UrunYorum>> _futureUrunYorumlar;
+  bool isFavorite = false;
+  int? favoriteProductId;
 
   @override
   void initState() {
     super.initState();
+    _checkFavorite();
     _futureUser = ApiService.fetchUserId(widget.product.satici) as Future<User>;
     _futureUrunYorumlar =
         ApiService.fetchUrunYorumlar(urunId: widget.product.urunId);
+  }
+
+  Future<void> _checkFavorite() async {
+    final user = ref.read(userProvider);
+    try {
+      final favorites =
+          await ApiService.fetchUserFavorites(null, null, null, null);
+      for (var item in favorites) {
+        if (item['urun'] == widget.product.urunId) {
+          setState(() {
+            isFavorite = true;
+            favoriteProductId = item['id'];
+          });
+          return;
+        }
+      }
+      setState(() {
+        isFavorite = false;
+        favoriteProductId = null;
+      });
+    } catch (e) {
+      setState(() {
+        isFavorite = false;
+        favoriteProductId = null;
+      });
+    }
   }
 
   @override
@@ -396,7 +425,8 @@ class _ProductsDetailViewBodyState
       BuildContext context, HomeStyle themeData) {
     return GestureDetector(
       onTap: () {
-        showTemporarySnackBar(context, 'Soru ve Cevaplar');
+        showTemporarySnackBar(context, 'Soru ve Cevaplar',
+            type: SnackBarType.info);
       },
       child: Container(
         margin: EdgeInsets.only(left: 15),
@@ -519,22 +549,33 @@ class _ProductsDetailViewBodyState
                           color: themeData.surfaceContainer,
                           borderRadius: BorderRadius.circular(6)),
                       child: favoriIconButton(context, () async {
+                        final user = ref.read(userProvider);
                         if (widget.isLoggedIn) {
-                          final user = ref.read(userProvider);
-                          try {
+                          if (isFavorite && favoriteProductId != null) {
+                            // Favoriden çıkar
                             await ApiService.fetchUserFavorites(
-                                null,
-                                user!.aliciProfili?.id ?? null,
-                                widget.product.urunId);
-                            showTemporarySnackBar(context, 'Favoriye eklendi');
-                          } catch (e) {
-                            showTemporarySnackBar(context, 'Hata: $e');
+                                null, null, null, favoriteProductId);
+                            showTemporarySnackBar(
+                                context, 'Favoriden çıkarıldı',
+                                type: SnackBarType.success);
+                          } else {
+                            // Favoriye ekle
+                            await ApiService.fetchUserFavorites(
+                              null,
+                              user!.id, // veya user!.aliciProfili?.id
+                              widget.product.urunId,
+                              null,
+                            );
+                            showTemporarySnackBar(context, 'Favoriye eklendi',
+                                type: SnackBarType.success);
                           }
+                          await _checkFavorite();
+                          setState(() {});
                         } else {
-                          showTemporarySnackBar(
-                              context, 'Lütfen giriş yapınız');
+                          showTemporarySnackBar(context, 'Lütfen giriş yapınız',
+                              type: SnackBarType.info);
                         }
-                      }, selected: false)))
+                      }, selected: isFavorite)))
               : SizedBox.shrink();
         })
       ],

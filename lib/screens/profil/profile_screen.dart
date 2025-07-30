@@ -66,6 +66,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
     if (isLoggedIn && user == null) {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('accesToken') ?? '';
+      print(token);
       await ref.read(userProvider.notifier).fetchUserMe();
       user = ref.read(userProvider);
     }

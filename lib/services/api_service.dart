@@ -437,8 +437,8 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchUserFavorites(
-      int? id, int? userID, int? urunID) async {
+  static Future<dynamic> fetchUserFavorites(
+      int? id, int? userID, int? urunID, int? deleteID) async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
@@ -449,32 +449,56 @@ class ApiService {
     } else {
       url = '${config.userFavoritesApiUrl}$id/';
     }
-    // userID ve urunID doluysa query parametre olarak ekle
-    if (userID != null || urunID != null) {
-      if (userID != null || urunID != null) {
-        return ['userID ve urunID boş olamaz.'];
+    http.Response response;
+    if (deleteID != null) {
+      // Sadece deleteID varsa DELETE işlemi
+      try {
+        response = await http.delete(
+          Uri.parse('${url}$deleteID/'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'X-API-Key': config.apiKey,
+            'Content-Type': 'application/json',
+          },
+        );
+      } catch (e) {
+        throw Exception('Favori ürünler alınamadı. Durum kodu: $e');
+      }
+      if ((response.statusCode == 204 || response.statusCode == 200)) {
+        return [];
       } else {
-        final response = await http.post(
+        throw Exception(
+            'Favori ürün silinemedi. Durum kodu: ${response.statusCode}');
+      }
+    } else if (userID != null && urunID != null) {
+      if (userID == 0 || urunID == 0) {
+        throw Exception('Kullanıcı veya ürün ID\'si eksik veya geçersiz!');
+      }
+      final body = {
+        'alici': userID,
+        'urun': urunID,
+      };
+      try {
+        response = await http.post(
           Uri.parse(url),
           headers: {
             'Authorization': 'Bearer $accessToken',
             'X-API-Key': config.apiKey,
             'Content-Type': 'application/json',
           },
-          body: json.encode({
-            'alici': userID,
-            'urun': urunID,
-          }),
+          body: json.encode(body),
         );
-        if (response.statusCode == 200 && response.body.isNotEmpty) {
-          final jsonData = json.decode(utf8.decode(response.bodyBytes));
-          return jsonData;
-        } else {
-          throw Exception(
-              'Favori ürünler alınamadı. Durum kodu: \\${response.statusCode}');
-        }
+      } catch (e) {
+        throw Exception('Favori ürünler alınamadı. Durum kodu: $e');
       }
-    } else {
+      if (response.statusCode == 201 && response.body.isNotEmpty) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        return jsonData; // Map dönebilir
+      } else {
+        throw Exception(
+            'Favori ürünler alınamadı. Durum kodu: ${response.statusCode}');
+      }
+    } else if (userID == null && urunID == null) {
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -485,11 +509,15 @@ class ApiService {
       );
       if (response.statusCode == 200 && response.body.isNotEmpty) {
         final jsonData = json.decode(utf8.decode(response.bodyBytes));
-        return jsonData;
+        return jsonData; // List dönebilir
       } else {
         throw Exception(
-            'Favori ürünler alınamadı. Durum kodu: \\${response.statusCode}');
+            'Favori ürünler alınamadı. Durum kodu: ${response.statusCode}');
       }
+    } else {
+      return [
+        'userID ve urunID birlikte dolu olmalı veya birlikte null olmalı.'
+      ];
     }
   }
 
