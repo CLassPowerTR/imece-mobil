@@ -49,15 +49,17 @@ class _CardsScreenState extends State<CardsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 4,
-        shadowColor: Colors.grey[300],
-        leadingWidth: MediaQuery.of(context).size.width * 0.3,
-        title: const Text('Kartlarım'),
-        leading: TurnBackTextIcon(),
-      ),
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 4,
+          shadowColor: Colors.grey[300],
+          leadingWidth: MediaQuery.of(context).size.width * 0.3,
+          title: customText('Kartlarım', context,
+              size: HomeStyle(context: context).bodyLarge.fontSize,
+              weight: FontWeight.w600),
+          leading: TurnBackTextIcon(),
+        ),
       body: isLoading
           ? const Stack(
               children: [

@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
+import 'package:imecehub/core/widgets/turnBackTextIcon.dart';
+import 'package:imecehub/models/users.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/services/api_service.dart';
+import 'package:imecehub/core/widgets/text.dart';
+import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'seller_comments_screen.dart';
 part 'products_comments_screen.dart';
 
-class CommentsScreen extends StatefulWidget {
+class CommentsScreen extends ConsumerStatefulWidget {
   const CommentsScreen({Key? key}) : super(key: key);
 
   @override
-  State<CommentsScreen> createState() => _CommentsScreenState();
+  ConsumerState<CommentsScreen> createState() => _CommentsScreenState();
 }
 
-class _CommentsScreenState extends State<CommentsScreen>
+class _CommentsScreenState extends ConsumerState<CommentsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -30,11 +36,21 @@ class _CommentsScreenState extends State<CommentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
     final theme = Theme.of(context);
     final secondary = theme.colorScheme.secondary;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Değerlendirmelerim'),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 4,
+        shadowColor: Colors.grey[300],
+        leadingWidth: MediaQuery.of(context).size.width * 0.3,
+        leading: TurnBackTextIcon(),
+        title: customText('Değerlendirmelerim', context,
+            size: HomeStyle(context: context).bodyLarge.fontSize,
+            weight: FontWeight.w600),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: TabBar(
@@ -58,9 +74,9 @@ class _CommentsScreenState extends State<CommentsScreen>
         controller: _tabController,
         children: [
           // Ürün Değerlendirmelerim
-          ProductsCommentsScreen(),
+          ProductsCommentsScreen(user: user),
           // Mağaza Değerlendirmelerim
-          SellerCommentsScreen(),
+          SellerCommentsScreen(user: user),
         ],
       ),
     );

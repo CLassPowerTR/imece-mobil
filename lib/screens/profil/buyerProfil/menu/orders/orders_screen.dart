@@ -32,7 +32,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final secondary = theme.colorScheme.secondary;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Siparişlerim'),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 4,
+        shadowColor: Colors.grey[300],
+        leadingWidth: MediaQuery.of(context).size.width * 0.3,
+        title: customText('Siparişlerim', context,
+            size: HomeStyle(context: context).bodyLarge.fontSize,
+            weight: FontWeight.w600),
+        leading: TurnBackTextIcon(),
         actions: [
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(

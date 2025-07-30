@@ -1,10 +1,12 @@
 part of 'comments_screen.dart';
 
 class SellerCommentsScreen extends StatelessWidget {
+  final User? user;
+  const SellerCommentsScreen({super.key, this.user});
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
-      future: ApiService.fetchSellersComments(),
+      future: ApiService.fetchSellersComments(user?.id, null),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(body: buildLoadingBar(context));

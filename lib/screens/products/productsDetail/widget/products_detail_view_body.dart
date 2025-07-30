@@ -1,6 +1,5 @@
 part of '../products_detail_screen.dart';
 
-
 class ProductsDetailViewBody extends ConsumerStatefulWidget {
   final Product product;
   final bool isLoggedIn;

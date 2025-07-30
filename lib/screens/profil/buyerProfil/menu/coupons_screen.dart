@@ -20,8 +20,13 @@ class _CouponsScreenState extends State<CouponsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leadingWidth: MediaQuery.of(context).size.width * 0.3,
         leading: TurnBackTextIcon(),
-        title: const Text('Kuponlarım'),
+        centerTitle: true,
+        title: customText('Kuponlarım', context,
+            size: HomeStyle(context: context).bodyLarge.fontSize,
+            weight: FontWeight.w600),
         actions: [
           TextButton(
               onPressed: () {},

@@ -141,7 +141,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                         borderRadius: BorderRadius.circular(8),
                         child: Column(
                           children: [
-                            _siparisKonum(context),
+                            _FutureFetchUserAdress(),
                             _teslimatBilgi(context, themeData),
                           ],
                         ),
@@ -965,6 +965,96 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           ),
         ],
       ),
+    );
+  }
+
+  FutureBuilder<List<UserAdress>> _FutureFetchUserAdress() {
+    final user = ref.watch(userProvider);
+    return FutureBuilder<List<UserAdress>>(
+      future: ApiService.fetchUserAdress(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(child: buildLoadingBar(context)),
+          );
+        } else if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(child: Text('Adres verisi alınamadı.')),
+          );
+        } else if (!snapshot.hasData ||
+            snapshot.data == null ||
+            snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: textButton(
+              context,
+              elevation: 0,
+              "Adres Ekle",
+              onPressed: () {
+                Navigator.pushNamed(context, '/profil/adress',
+                    arguments: {'buyerProfil': user});
+              },
+            ),
+          );
+        } else {
+          final adresler = snapshot.data!;
+          final hasVarsayilan =
+              adresler.any((adres) => adres.varsayilanAdres == true);
+          if (hasVarsayilan) {
+            final varsayilanAdres =
+                adresler.firstWhere((adres) => adres.varsayilanAdres == true);
+            return AdressCardOrder(
+              ilIlce: '${varsayilanAdres.il} / ${varsayilanAdres.ilce}',
+              adres: varsayilanAdres.adresSatiri1,
+              icMapUrl: ic_map,
+              onLocationChange: () {
+                // Konum değiştir fonksiyonu
+              },
+            );
+          } else {
+            // Varsayılan adres yok, ilk adresi göster ve buton ekle
+            final ilkAdres = adresler.first;
+            return Column(
+              children: [
+                AdressCardOrder(
+                  ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
+                  adres: ilkAdres.adresSatiri1,
+                  icMapUrl: ic_map,
+                  onLocationChange: () {
+                    // Konum değiştir fonksiyonu
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: textButton(
+                    context,
+                    "Varsayılan adres olarak ayarla",
+                    onPressed: () async {
+                      await ApiService.updateUserAdress(
+                        ilkAdres.id,
+                        ilkAdres.ulke,
+                        ilkAdres.il,
+                        ilkAdres.ilce,
+                        ilkAdres.mahalle,
+                        ilkAdres.postaKodu,
+                        ilkAdres.adresSatiri1,
+                        ilkAdres.adresSatiri2,
+                        ilkAdres.baslik,
+                        ilkAdres.adresTipi,
+                        true,
+                        ilkAdres.kullanici,
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        }
+      },
     );
   }
 }

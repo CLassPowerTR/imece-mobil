@@ -84,13 +84,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
     if (_lastLoginState == null) {
       // İlk yüklenme
       return Scaffold(
+        appBar: AppBar(),
         backgroundColor: Colors.white,
-        body: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            buildLoadingBar(context),
-            SizedBox(height: 16),
-          ],
+        body: Center(
+          child: buildLoadingBar(context),
         ),
       );
     }

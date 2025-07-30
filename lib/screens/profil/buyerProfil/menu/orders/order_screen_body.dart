@@ -1,23 +1,26 @@
 part of '../../buyer_profil_screen.dart';
 
-class OrderScreenBody extends StatefulWidget {
+class OrderScreenBody extends ConsumerStatefulWidget {
   const OrderScreenBody({Key? key}) : super(key: key);
 
   @override
-  State<OrderScreenBody> createState() => _OrderScreenBodyState();
+  ConsumerState<OrderScreenBody> createState() => _OrderScreenBodyState();
 }
 
-class _OrderScreenBodyState extends State<OrderScreenBody> {
+class _OrderScreenBodyState extends ConsumerState<OrderScreenBody> {
   late Future<List<dynamic>> _ordersFuture;
 
   @override
   void initState() {
     super.initState();
-    _ordersFuture = ApiService.fetchLogisticOrder();
+    // userProvider'ı initState'de ref ile alamayız, build'de alacağız.
+    // _ordersFuture'ı build içinde başlatacağız.
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    _ordersFuture = ApiService.fetchLogisticOrder(user?.id); // id gönderiyoruz
     return FutureBuilder<List<dynamic>>(
       future: _ordersFuture,
       builder: (context, snapshot) {

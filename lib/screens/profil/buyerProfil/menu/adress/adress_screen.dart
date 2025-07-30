@@ -15,8 +15,7 @@ class _AdressScreenState extends State<AdressScreen> {
   @override
   void initState() {
     super.initState();
-    _adressFuture = ApiService.fetchUserAdress()
-        .then((list) => list.map((e) => UserAdress.fromJson(e)).toList());
+    _adressFuture = ApiService.fetchUserAdress();
   }
 
   @override
@@ -42,8 +41,7 @@ class _AdressScreenState extends State<AdressScreen> {
                     'isUpdate': false,
                   });
               setState(() {
-                _adressFuture = ApiService.fetchUserAdress().then(
-                    (list) => list.map((e) => UserAdress.fromJson(e)).toList());
+                _adressFuture = ApiService.fetchUserAdress();
               });
             },
             child: customText('Adres Ekle', context,
@@ -90,10 +88,7 @@ class _AdressScreenState extends State<AdressScreen> {
                               'isUpdate': true,
                             });
                         setState(() {
-                          _adressFuture = ApiService.fetchUserAdress().then(
-                              (list) => list
-                                  .map((e) => UserAdress.fromJson(e))
-                                  .toList());
+                          _adressFuture = ApiService.fetchUserAdress();
                         });
                       },
                       onDelete: () async {
@@ -103,10 +98,7 @@ class _AdressScreenState extends State<AdressScreen> {
                         try {
                           await ApiService.deleteUserAdress(adres.id);
                           setState(() {
-                            _adressFuture = ApiService.fetchUserAdress().then(
-                                (list) => list
-                                    .map((e) => UserAdress.fromJson(e))
-                                    .toList());
+                            _adressFuture = ApiService.fetchUserAdress();
                           });
                         } catch (e) {
                           showTemporarySnackBar(

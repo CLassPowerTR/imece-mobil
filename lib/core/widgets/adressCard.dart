@@ -136,3 +136,78 @@ class AdressCard extends StatelessWidget {
     );
   }
 }
+
+class AdressCardOrder extends StatelessWidget {
+  final String ilIlce;
+  final String adres;
+  final String icMapUrl;
+  final VoidCallback? onLocationChange;
+  const AdressCardOrder({
+    Key? key,
+    required this.ilIlce,
+    required this.adres,
+    required this.icMapUrl,
+    this.onLocationChange,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      margin: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Image.network(
+                icMapUrl,
+                errorBuilder: (context, error, stackTrace) {
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(top: 30, left: 5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ilIlce,
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 18),
+                  ),
+                  Text(
+                    adres,
+                    textAlign: TextAlign.left,
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    margin: const EdgeInsets.all(0),
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                        onPressed: onLocationChange,
+                        child: const Text(
+                          'Konum bilgileri değiştir',
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 34, 255, 34),
+                              fontWeight: FontWeight.w900),
+                        )),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

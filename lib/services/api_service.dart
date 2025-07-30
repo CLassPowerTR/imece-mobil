@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/models/userAdress.dart';
 import '../models/users.dart';
 import '../models/productCategories.dart';
 import '../api/api_config.dart'; // Add this line to import ApiConfig
@@ -492,7 +493,7 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchUserAdress() async {
+  static Future<List<UserAdress>> fetchUserAdress() async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
@@ -507,7 +508,9 @@ class ApiService {
     );
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      return jsonData;
+      return (jsonData as List)
+          .map((e) => UserAdress.fromJson(e as Map<String, dynamic>))
+          .toList();
     } else {
       throw Exception(
           'Adresler alınamadı. Durum kodu: \\${response.statusCode}');
@@ -730,13 +733,22 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchProductsComments() async {
+  static Future<List<dynamic>> fetchProductsComments(
+      int? kullaniciID, int? magazaID) async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
+    String url;
+    if (kullaniciID != null) {
+      url = '${config.urunYorumApiUrl}?kullanici_id=$kullaniciID';
+    } else if (magazaID != null) {
+      url = '${config.urunYorumApiUrl}?magaza_id=$magazaID';
+    } else {
+      url = config.urunYorumApiUrl;
+    }
     final response = await http.get(
-      Uri.parse(config.urunYorumApiUrl),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
@@ -752,13 +764,22 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchSellersComments() async {
+  static Future<List<dynamic>> fetchSellersComments(
+      int? kullaniciID, int? magazaID) async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
+    String url;
+    if (kullaniciID != null) {
+      url = '${config.urunYorumApiUrl}?kullanici_id=$kullaniciID';
+    } else if (magazaID != null) {
+      url = '${config.urunYorumApiUrl}?magaza_id=$magazaID';
+    } else {
+      url = config.urunYorumApiUrl;
+    }
     final response = await http.get(
-      Uri.parse(config.urunYorumApiUrl),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
@@ -774,13 +795,19 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> fetchLogisticOrder() async {
+  static Future<List<dynamic>> fetchLogisticOrder(int? aliciID) async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
+    String url;
+    if (aliciID != null) {
+      url = '${config.logisticOrderApiUrl}?alici_id=$aliciID';
+    } else {
+      url = config.logisticOrderApiUrl;
+    }
     final response = await http.get(
-      Uri.parse(config.logisticOrderApiUrl),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,

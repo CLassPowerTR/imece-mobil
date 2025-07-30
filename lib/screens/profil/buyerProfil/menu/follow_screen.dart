@@ -20,8 +20,16 @@ class _FollowScreenState extends State<FollowScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 4,
+        shadowColor: Colors.grey[300],
+        leadingWidth: MediaQuery.of(context).size.width * 0.3,
+        title: customText('Takip Ettiklerim', context,
+            size: HomeStyle(context: context).bodyLarge.fontSize,
+            weight: FontWeight.w600),
         leading: TurnBackTextIcon(),
-        title: const Text('Takip Ettiklerim'),
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _followFuture,
@@ -67,9 +75,13 @@ class _FollowScreenState extends State<FollowScreen> {
                         },
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              user.saticiProfili!.profilBanner!,
-                            ),
+                            backgroundImage: (user.saticiProfili != null &&
+                                    user.saticiProfili!.profilBanner != null)
+                                ? NetworkImage(
+                                    user.saticiProfili!.profilBanner!)
+                                : const AssetImage(
+                                        'assets/icon/ic_profilDuzenle.png')
+                                    as ImageProvider,
                           ),
                           title: Text(user.firstName.isNotEmpty
                               ? user.firstName
