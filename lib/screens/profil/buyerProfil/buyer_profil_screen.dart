@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/api/api_config.dart';
+import 'package:imecehub/core/function/actions.dart';
 import 'package:imecehub/core/widgets/adressCard.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/creditCart.dart';
+import 'package:imecehub/core/widgets/followsCard.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/turnBackTextIcon.dart';
@@ -16,6 +18,11 @@ import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imecehub/screens/products/products_screen.dart';
+import 'package:imecehub/core/widgets/productsCard.dart';
+import 'package:imecehub/models/products.dart';
+import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'buyer_profil_view_header.dart';

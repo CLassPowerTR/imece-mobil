@@ -588,7 +588,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   ),
                   onPressed: () {},
                   child: customText(
-                      "${widget.sellerProfil.saticiProfili?.magazaAdi ?? ''}",
+                      "${widget.sellerProfil.saticiProfili?.profession ?? ''}",
                       context,
                       weight: FontWeight.bold,
                       size: HomeStyle(context: context).bodySmall.fontSize)),

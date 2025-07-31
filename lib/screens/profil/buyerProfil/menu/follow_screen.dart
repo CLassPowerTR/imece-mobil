@@ -10,6 +10,18 @@ class FollowScreen extends StatefulWidget {
 class _FollowScreenState extends State<FollowScreen> {
   late Future<List<dynamic>> _followFuture;
 
+  Future<List<User>> _getAllFollowedUsers(List<dynamic> takipEdilenler) async {
+    List<User> users = [];
+    for (var item in takipEdilenler) {
+      final saticiId = item['satici'];
+      try {
+        final user = await ApiService.fetchUserId(saticiId);
+        users.add(user);
+      } catch (_) {}
+    }
+    return users;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,63 +47,55 @@ class _FollowScreenState extends State<FollowScreen> {
         future: _followFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(body: buildLoadingBar(context));
+            return SizedBox();
           } else if (snapshot.hasError) {
-            return Center(child: Text('Hata: \\${snapshot.error}'));
+            return Center(child: Text('Hata: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Takip edilen bulunamadı.'));
           } else {
             final takipEdilenler = snapshot.data!;
-            return ListView.builder(
-              itemCount: takipEdilenler.length,
-              itemBuilder: (context, index) {
-                final item = takipEdilenler[index];
-                final saticiId = item['satici'];
-                return FutureBuilder<User>(
-                  future: ApiService.fetchUserId(saticiId),
-                  builder: (context, userSnapshot) {
-                    if (userSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return Scaffold(body: buildLoadingBar(context));
-                    } else if (userSnapshot.hasError) {
-                      return Center(
-                          child: Text('Hata: \\${userSnapshot.error}'));
-                    } else if (!userSnapshot.hasData) {
-                      return Center(child: Text('Kullanıcı bulunamadı'));
-                    } else {
-                      final user = userSnapshot.data!;
-                      return GestureDetector(
-                        onTap: () async {
-                          setState(() async {
-                            await Navigator.pushNamed(
-                              context,
-                              '/profil/sellerProfile',
-                              arguments: [user, false],
-                            );
-                            setState(() {
-                              _followFuture = ApiService.fetchUserFollow();
-                            });
+            return FutureBuilder<List<User>>(
+              future: _getAllFollowedUsers(takipEdilenler),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return Scaffold(body: buildLoadingBar(context));
+                } else if (userSnapshot.hasError) {
+                  return Center(child: Text('Hata: ${userSnapshot.error}'));
+                } else if (!userSnapshot.hasData ||
+                    userSnapshot.data!.isEmpty) {
+                  return const Center(child: Text('Kullanıcı bulunamadı'));
+                } else {
+                  final users = userSnapshot.data!;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      mainAxisExtent: MediaQuery.of(context).size.height * 0.2,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      final saticiId = user.id;
+                      return FollowsCard(
+                        context,
+                        user,
+                        saticiId,
+                        () async {
+                          await Navigator.pushNamed(
+                            context,
+                            '/profil/sellerProfile',
+                            arguments: [user, false],
+                          );
+                          setState(() {
+                            _followFuture = ApiService.fetchUserFollow();
                           });
                         },
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: (user.saticiProfili != null &&
-                                    user.saticiProfili!.profilBanner != null)
-                                ? NetworkImage(
-                                    user.saticiProfili!.profilBanner!)
-                                : const AssetImage(
-                                        'assets/icon/ic_profilDuzenle.png')
-                                    as ImageProvider,
-                          ),
-                          title: Text(user.firstName.isNotEmpty
-                              ? user.firstName
-                              : user.username),
-                          subtitle: Text('Satıcı ID: $saticiId'),
-                        ),
                       );
-                    }
-                  },
-                );
+                    },
+                  );
+                }
               },
             );
           }

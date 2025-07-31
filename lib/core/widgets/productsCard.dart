@@ -230,3 +230,40 @@ class _productsCardState extends ConsumerState<productsCard> {
     );
   }
 }
+
+GridView productCards({
+  required double height,
+  required double width,
+  required List<Product> products,
+  required bool Function(Product) isInSepet,
+  required bool Function(Product) isFavorite,
+  required VoidCallback Function(Product) onSepeteEkle,
+  required VoidCallback Function(Product) onFavoriEkle,
+  required BuildContext context,
+}) {
+  return GridView.builder(
+    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      mainAxisExtent: height * 0.4,
+      crossAxisCount: 2,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+    ),
+    itemCount: products.length,
+    shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
+    itemBuilder: (context, index) {
+      final product = products[index];
+      return productsCard(
+        sepeteEkle: onSepeteEkle(product),
+        favoriEkle: onFavoriEkle(product),
+        isSepet: isInSepet(product),
+        isFavorite: isFavorite(product),
+        product: product,
+        width: width,
+        context: context,
+        height: height,
+      );
+    },
+  );
+}

@@ -2,7 +2,7 @@ class SellerProfil {
   final int id;
   final String? profilBanner;
   final String? profilTanitimYazisi;
-  final double degerlendirmePuani;
+  final String? degerlendirmePuani;
   final String? magazaAdi;
   final String? saticiVergiNumarasi;
   final String? saticiIban;
@@ -15,7 +15,7 @@ class SellerProfil {
     required this.id,
     this.profilBanner,
     this.profilTanitimYazisi,
-    required this.degerlendirmePuani,
+    this.degerlendirmePuani,
     this.magazaAdi,
     this.saticiVergiNumarasi,
     this.saticiIban,
@@ -30,9 +30,7 @@ class SellerProfil {
       id: json['id'] ?? 0,
       profilBanner: json['profil_banner'],
       profilTanitimYazisi: json['profil_tanitim_yazisi'],
-      degerlendirmePuani:
-          double.tryParse(json['degerlendirme_puani']?.toString() ?? '0.0') ??
-              0.0,
+      degerlendirmePuani: json['degerlendirme_puani'],
       magazaAdi: json['magaza_adi'],
       saticiVergiNumarasi: json['satici_vergi_numarasi'],
       saticiIban: json['satici_iban'],
