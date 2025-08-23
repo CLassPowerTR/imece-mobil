@@ -233,13 +233,16 @@ class ApiService {
         await prefs.setString('refreshToken', refreshToken);
       }
     } else {
-      final errorStatus = jsonData != null
-          ? (jsonData['status'] ?? response.statusCode)
-          : response.statusCode;
-      final errorMessage = jsonData != null
-          ? (jsonData['message'] ?? 'Kullanıcı kaydı başarısız.')
-          : response.body;
-      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
+      // Sunucu JSON dönerse map olarak ilet; değilse metni döndür
+      if (jsonData is Map<String, dynamic>) {
+        // Beklenen örnek: { email: [..], password: [..], username: [..] }
+        throw Exception(json.encode(jsonData));
+      } else {
+        final errorMessage = jsonData != null
+            ? (jsonData['errors'] ?? 'Kullanıcı kaydı başarısız.')
+            : response.body;
+        throw Exception('$errorMessage');
+      }
     }
   }
 
@@ -263,9 +266,10 @@ class ApiService {
         await prefs.setString('refreshToken', refreshToken);
       }
     } else {
-      final errorStatus = jsonData['status'] ?? response.statusCode;
-      final errorMessage = jsonData['message'] ?? 'Kullanıcı girişi başarısız.';
-      throw Exception('Status: $errorStatus \nMessage: $errorMessage');
+      final errorMessage = jsonData != null
+          ? (jsonData['message'] ?? 'Kullanıcı kaydı başarısız.')
+          : response.body;
+      throw Exception('$errorMessage');
     }
   }
 
@@ -395,6 +399,9 @@ class ApiService {
           final prefs = await SharedPreferences.getInstance();
           await prefs.remove('accesToken');
           await prefs.remove('refreshToken');
+        } else if (jsonData is Map<String, dynamic> &&
+            jsonData['code'] == 'token_not_valid') {
+          throw Exception('Unauthorized');
         }
       }
       throw Exception(

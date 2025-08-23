@@ -30,6 +30,7 @@ class OrderScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
+  int tryLoginCount = 0;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
@@ -41,29 +42,24 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           );
         } else if (snapshot.hasError) {
           return Scaffold(
-              body: Center(child: Text('Hata: \\${snapshot.error}')));
+              body: Center(
+                  child: Column(
+            children: [
+              Text('Hata Oluştu.\nLütfen Tekrar Deneyiniz.'),
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    tryLoginCount++;
+                  });
+                },
+                child: Text('Tekrar Dene'),
+              )
+            ],
+          )));
         } else if (snapshot.hasData) {
           final isLoggedIn = snapshot.data!;
           if (!isLoggedIn) {
-            return Scaffold(
-              body: Center(
-                  child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  spacing: 20,
-                  children: [
-                    customText('Lütfen giriş yapınız', context),
-                    textButton(context, 'Giriş Yap', onPressed: () {
-                      ref.read(bottomNavIndexProvider.notifier).state = 3;
-                      //Navigator.pushReplacementNamed(context, '/home');
-                    })
-                  ],
-                ),
-              )),
-            );
+            return _isNotLoggin(context, ref);
           }
           return Scaffold(
               appBar: _CartScreenHeader(context), body: _CartViewBody());
@@ -74,11 +70,58 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     );
   }
 
+  Scaffold _isNotLoggin(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: Center(
+          child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          spacing: 20,
+          children: [
+            customText('Lütfen giriş yapınız!', context,
+                textAlign: TextAlign.center,
+                size: HomeStyle(context: context).bodyLarge.fontSize,
+                weight: FontWeight.bold),
+            textButton(context, 'Giriş Yap', onPressed: () {
+              ref.read(bottomNavIndexProvider.notifier).state = 3;
+              //Navigator.pushReplacementNamed(context, '/home');
+            })
+          ],
+        ),
+      )),
+    );
+  }
+
   Future<bool> _checkLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accesToken') ?? '';
     return token.isNotEmpty;
   }
+}
+
+Scaffold _isNotLoggin(BuildContext context, WidgetRef ref) {
+  return Scaffold(
+    body: Center(
+        child: Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        spacing: 20,
+        children: [
+          customText('Lütfen giriş yapınız', context),
+          textButton(context, 'Giriş Yap', onPressed: () {
+            ref.read(bottomNavIndexProvider.notifier).state = 3;
+            //Navigator.pushReplacementNamed(context, '/home');
+          })
+        ],
+      ),
+    )),
+  );
 }
 
 Text _appBarHeaderText(String title) {

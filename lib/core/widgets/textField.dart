@@ -9,6 +9,8 @@ TextField textField(
   Color? hintTextColor,
   BorderRadius? borderRadius,
   Color? borderColor,
+  String? errorText,
+  Color? errorColor,
   TextInputType? keyboardType,
   TextEditingController? controller,
   bool obscureText = false,
@@ -51,6 +53,7 @@ TextField textField(
     decoration: InputDecoration(
       alignLabelWithHint: true,
       isDense: true,
+      errorText: errorText,
       labelStyle: TextStyle(
           color: labelTextColor ??
               HomeStyle(context: context).outline.withOpacity(0.5)),
@@ -64,6 +67,16 @@ TextField textField(
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
           color: HomeStyle(context: context).secondary,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: errorColor ?? Colors.red,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: errorColor ?? Colors.red,
         ),
       ),
       suffixIcon: showSuffixIcon

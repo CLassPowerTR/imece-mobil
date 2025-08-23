@@ -108,6 +108,9 @@ SizedBox orLine(
     width: width,
     height: containerHeight ?? 24,
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Expanded(
           flex: 4,
@@ -119,6 +122,7 @@ SizedBox orLine(
         Expanded(
           flex: 1,
           child: customText('OR', context,
+              textAlign: TextAlign.center,
               color: HomeStyle(context: context).outline.withOpacity(0.4)),
         ),
         Expanded(
@@ -226,7 +230,7 @@ SizedBox passwordContainer(
   bool obscureText = false,
   VoidCallback? onTap,
   bool showSuffixIcon = false,
-
+  String? errorText,
 }) {
   return SizedBox(
     height: containerHeight ?? 90,
@@ -243,15 +247,16 @@ SizedBox passwordContainer(
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        SizedBox(
-            height: textFieldHeight ?? 55,
+        ConstrainedBox(
+            constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
             child: textField(context,
                 hintText: hintText,
                 controller: textFieldController,
                 obscureText: obscureText,
                 showSuffixIcon: showSuffixIcon,
-                
-                onTap: onTap)),
+                onTap: onTap,
+                errorText: errorText,
+                errorColor: Colors.red)),
       ],
     ),
   );
@@ -260,7 +265,8 @@ SizedBox passwordContainer(
 SizedBox emailAdressContainer(double width, BuildContext context,
     {double? textFieldHeight,
     double? containerHeight,
-    TextEditingController? controller}) {
+    TextEditingController? controller,
+    String? errorText}) {
   return SizedBox(
     height: containerHeight ?? 90,
     width: width,
@@ -276,10 +282,13 @@ SizedBox emailAdressContainer(double width, BuildContext context,
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        SizedBox(
-            height: textFieldHeight ?? 55,
+        ConstrainedBox(
+            constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
             child: textField(context,
-                hintText: 'Enter your email adress', controller: controller)),
+                hintText: 'Enter your email adress',
+                controller: controller,
+                errorText: errorText,
+                errorColor: Colors.red)),
       ],
     ),
   );
@@ -288,7 +297,8 @@ SizedBox emailAdressContainer(double width, BuildContext context,
 SizedBox usernameContainer(double width, BuildContext context,
     {double? textFieldHeight,
     double? containerHeight,
-    TextEditingController? controller}) {
+    TextEditingController? controller,
+    String? errorText}) {
   return SizedBox(
     height: containerHeight ?? 90,
     width: width,
@@ -304,12 +314,14 @@ SizedBox usernameContainer(double width, BuildContext context,
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        SizedBox(
-          height: textFieldHeight ?? 55,
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
           child: textField(
             context,
             hintText: 'Enter your username',
             controller: controller,
+            errorText: errorText,
+            errorColor: Colors.red,
           ),
         ),
       ],

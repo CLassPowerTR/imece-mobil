@@ -105,8 +105,19 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       future: _sepetFuture,
       builder: (context, snapshot) {
         bool isLoading = snapshot.connectionState == ConnectionState.waiting;
+        print('ASDASF: ${snapshot}');
         if (snapshot.hasError) {
-          return Center(child: Text('Hata: ${snapshot.error}'));
+          final errorText = snapshot.error?.toString() ?? '';
+          if (errorText.contains('Unauthorized')) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('accesToken');
+              await prefs.remove('refreshToken');
+            });
+            return _isNotLoggin(context, ref);
+          } else {
+            return Center(child: Text('Hata: $errorText'));
+          }
         } else if (!snapshot.hasData) {
           return Scaffold(body: buildLoadingBar(context));
         } else {

@@ -56,8 +56,9 @@ class _profileNotLoginState extends State<ProfileNotLogin> with RouteAware {
             ),
             customText('Profilim', context,
                 size: HomeStyle(context: context).bodyLarge.fontSize,
-                weight: FontWeight.w500),
-            customText('Profilinizi görüntüleyebilmek için lütfen giriş yapın.',
+                weight: FontWeight.bold),
+            customText(
+                'Profilinizi görüntüleyebilmek için lütfen giriş yapın...',
                 context,
                 size: 13),
             textButton(
