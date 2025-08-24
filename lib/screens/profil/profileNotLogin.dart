@@ -45,13 +45,12 @@ class _profileNotLoginState extends State<ProfileNotLogin> with RouteAware {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              'assets/vectors/vite.svg',
+            Image.network(
+              NotFound.LogoPNGUrl,
               fit: BoxFit.cover,
-              placeholderBuilder: (BuildContext context) {
-                return Container(
-                    padding: const EdgeInsets.all(30.0),
-                    child: const CircularProgressIndicator());
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return Image.network(NotFound.LogoPNGUrl);
               },
             ),
             customText('Profilim', context,

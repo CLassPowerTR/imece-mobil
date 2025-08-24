@@ -105,7 +105,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       future: _sepetFuture,
       builder: (context, snapshot) {
         bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-        print('ASDASF: ${snapshot}');
+
         if (snapshot.hasError) {
           final errorText = snapshot.error?.toString() ?? '';
           if (errorText.contains('Unauthorized')) {

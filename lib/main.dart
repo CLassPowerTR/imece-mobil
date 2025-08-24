@@ -34,6 +34,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: CustomLightTheme().themeData,
       darkTheme: CustomDarkTheme().themeData,
       themeMode: ThemeMode.light,
+      debugShowCheckedModeBanner: false,
       initialRoute: '/home',
       routes: appRoutes,
       navigatorObservers: [routeObserver],

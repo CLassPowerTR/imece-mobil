@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/adressCard.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/richText.dart';
@@ -42,20 +44,35 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           );
         } else if (snapshot.hasError) {
           return Scaffold(
-              body: Center(
-                  child: Column(
-            children: [
-              Text('Hata Oluştu.\nLütfen Tekrar Deneyiniz.'),
-              TextButton(
-                onPressed: () async {
-                  setState(() {
-                    tryLoginCount++;
-                  });
-                },
-                child: Text('Tekrar Dene'),
-              )
-            ],
-          )));
+              body: SafeArea(
+            child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  spacing: 15,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      NotFound.LogoPNGUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (BuildContext context, Object exception,
+                          StackTrace? stackTrace) {
+                        return Image.network(NotFound.LogoPNGUrl,
+                            fit: BoxFit.cover);
+                      },
+                    ),
+                    Text('Hata Oluştu.\nLütfen Tekrar Deneyiniz.'),
+                    TextButton(
+                      onPressed: () async {
+                        setState(() {
+                          tryLoginCount++;
+                        });
+                      },
+                      child: Text('Tekrar Dene'),
+                    )
+                  ],
+                )),
+          ));
         } else if (snapshot.hasData) {
           final isLoggedIn = snapshot.data!;
           if (!isLoggedIn) {
@@ -72,23 +89,53 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   Scaffold _isNotLoggin(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Center(
+      body: SafeArea(
           child: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           spacing: 20,
           children: [
-            customText('Lütfen giriş yapınız!', context,
+            Image.network(
+              NotFound.LogoPNGUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return Image.network(NotFound.LogoPNGUrl);
+              },
+            ),
+            customText('Sepetim', context,
                 textAlign: TextAlign.center,
                 size: HomeStyle(context: context).bodyLarge.fontSize,
                 weight: FontWeight.bold),
-            textButton(context, 'Giriş Yap', onPressed: () {
-              ref.read(bottomNavIndexProvider.notifier).state = 3;
-              //Navigator.pushReplacementNamed(context, '/home');
-            })
+            customText(
+                'Sepetinizi görüntüleyebilmek için lütfen giriş yapınız.',
+                context,
+                textAlign: TextAlign.center,
+                size: HomeStyle(context: context).bodySmall.fontSize),
+            textButton(
+              context,
+              'Üye Ol',
+              onPressed: () {
+                Navigator.pushNamed(context, '/profil/signUp');
+              },
+              shadowColor:
+                  HomeStyle(context: context).secondary.withOpacity(0.5),
+            ),
+            textButton(
+              context,
+              'Giriş Yap',
+              buttonColor:
+                  HomeStyle(context: context).secondary.withOpacity(0.2),
+              titleColor: HomeStyle(context: context).tertiary,
+              shadowColor:
+                  HomeStyle(context: context).secondary.withOpacity(0.5),
+              onPressed: () {
+                Navigator.pushNamed(context, '/profil/signIn');
+              },
+            )
           ],
         ),
       )),

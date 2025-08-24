@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';

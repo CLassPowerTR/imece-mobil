@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/productsCard2.dart';

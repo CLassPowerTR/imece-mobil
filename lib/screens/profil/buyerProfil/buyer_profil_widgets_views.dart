@@ -1,8 +1,5 @@
 part of 'buyer_profil_screen.dart';
 
-const String defaultProfileImageUrl =
-    'https://thumbs.dreamstime.com/b/default-profile-picture-icon-high-resolution-high-resolution-default-profile-picture-icon-symbolizing-no-display-picture-360167031.jpg';
-
 class _topProfile extends StatelessWidget {
   final User buyerProfil;
   final double height;
@@ -17,12 +14,12 @@ class _topProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height * 0.1,
+      height: height * 0.3,
       width: width,
       child: OverflowBox(
-        maxHeight: height * 0.22,
+        maxHeight: height * 0.4,
         maxWidth: width,
-        minHeight: height * 0.2,
+        minHeight: height * 0.4,
         minWidth: width,
         child: Container(
             decoration: BoxDecoration(
@@ -40,14 +37,16 @@ class _topProfile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 3,
               children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.06),
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.white,
                   backgroundImage: NetworkImage(
                       (buyerProfil.profilFotograf == null ||
                               (buyerProfil.profilFotograf?.isEmpty ?? true))
-                          ? defaultProfileImageUrl
+                          ? NotFound.defaultProfileImageUrl
                           : buyerProfil.profilFotograf!),
                 ),
                 Builder(builder: (context) {
@@ -55,6 +54,7 @@ class _topProfile extends StatelessWidget {
                       buyerProfil.lastName == '') {
                     return customText(buyerProfil.username, context,
                         weight: FontWeight.bold,
+                        maxLines: 2,
                         size:
                             HomeStyle(context: context).headlineSmall.fontSize);
                   }
@@ -62,8 +62,19 @@ class _topProfile extends StatelessWidget {
                       buyerProfil.firstName + ' ' + buyerProfil.lastName,
                       context,
                       weight: FontWeight.bold,
+                      maxLines: 2,
                       size: HomeStyle(context: context).headlineSmall.fontSize);
                 }),
+                if (buyerProfil.email != null)
+                  customText(buyerProfil.email!, context,
+                      color:
+                          HomeStyle(context: context).primary.withOpacity(0.5),
+                      maxLines: 2,
+                      size: HomeStyle(context: context).bodyMedium.fontSize),
+                customText(
+                    color: HomeStyle(context: context).primary.withOpacity(0.5),
+                    '${buyerProfil.rol == 'alici' ? 'Alıcı' : ''}',
+                    context)
               ],
             )),
       ),
@@ -78,11 +89,6 @@ class _logoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border:
-            Border.all(color: HomeStyle(context: context).outline, width: 1.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: TextButton(
         style: ButtonStyle(
@@ -105,24 +111,20 @@ class _logoutButton extends StatelessWidget {
           }
         },
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          spacing: 15,
           children: [
             Icon(
               Icons.logout_outlined,
               color: Colors.red,
               size: HomeStyle(context: context).headlineSmall.fontSize,
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Align(
-                alignment: Alignment.center,
-                child: customText(
-                  'Çıkış Yap',
-                  context,
-                  size: HomeStyle(context: context).bodyLarge.fontSize,
-                  color: HomeStyle(context: context).primary,
-                ),
-              ),
+            customText(
+              'Çıkış Yap',
+              context,
+              weight: FontWeight.w500,
+              size: HomeStyle(context: context).bodyLarge.fontSize,
+              color: Colors.red,
             ),
           ],
         ),
@@ -135,24 +137,67 @@ class _userMenu extends StatelessWidget {
   final User buyerProfil;
   const _userMenu({super.key, required this.buyerProfil});
 
-  static const List<String> menuItems = [
-    'Siparişlerim',
-    'Değerlendirmelerim',
-    'İndirim Kuponlarım',
-    'Takip ettiklerim',
-    'Adres Bilgilerim',
-    'Kartlarım',
-    'Favorilerim',
-  ];
-
-  static const List<IconData> menuIcons = [
-    Icons.shopping_bag_outlined, // Siparişlerim
-    Icons.star_rate_outlined, // Değerlendirmelerim
-    Icons.card_giftcard_outlined, // İndirim Kuponlarım
-    Icons.person_outline_sharp, // Takip ettiklerim
-    Icons.location_on_outlined, // Adres Bilgilerim
-    Icons.credit_card_outlined, // Kartlarım
-    Icons.favorite_border, // Favorilerim
+  static const List<Map<String, dynamic>> menuItemsInfo = [
+    {
+      'title': 'Profilim',
+      'icon': Icons.person_outline_sharp,
+      'color': '#15d7fa',
+      'route': null,
+    },
+    {
+      'title': 'Siparişlerim',
+      'icon': Icons.shopping_basket_outlined,
+      'color': '#3baa00',
+      'route': '/profil/orders',
+    },
+    {
+      'title': 'Değerlendirmelerim',
+      'icon': Icons.star_rate_outlined,
+      'color': '#ffaa56',
+      'route': '/profil/comments',
+    },
+    {
+      'title': 'Dahil Olduğum Gruplar',
+      'icon': Icons.group_outlined,
+      'color': '#aa56ff',
+      'route': null,
+    },
+    {
+      'title': 'İndirim Kuponlarım',
+      'icon': Icons.card_giftcard_outlined,
+      'color': '#cc6c00',
+      'route': '/profil/coupons',
+    },
+    {
+      'title': 'Takip ettiklerim',
+      'icon': Icons.person_outline_sharp,
+      'color': '#ffaaaa',
+      'route': '/profil/follow',
+    },
+    {
+      'title': 'Adres Bilgilerim',
+      'icon': Icons.location_on_outlined,
+      'color': '#00bfbf',
+      'route': '/profil/adress',
+    },
+    {
+      'title': 'Kartlarım',
+      'icon': Icons.credit_card_outlined,
+      'color': '#ff007f',
+      'route': '/profil/cards',
+    },
+    {
+      'title': 'Favorilerim',
+      'icon': Icons.favorite_border,
+      'color': '#ff0000',
+      'route': '/profil/favorite',
+    },
+    {
+      'title': 'Ayarlar',
+      'icon': Icons.settings_outlined,
+      'color': '#000000',
+      'route': null,
+    },
   ];
 
   @override
@@ -162,7 +207,7 @@ class _userMenu extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (int i = 0; i < menuItems.length; i++) ...[
+          for (int i = 0; i < menuItemsInfo.length; i++) ...[
             TextButton(
               style: ButtonStyle(
                 padding: WidgetStateProperty.all(
@@ -173,29 +218,16 @@ class _userMenu extends StatelessWidget {
                     HomeStyle(context: context).secondary),
               ),
               onPressed: () {
-                switch (i) {
-                  case 0:
-                    Navigator.pushNamed(context, '/profil/orders');
-                    break;
-                  case 1:
-                    Navigator.pushNamed(context, '/profil/comments');
-                    break;
-                  case 2:
-                    Navigator.pushNamed(context, '/profil/coupons');
-                    break;
-                  case 3:
-                    Navigator.pushNamed(context, '/profil/follow');
-                    break;
-                  case 4:
-                    Navigator.pushNamed(context, '/profil/adress',
+                final route = menuItemsInfo[i]['route'] as String?;
+                if (route != null) {
+                  if (route == '/profil/adress') {
+                    Navigator.pushNamed(context, route,
                         arguments: {'buyerProfil': buyerProfil});
-                    break;
-                  case 5:
-                    Navigator.pushNamed(context, '/profil/cards');
-                    break;
-                  default:
-                    Navigator.pushNamed(context, '/profil/favorite');
-                    break;
+                  } else {
+                    Navigator.pushNamed(context, route);
+                  }
+                } else {
+                  // TODO: route null ise ilgili sayfa eklenecek
                 }
               },
               child: Row(
@@ -203,16 +235,19 @@ class _userMenu extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(menuIcons[i], size: 22, color: Colors.grey[700]),
+                      Icon(menuItemsInfo[i]['icon'],
+                          size: 22,
+                          color: Color(int.parse(menuItemsInfo[i]['color']
+                              .replaceAll('#', '0xff')))),
                       SizedBox(width: 12),
-                      customText(menuItems[i], context),
+                      customText(menuItemsInfo[i]['title'], context),
                     ],
                   ),
                   Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
                 ],
               ),
             ),
-            if (i != menuItems.length - 1)
+            if (i != menuItemsInfo.length - 1)
               Divider(
                 height: 1,
                 thickness: 1,

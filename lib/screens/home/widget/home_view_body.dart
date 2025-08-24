@@ -665,8 +665,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               image: DecorationImage(
                 image: (category.gorsel != null && category.gorsel.isNotEmpty)
                     ? NetworkImage(category.gorsel)
-                    : NetworkImage(
-                        'https://imecehub.com/media/kapak_gorseli/2025/05/05/imecehub.jpg'),
+                    : NetworkImage(NotFound.LogoPNGUrl),
                 fit: BoxFit.cover,
               ),
             ),
