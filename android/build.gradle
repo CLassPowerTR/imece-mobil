@@ -19,13 +19,18 @@ tasks.register("clean", Delete) {
 
 // android/build.gradle
 buildscript {
+	ext {
+        kotlin_version = '2.1.0'
+        gradle_version = '8.4.2' // Android Gradle Plugin (AGP) için stabil bir sürüm
+    }
 	repositories {
 		google()
 		mavenCentral()
 		gradlePluginPortal()
 	}
 	dependencies {
-		classpath "com.android.tools.build:gradle:8.3.2"
-		// classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22" // varsa, önerilir
+		classpath "com.android.tools.build:gradle:$gradle_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.4.1'
 	}
 }
