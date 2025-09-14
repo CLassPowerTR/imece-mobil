@@ -31,7 +31,7 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    final expandedHeight = height * 0.36;
+    final expandedHeight = height * 0.3;
     final isCollapsed = _scrollController.hasClients &&
         _scrollController.offset > (expandedHeight - kToolbarHeight);
     final titleColor = isCollapsed
@@ -74,7 +74,7 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: AppPaddings.h16,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,

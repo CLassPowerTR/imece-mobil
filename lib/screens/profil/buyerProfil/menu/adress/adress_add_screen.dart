@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/widgets/dropdownBox.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
@@ -95,7 +96,7 @@ class _AdressAddScreenState extends State<AdressAddScreen> {
         title: const Text('Adres Ekle'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppPaddings.all16,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -201,6 +202,7 @@ class _AdressAddScreenState extends State<AdressAddScreen> {
                       elevation: 0,
                       onPressed: () async {
                         final kullanici = widget.user.id;
+                        //print(kullanici);
                         if (widget.isUpdate != true) {
                           // Kaydetme işlemi burada yapılacak
                           try {

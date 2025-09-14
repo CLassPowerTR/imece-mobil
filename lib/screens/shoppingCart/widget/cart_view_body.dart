@@ -991,7 +991,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           );
         } else if (snapshot.hasError) {
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppPaddings.all16,
             child: Center(child: Text('Adres verisi alınamadı.')),
           );
         } else if (!snapshot.hasData ||

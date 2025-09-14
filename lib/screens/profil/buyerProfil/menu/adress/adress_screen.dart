@@ -15,7 +15,7 @@ class _AdressScreenState extends State<AdressScreen> {
   @override
   void initState() {
     super.initState();
-    _adressFuture = ApiService.fetchUserAdress();
+    _adressFuture = ApiService.fetchUserAdress(userID: widget.buyerProfil.id);
   }
 
   @override
@@ -41,7 +41,8 @@ class _AdressScreenState extends State<AdressScreen> {
                     'isUpdate': false,
                   });
               setState(() {
-                _adressFuture = ApiService.fetchUserAdress();
+                _adressFuture =
+                    ApiService.fetchUserAdress(userID: widget.buyerProfil.id);
               });
             },
             child: customText('Adres Ekle', context,
@@ -88,7 +89,8 @@ class _AdressScreenState extends State<AdressScreen> {
                               'isUpdate': true,
                             });
                         setState(() {
-                          _adressFuture = ApiService.fetchUserAdress();
+                          _adressFuture = ApiService.fetchUserAdress(
+                              userID: widget.buyerProfil.id);
                         });
                       },
                       onDelete: () async {
@@ -98,7 +100,8 @@ class _AdressScreenState extends State<AdressScreen> {
                         try {
                           await ApiService.deleteUserAdress(adres.id);
                           setState(() {
-                            _adressFuture = ApiService.fetchUserAdress();
+                            _adressFuture = ApiService.fetchUserAdress(
+                                userID: widget.buyerProfil.id);
                           });
                         } catch (e) {
                           showTemporarySnackBar(
