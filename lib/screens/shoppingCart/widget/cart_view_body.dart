@@ -31,6 +31,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
   static Map<String, dynamic> sepetInfo = {};
 
+  late Future<List<UserAdress>> _adressFuture;
+
   int urunKg = 11;
   late Future<Map<String, dynamic>> _sepetFuture;
   late Future<User> _sellerProfileFuture;
@@ -125,7 +127,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           final durum = data['durum'];
           if (durum == 'BOS_SEPET') {
             return Padding(
-              padding: const EdgeInsets.all(32.0),
+              padding: AppPaddings.all32,
               child: Center(
                 child: Column(
                   spacing: 10,
@@ -148,8 +150,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                         color: themeData.surfaceContainer,
                         width: width,
                         isBoxShadow: true,
-                        margin: EdgeInsets.all(8),
-                        borderRadius: BorderRadius.circular(8),
+                        margin: AppPaddings.all8,
+                        borderRadius: AppRadius.r8,
                         child: Column(
                           children: [
                             _FutureFetchUserAdress(),
@@ -162,7 +164,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                           context,
                           color: themeData.surfaceContainer,
                           borderRadius: BorderRadius.circular(8),
-                          margin: EdgeInsets.all(8),
+                          margin: AppPaddings.all8,
                           padding:
                               EdgeInsets.only(left: 12, right: 12, bottom: 12),
                           child: Column(
@@ -323,9 +325,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Container _satinAlim(BuildContext context, HomeStyle themeData) {
     return container(context,
         color: themeData.surfaceContainer,
-        padding: EdgeInsets.all(12),
-        margin: EdgeInsets.all(8),
-        borderRadius: BorderRadius.circular(8),
+        padding: AppPaddings.all12,
+        margin: AppPaddings.all8,
+        borderRadius: AppRadius.r8,
         child: Column(
           spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,9 +392,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Container _odemeSecenegi(BuildContext context, themeData, width) {
     return container(
       context,
-      margin: EdgeInsets.all(8),
-      padding: EdgeInsets.all(12),
-      borderRadius: BorderRadius.circular(8),
+      margin: AppPaddings.all8,
+      padding: AppPaddings.all12,
+      borderRadius: AppRadius.r8,
       color: themeData.surfaceContainer,
       width: width,
       isBoxShadow: true,
@@ -408,15 +410,15 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           Container(
             //height: MediaQuery.of(context).size.height * 0.06,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: AppRadius.r5,
               border: Border.all(color: Colors.grey),
             ),
             child: DropdownButtonFormField<String>(
               alignment: Alignment.centerLeft,
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: AppRadius.r5,
               dropdownColor: Colors.white,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                contentPadding: AppPaddings.h10,
                 border: InputBorder.none,
               ),
               value: selectedCard,
@@ -596,9 +598,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       context,
       color: themeData.surfaceContainer,
       width: width,
-      padding: EdgeInsets.all(12),
-      margin: EdgeInsets.all(8),
-      borderRadius: BorderRadius.circular(8),
+      padding: AppPaddings.all12,
+      margin: AppPaddings.all8,
+      borderRadius: AppRadius.r8,
       child: FutureBuilder<Map<String, dynamic>>(
           future: _sepetInfoFuture,
           builder: (context, snapshot) {
@@ -685,8 +687,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     return container(
       context,
       color: themeData.surfaceContainer,
-      padding: EdgeInsets.all(8),
-      margin: EdgeInsets.symmetric(vertical: 4),
+      padding: AppPaddings.all8,
+      margin: AppPaddings.v4,
       borderRadius: BorderRadius.circular(8),
       child: Column(
         children: [
@@ -734,17 +736,16 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             ],
           ),
           Container(
-            margin: EdgeInsets.only(top: 5),
+            margin: AppPaddings.t5,
             child: Row(
               spacing: 10,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 10),
-                  padding: EdgeInsets.only(left: 10),
+                  margin: AppPaddings.t10,
+                  padding: AppPaddings.l10,
                   decoration: BoxDecoration(
                     color: Colors.grey[200], // İsteğe bağlı arka plan rengi
-                    borderRadius:
-                        BorderRadius.circular(5), // Köşe yuvarlaklığı 5
+                    borderRadius: AppRadius.r5, // Köşe yuvarlaklığı 5
                     border: Border.all(
                         width: 1,
                         color:
@@ -876,13 +877,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       context,
       color: themeData.surfaceContainer,
       isBoxShadow: false,
-      margin: EdgeInsets.all(20),
+      margin: AppPaddings.all20,
       child: Row(
         spacing: 10,
         children: [
           Container(
             width: MediaQuery.of(context).size.width * 0.25,
-            margin: EdgeInsets.only(left: 10),
+            margin: AppPaddings.l10,
             child: Image.network(ic_truck),
           ),
           Expanded(
@@ -925,11 +926,11 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Card _siparisKonum(BuildContext context) {
     return Card(
       color: Colors.white,
-      margin: EdgeInsets.all(10),
+      margin: AppPaddings.all10,
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            padding: AppPaddings.all10,
             alignment: Alignment.center,
             child: SizedBox(
               width: 100,
@@ -981,12 +982,19 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
   FutureBuilder<List<UserAdress>> _FutureFetchUserAdress() {
     final user = ref.watch(userProvider);
+
+    // Eğer kullanıcı hazırsa adresi hemen çek, değilse userProvider değişimini dinle
+    final initialUser = ref.read(userProvider);
+    if (initialUser != null && initialUser.id != null) {
+      _adressFuture = ApiService.fetchUserAdress(userID: initialUser.id);
+    }
+
     return FutureBuilder<List<UserAdress>>(
-      future: ApiService.fetchUserAdress(),
+      future: _adressFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppPaddings.all16,
             child: Center(child: buildLoadingBar(context)),
           );
         } else if (snapshot.hasError) {
@@ -998,7 +1006,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             snapshot.data == null ||
             snapshot.data!.isEmpty) {
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppPaddings.all16,
             child: textButton(
               context,
               elevation: 0,
@@ -1038,7 +1046,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: AppPaddings.all8,
                   child: textButton(
                     context,
                     "Varsayılan adres olarak ayarla",
