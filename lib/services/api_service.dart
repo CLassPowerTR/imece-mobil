@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/userAdress.dart';
-import 'package:imecehub/providers/auth_provider.dart';
-import 'package:riverpod/src/state_notifier_provider.dart';
+import 'package:imecehub/models/campaigns.dart';
 import '../models/users.dart';
 import '../models/productCategories.dart';
 import '../api/api_config.dart'; // Add this line to import ApiConfig
@@ -924,5 +923,92 @@ class ApiService {
       throw Exception(
           'Kargo bilgileri alınamadı. Durum kodu: \\${response.statusCode}');
     }
+  }
+
+  static Future<Map<String, dynamic>> postTriggerPayment(
+      Map<String, dynamic> paymentPayload) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final String url = config.paymentTriggerApiUrl.isNotEmpty
+        ? config.paymentTriggerApiUrl
+        : 'https://imecehub.com/api/payment/siparisitem/trigger-payment/';
+
+    http.Response response;
+    try {
+      response = await http.post(
+        Uri.parse(url),
+        body: json.encode(paymentPayload),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+    } catch (e) {
+      throw Exception('Ödeme isteği gönderilemedi: $e');
+    }
+
+    final String contentType =
+        response.headers['content-type']?.toLowerCase() ?? '';
+    final String bodyText = utf8.decode(response.bodyBytes);
+
+    Map<String, dynamic>? jsonData;
+    if (contentType.contains('application/json')) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        throw Exception('Ödeme cevabı JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'raw': bodyText};
+    } else {
+      if (jsonData != null) {
+        throw Exception(json.encode(jsonData));
+      } else {
+        throw Exception(bodyText.isNotEmpty
+            ? bodyText
+            : 'Ödeme başarısız. Durum kodu: ${response.statusCode}');
+      }
+    }
+  }
+
+  static Future<Campaigns> fetchProductsCampaings() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.productsCampaingsApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is Map<String, dynamic>) {
+        return Campaigns.fromJson(jsonData);
+      } else {
+        throw Exception(
+            'Kampanyalar beklenen formatta değil: ${jsonData.runtimeType}');
+      }
+    } else {
+      throw Exception(
+          'Kampanyalar alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  // Hikayeler için placeholder; API netleşene kadar boş liste döndürür
+  static Future<List<dynamic>> fetchStories() async {
+    return [];
   }
 }

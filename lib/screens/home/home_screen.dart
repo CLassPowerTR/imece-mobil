@@ -4,6 +4,7 @@ import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/productsCard2.dart';
+import 'package:imecehub/core/widgets/campaings_card.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
@@ -11,6 +12,7 @@ import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/productCategories.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/models/campaigns.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/products/products_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
@@ -63,8 +65,4 @@ class _HomeScreenState extends State<HomeScreen> {
       //bottomNavigationBar: _HomeBottomNavigationBar(), // Bottom NavigationBar yerine body'nin en altına taşındı
     );
   }
-}
-
-extension _HomeStyleExtension on BuildContext {
-  HomeStyle get homeStyle => HomeStyle(context: this);
 }

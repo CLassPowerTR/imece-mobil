@@ -6,6 +6,7 @@ final class HomeStyle {
 
   Color get primary => Theme.of(_context).colorScheme.primary;
   Color get secondary => Theme.of(_context).colorScheme.secondary;
+  Color get onPrimary => Theme.of(_context).colorScheme.onPrimary;
   Color get onSecondary => Theme.of(_context).colorScheme.onSecondary;
   Color get outline => Theme.of(_context).colorScheme.outline;
   Color get surface => Theme.of(_context).colorScheme.surface;
@@ -14,6 +15,7 @@ final class HomeStyle {
   Color get shadow => Theme.of(_context).colorScheme.shadow;
   Color get tertiary => Theme.of(_context).colorScheme.tertiary;
   Color get surfaceContainer => Theme.of(_context).colorScheme.surfaceContainer;
+  Color get error => Theme.of(_context).colorScheme.error;
 
   TextStyle get appBarTextStyle => Theme.of(_context).textTheme.headlineMedium!;
   TextStyle get headlineSmall => Theme.of(_context).textTheme.headlineSmall!;
@@ -22,7 +24,15 @@ final class HomeStyle {
   TextStyle get bodyLarge => Theme.of(_context).textTheme.bodyLarge!;
   TextStyle get bodyMedium => Theme.of(_context).textTheme.bodyMedium!;
   TextStyle get bodySmall => Theme.of(_context).textTheme.bodySmall!;
+  TextStyle get titleLarge => Theme.of(_context).textTheme.titleLarge!;
+  TextStyle get titleMedium => Theme.of(_context).textTheme.titleMedium!;
+  TextStyle get titleSmall => Theme.of(_context).textTheme.titleSmall!;
+  TextStyle get displayLarge => Theme.of(_context).textTheme.displayLarge!;
+  TextStyle get displayMedium => Theme.of(_context).textTheme.displayMedium!;
+  TextStyle get displaySmall => Theme.of(_context).textTheme.displaySmall!;
   TextStyle get labelLarge => Theme.of(_context).textTheme.labelLarge!;
+  TextStyle get labelMedium => Theme.of(_context).textTheme.labelMedium!;
+  TextStyle get labelSmall => Theme.of(_context).textTheme.labelSmall!;
 
   EdgeInsets get appBarPadding => const EdgeInsets.symmetric(horizontal: 20);
   EdgeInsets get bottomNavigationBarPadding =>

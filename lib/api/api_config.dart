@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
+  final String baseUrl = dotenv.env['BASE_URL'] ?? '';
   final String usersApiUrl = dotenv.env['USERS_API_URL'] ?? '';
   final String userMeApiUrl = dotenv.env['USER_ME_API_URL'] ?? '';
   final String userRqLoginApiUrl = dotenv.env['USER_RQ_LOGIN_API_URL'] ?? '';
@@ -17,6 +18,7 @@ class ApiConfig {
   final String categoriesApiUrl = dotenv.env['CATEGORIES_API_URL'] ?? '';
   final String populerProductsApiUrl =
       dotenv.env['POPULER_PRODUCTS_API_URL'] ?? '';
+  final String productsCampaingsApiUrl = dotenv.env['PRODUCTS_CAMPAINGS'] ?? '';
   final String companiesApiUrl = dotenv.env['COMPANIES_API_URL'] ?? '';
   final String urunYorumApiUrl = dotenv.env['URUN_YORUM_API_URL'] ?? '';
   final String sepetGetApiUrl = dotenv.env['SEPET_GET_API_URL'] ?? '';
@@ -24,6 +26,8 @@ class ApiConfig {
   final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String sellerProfileApiUrl = dotenv.env['SELLER_PROFILE_API_URL'] ?? '';
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
+  final String paymentTriggerApiUrl =
+      dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';
 
   // Singleton pattern (isteğe bağlı)

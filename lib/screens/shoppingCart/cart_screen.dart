@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
@@ -21,6 +22,7 @@ import 'package:u_credit_card/u_credit_card.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 part 'widget/cart_view_header.dart';
 part 'widget/cart_view_body.dart';

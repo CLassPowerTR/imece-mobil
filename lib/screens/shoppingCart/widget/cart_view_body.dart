@@ -31,11 +31,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
   static Map<String, dynamic> sepetInfo = {};
 
-  late Future<List<UserAdress>> _adressFuture;
-
   int urunKg = 11;
   late Future<Map<String, dynamic>> _sepetFuture;
-  late Future<User> _sellerProfileFuture;
   final storage = FlutterSecureStorage();
   String? cardNumber;
   String? lateDate;
@@ -59,6 +56,118 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     });
     _loadCardInfo();
     _fetchSepet();
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
+  }
+
+  Future<void> _handleSatinAl(BuildContext context) async {
+    if (!_confirm) {
+      showTemporarySnackBar(
+          context, 'Lütfen satın alım koşullarını onaylayın.');
+      return;
+    }
+
+    final double amount =
+        double.tryParse('${sepetInfo['toplam_tutar'] ?? '0'}') ?? 0.0;
+
+    final String cardNo =
+        (cardNumber ?? _cardNumberController.text).replaceAll(' ', '');
+    final String cvvNo = (cvv ?? _cvvController.text);
+    final String holder = (cartUserName ?? _cartUserNameController.text);
+    final String expire = (lateDate ?? _lateUseDateController.text);
+    String expMonth = '';
+    String expYear = '';
+    if (expire.isNotEmpty && expire.contains('/')) {
+      final parts = expire.split('/');
+      if (parts.length == 2) {
+        expMonth = parts[0];
+        expYear = parts[1].length == 2 ? '20${parts[1]}' : parts[1];
+      }
+    }
+
+    final Map<String, dynamic> paymentPayload = {
+      'PaymentDealerRequest': {
+        'CardHolderFullName': holder,
+        'CardNumber': cardNo,
+        'ExpMonth': expMonth,
+        'ExpYear': expYear,
+        'CvcNumber': cvvNo,
+        'CardToken': '',
+        'Amount': amount,
+        'Currency': 'TL',
+        'InstallmentNumber': 1,
+        'ClientIP': '192.168.1.101',
+        'OtherTrxCode': '',
+        'SubMerchantName': '',
+        'IsPoolPayment': 0,
+        'IsPreAuth': 0,
+        'IsTokenized': 0,
+        'IntegratorId': 0,
+        'Software': 'Possimulation',
+        'Description': 'Sepet Ödemesi',
+        'ReturnHash': 1,
+        'RedirectUrl':
+            'https://service.refmokaunited.com/PaymentDealerThreeD?MyTrxCode=000000000000000',
+        'RedirectType': 0,
+        'BuyerInformation': {
+          'BuyerFullName': 'Ali Yılmaz',
+          'BuyerGsmNumber': '5551110022',
+          'BuyerEmail': 'aliyilmaz@xyz.com',
+          'BuyerAddress': 'Tasdelen / Çekmeköy',
+        },
+        'CustomerInformation': {
+          'DealerCustomerId': '',
+          'CustomerCode': '1234',
+          'FirstName': 'Ali',
+          'LastName': 'Yılmaz',
+          'Gender': '1',
+          'BirthDate': '',
+          'GsmNumber': '',
+          'Email': 'aliyilmaz@xyz.com',
+          'Address': '',
+          'CardName': 'Maximum kartım',
+        },
+      }
+    };
+
+    showTemporarySnackBar(context, 'Sipariş onaylanıyor...');
+    try {
+      final response = await ApiService.postTriggerPayment(paymentPayload);
+
+      final resultCode = response['ResultCode']?.toString();
+      if (resultCode == 'Success') {
+        final dynamic data = response['Data'];
+        final String? redirectUrl =
+            data is Map<String, dynamic> ? (data['Url']?.toString()) : null;
+        if (redirectUrl != null && redirectUrl.isNotEmpty) {
+          showTemporarySnackBar(context, '3D Secure yönlendiriliyor...');
+          final uri = Uri.parse(redirectUrl);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        } else {
+          showTemporarySnackBar(context, 'Siparişiniz başarıyla alındı!');
+          _fetchSepet();
+        }
+      } else if (resultCode == 'PaymentDealer.CheckCardInfo.InvalidCardInfo') {
+        showTemporarySnackBar(context, 'Hatalı kart bilgisi.');
+      } else if (response['durum'] == 'STOK_YETERSIZ') {
+        final List<dynamic> yetersiz = response['yetersiz_urunler'] ?? [];
+        final String msg = yetersiz
+            .map(
+                (e) => (e is Map && e['urun_adi'] != null) ? e['urun_adi'] : '')
+            .where((e) => e.toString().isNotEmpty)
+            .join(', ');
+        showTemporarySnackBar(context, 'Stok yetersizliği: $msg');
+      } else {
+        final String mesaj = (response['mesaj']?.toString() ??
+            response['ResultCode']?.toString() ??
+            'Bilinmeyen hata.');
+        showTemporarySnackBar(context, 'Sipariş onaylama başarısız: $mesaj');
+      }
+    } catch (err) {
+      final String errorMessage = err.toString();
+      showTemporarySnackBar(context, errorMessage);
+    }
   }
 
   // Otomatik ve manuel yenileme için fonksiyon
@@ -382,7 +491,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                         fontSize: themeData.bodyLarge.fontSize,
                         weight: FontWeight.bold,
                         elevation: 6,
-                        shadowColor: themeData.secondary))
+                        shadowColor: themeData.secondary, onPressed: () async {
+                  await _handleSatinAl(context);
+                }))
               ],
             )
           ],
@@ -683,174 +794,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _sepetUrunleriContainer(themeData) {
-    return container(
-      context,
-      color: themeData.surfaceContainer,
-      padding: AppPaddings.all8,
-      margin: AppPaddings.v4,
-      borderRadius: BorderRadius.circular(8),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 8,
-            children: [
-              Image.network(
-                'https://st4.depositphotos.com/16122460/38897/i/450/depositphotos_388975100-stock-photo-delicious-fresh-ripe-tangerines-background.jpg',
-                width: 100,
-                height: 100,
-              ),
-              Expanded(
-                child: richText(context,
-                    maxLines: 6,
-                    color: themeData.primary,
-                    textAlign: TextAlign.left,
-                    children: [
-                      TextSpan(
-                          text: 'Turuncu Mandalina',
-                          style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontWeight: FontWeight.bold,
-                              fontSize: themeData.bodyLarge.fontSize)),
-                      TextSpan(
-                          text: '\nTatlı, Sulu, Turuncu, mandalina, turunçgil',
-                          style: TextStyle(
-                            fontSize: themeData.bodyMedium.fontSize,
-                            overflow: TextOverflow.ellipsis,
-                          )),
-                      TextSpan(
-                          text: '\n\nMuhammet Yusuf Akar',
-                          style: TextStyle(
-                              fontSize: themeData.bodySmall.fontSize)),
-                    ]),
-              ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {});
-                  },
-                  icon: Icon(
-                    Icons.delete_outline_rounded,
-                    color: Colors.red,
-                  )),
-            ],
-          ),
-          Container(
-            margin: AppPaddings.t5,
-            child: Row(
-              spacing: 10,
-              children: [
-                Container(
-                  margin: AppPaddings.t10,
-                  padding: AppPaddings.l10,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200], // İsteğe bağlı arka plan rengi
-                    borderRadius: AppRadius.r5, // Köşe yuvarlaklığı 5
-                    border: Border.all(
-                        width: 1,
-                        color:
-                            themeData.outline), // İnce bir kenarlık (opsiyonel)
-                  ),
-                  child: Row(
-                    children: [
-                      // Sol tarafta "11 KG" yazısı
-                      Text(
-                        urunKg.toString() + ' KG',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      // Sağ tarafta - ve + butonları
-                      Row(
-                        children: [
-                          // "-" butonu
-                          IconButton(
-                            icon: Icon(
-                              Icons.remove,
-                              color: Colors.red,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                urunKg -= 1;
-                              });
-                            },
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            iconSize: 20,
-                          ),
-                          // "+" butonu
-                          Container(
-                            color: Colors.black,
-                            height: 20,
-                            width: 1,
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              color: Colors.green,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                urunKg += 1;
-                              });
-                            },
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            iconSize: 20,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: richText(
-                      textAlign: TextAlign.left,
-                      fontSize: themeData.bodyMedium.fontSize,
-                      context,
-                      children: [
-                        TextSpan(
-                            text: '1KG: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(
-                          text: ' 36 TL',
-                        ),
-                        TextSpan(
-                            text: '\nMaks. KG: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(text: ' 56')
-                      ]),
-                ),
-                Expanded(
-                  child: richText(
-                      fontSize: themeData.bodyMedium.fontSize,
-                      textAlign: TextAlign.center,
-                      context,
-                      children: [
-                        TextSpan(
-                            text: 'Ürün Tutarı',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(text: '\n${urunKg * 36} TL')
-                      ]),
-                ),
-              ],
-            ),
-          ),
-          //Divider(),
-        ],
-      ),
-    );
-  }
-
-  Container _bosluk(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.03,
-      color: Colors.grey[100],
-    );
-  }
-
   Container _teslimatBilgi(BuildContext context, themeData) {
     String? teslimatTarihiStr =
         sepetInfo['son_teslimat_tarihi'] != null && sepetInfo.isNotEmpty
@@ -923,74 +866,26 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Card _siparisKonum(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      margin: AppPaddings.all10,
-      child: Row(
-        children: [
-          Container(
-            padding: AppPaddings.all10,
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Image.network(ic_map),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.only(top: 30, left: 5),
-              child: Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Türkiye / İstanbul',
-                      textAlign: TextAlign.left,
-                      style:
-                          TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-                    ),
-                    Text(
-                      'Çınar Mahallesi 878 sokak no 14 daire 1 İstanbul Bağcılar',
-                      textAlign: TextAlign.left,
-                    ),
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.05,
-                      margin: EdgeInsets.all(0),
-                      alignment: Alignment.bottomRight,
-                      child: TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Konum bilgileri değiştir',
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 34, 255, 34),
-                                fontWeight: FontWeight.w900),
-                          )),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  Future<List<UserAdress>> _awaitUserAndFetchAddresses() async {
+    User? u = ref.read(userProvider);
+    while (mounted && (u == null)) {
+      try {
+        await ref.read(userProvider.notifier).fetchUserMe();
+      } catch (_) {}
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (!mounted) break;
+      setState(() {});
+      u = ref.read(userProvider);
+    }
+    if (u == null) {
+      return <UserAdress>[];
+    }
+    return ApiService.fetchUserAdress(userID: u.id);
   }
 
   FutureBuilder<List<UserAdress>> _FutureFetchUserAdress() {
-    final user = ref.watch(userProvider);
-
-    // Eğer kullanıcı hazırsa adresi hemen çek, değilse userProvider değişimini dinle
-    final initialUser = ref.read(userProvider);
-    if (initialUser != null && initialUser.id != null) {
-      _adressFuture = ApiService.fetchUserAdress(userID: initialUser.id);
-    }
-
     return FutureBuilder<List<UserAdress>>(
-      future: _adressFuture,
+      future: _awaitUserAndFetchAddresses(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Padding(
@@ -1002,9 +897,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             padding: AppPaddings.all16,
             child: Center(child: Text('Adres verisi alınamadı.')),
           );
-        } else if (!snapshot.hasData ||
-            snapshot.data == null ||
-            snapshot.data!.isEmpty) {
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final currentUser = ref.read(userProvider);
           return Padding(
             padding: AppPaddings.all16,
             child: textButton(
@@ -1013,7 +907,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               "Adres Ekle",
               onPressed: () {
                 Navigator.pushNamed(context, '/profil/adress',
-                    arguments: {'buyerProfil': user});
+                    arguments: {'buyerProfil': currentUser});
               },
             ),
           );

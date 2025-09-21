@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 class AppRadius {
   AppRadius._();
+  static const BorderRadius r3 = BorderRadius.all(Radius.circular(3));
   static const BorderRadius r5 = BorderRadius.all(Radius.circular(5));
   static const BorderRadius r8 = BorderRadius.all(Radius.circular(8));
   static const BorderRadius r12 = BorderRadius.all(Radius.circular(12));

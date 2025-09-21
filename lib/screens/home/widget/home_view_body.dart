@@ -1,7 +1,7 @@
 part of '../home_screen.dart';
 
 class _HomeViewBody extends StatefulWidget {
-  const _HomeViewBody({super.key});
+  const _HomeViewBody();
 
   @override
   State<_HomeViewBody> createState() => _HomeViewBodyState();
@@ -37,28 +37,25 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshFutures() async {
     // API'den verileri çek ve cache'i güncelle
-    List<Category> freshCategory =
-        await ApiService.fetchCategories() as List<Category>;
+    List<Category> freshCategory = await ApiService.fetchCategories();
     setState(() {
       cachedCategories = freshCategory;
       _futureCategory = Future.value(freshCategory);
     });
-    List<Company> freshSellers =
-        await ApiService.fetchSellers() as List<Company>;
+    List<Company> freshSellers = await ApiService.fetchSellers();
     setState(() {
       cachedSellers = freshSellers;
       _futureSellers = Future.value(freshSellers);
     });
 
     List<Product> freshPopulerProducts =
-        await ApiService.fetchSellers() as List<Product>;
+        await ApiService.fetchPopulerProducts();
     setState(() {
       cachedPopulerProducts = freshPopulerProducts;
       _futurePopulerProducts = Future.value(freshPopulerProducts);
     });
   }
 
-  List kampanyalar = ['Kampanya 1', 'Kampanya 2', 'Kampanya 3'];
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -78,17 +75,10 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                       _futureCategories(width, height),
-                      _kampanyalarText(context),
                       _kampanyalarItems(width, height),
-                      Builder(builder: (context) {
-                        return !isLoggedIn
-                            ? _kayitContainer(context, height)
-                            : SizedBox.shrink();
-                      }),
                       //_saticilarList(height, context, width),
                       _futureSellersView(height, width, themeData),
                       _alimTipiContainer(height, context),
-
                       //_populerUrunCards(width, height),
                       _futurePopulerProductsView(width, height),
                       _onerilerContainer(height, context, width),
@@ -486,42 +476,43 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
 
   Container _kampanyalarItems(double width, double height) {
     return Container(
-      decoration: BoxDecoration(boxShadow: [
-        boxShadow(context),
-      ]),
-      height:
-          height * 0.17, // Kategori widget'larının yüksekliğine göre ayarlayın
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: kampanyalar.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index == kampanyalar.length - 1 ? 0 : 8,
-            ),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  showTemporarySnackBar(
-                      context, 'onPressed ${kampanyalar[index]}',
-                      type: SnackBarType.warning);
-                });
+      height: height * 0.3,
+      child: FutureBuilder<Campaigns>(
+        future: ApiService.fetchProductsCampaings(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Row(children: [
+              Expanded(child: buildLoadingBar(context)),
+            ]);
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Hata oluştu: ${snapshot.error}"));
+          } else if (snapshot.hasData) {
+            final campaigns = snapshot.data!;
+            if (campaigns.data.isEmpty) {
+              return SizedBox();
+            }
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: campaigns.data.length,
+              itemBuilder: (context, index) {
+                final item = campaigns.data[index];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: index == campaigns.data.length - 1 ? 0 : 8,
+                  ),
+                  child: CampaingsCard(
+                    item: item,
+                    width: width,
+                    height: height,
+                  ),
+                );
               },
-              child: _kampanyalar(kampanyalar[index], width, height),
-            ),
-          );
+            );
+          } else {
+            return SizedBox();
+          }
         },
       ),
-    );
-  }
-
-  Padding _kampanyalarText(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: customText('Kampanyalar', context,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
-          weight: FontWeight.bold,
-          color: HomeStyle(context: context).primary),
     );
   }
 
@@ -663,7 +654,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               borderRadius:
                   HomeStyle(context: context).bodyCategoryContainerBorderRadius,
               image: DecorationImage(
-                image: (category.gorsel != null && category.gorsel.isNotEmpty)
+                image: category.gorsel.isNotEmpty
                     ? NetworkImage(category.gorsel)
                     : NetworkImage(NotFound.LogoPNGUrl),
                 fit: BoxFit.cover,
@@ -680,32 +671,6 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     );
   }
 
-  Widget _kampanyalar(dynamic kampanyalar, double width, double height) {
-    double containerWidth = width * 0.89;
-    double containerHeight = height * 0.2;
-    return Container(
-      width: containerWidth,
-      height: containerHeight,
-      decoration: BoxDecoration(
-        image: const DecorationImage(
-          image: AssetImage('assets/image/grupalim.jpg'),
-          fit: BoxFit.cover,
-        ),
-        borderRadius:
-            HomeStyle(context: context).bodyCategoryContainerBorderRadius,
-      ),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            customText(kampanyalar.toString(), context,
-                color: HomeStyle(context: context).secondary,
-                weight: FontWeight.bold,
-                size: HomeStyle(context: context).headlineSmall.fontSize),
-          ]),
-    );
-  }
-
   void _voidCachedCategories() {
     //_futureCategory = ApiService.fetchCategories() as Future<List<Category>>;
     // Aşağıdaki kodu initState içine ekleyerek, eğer cachedProducts dolu ise
@@ -715,7 +680,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       _futureCategory = Future.value(cachedCategories);
     } else {
       // İlk açılışta veya cache boşsa API'den verileri çek
-      _futureCategory = ApiService.fetchCategories() as Future<List<Category>>;
+      _futureCategory = ApiService.fetchCategories();
       _futureCategory.then((categories) {
         // Gelen veriyi cache'e atıyoruz.
         cachedCategories = categories;
@@ -729,7 +694,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       _futureSellers = Future.value(cachedSellers);
     } else {
       // İlk açılışta veya cache boşsa API'den verileri çek
-      _futureSellers = ApiService.fetchSellers() as Future<List<Company>>;
+      _futureSellers = ApiService.fetchSellers();
       _futureSellers.then((sellers) {
         // Gelen veriyi cache'e atıyoruz.
         cachedSellers = sellers;
@@ -743,8 +708,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       _futurePopulerProducts = Future.value(cachedPopulerProducts);
     } else {
       // İlk açılışta veya cache boşsa API'den verileri çek
-      _futurePopulerProducts =
-          ApiService.fetchPopulerProducts() as Future<List<Product>>;
+      _futurePopulerProducts = ApiService.fetchPopulerProducts();
       _futurePopulerProducts.then((populerProducts) {
         // Gelen veriyi cache'e atıyoruz.
         cachedPopulerProducts = populerProducts;
