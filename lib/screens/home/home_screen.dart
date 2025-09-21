@@ -7,6 +7,7 @@ import 'package:imecehub/core/widgets/productsCard2.dart';
 import 'package:imecehub/core/widgets/campaings_card.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
+import 'package:imecehub/core/widgets/story_campaings_card.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/companies.dart';

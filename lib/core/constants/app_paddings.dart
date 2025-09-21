@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 class AppPaddings {
   AppPaddings._();
-
+  static const EdgeInsets all4 = EdgeInsets.all(4);
   static const EdgeInsets all8 = EdgeInsets.all(8);
   static const EdgeInsets all10 = EdgeInsets.all(10);
   static const EdgeInsets all12 = EdgeInsets.all(12);

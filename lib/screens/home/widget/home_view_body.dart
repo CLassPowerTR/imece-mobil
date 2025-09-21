@@ -77,6 +77,8 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                       _futureCategories(width, height),
                       _kampanyalarItems(width, height),
                       //_saticilarList(height, context, width),
+                      SizedBox(height: 16),
+                      StoryCampaingsCard(height: height, width: width),
                       _futureSellersView(height, width, themeData),
                       _alimTipiContainer(height, context),
                       //_populerUrunCards(width, height),

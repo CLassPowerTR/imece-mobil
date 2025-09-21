@@ -6,6 +6,7 @@ import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/campaigns.dart';
+import 'package:imecehub/models/stories.dart';
 import '../models/users.dart';
 import '../models/productCategories.dart';
 import '../api/api_config.dart'; // Add this line to import ApiConfig
@@ -1008,7 +1009,55 @@ class ApiService {
   }
 
   // Hikayeler için placeholder; API netleşene kadar boş liste döndürür
-  static Future<List<dynamic>> fetchStories() async {
-    return [];
+  static Future<Stories> fetchCampaignsStories() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.productsCampaignsStoriesApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is Map<String, dynamic>) {
+        return Stories.fromJson(jsonData);
+      } else {
+        throw Exception('Hikayeler beklenen formatta değil');
+      }
+    } else {
+      throw Exception(
+          'Hikayeler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Stories> fetchStories() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.productsStoriesApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is Map<String, dynamic>) {
+        return Stories.fromJson(jsonData);
+      } else {
+        throw Exception('Hikayeler beklenen formatta değil');
+      }
+    } else {
+      throw Exception(
+          'Hikayeler alınamadı. Durum kodu: \\${response.statusCode}');
+    }
   }
 }
