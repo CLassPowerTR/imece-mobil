@@ -142,7 +142,7 @@ class _userMenu extends StatelessWidget {
       'title': 'Profilim',
       'icon': Icons.person_outline_sharp,
       'color': '#15d7fa',
-      'route': null,
+      'route': '/profil/myProfile',
     },
     {
       'title': 'Siparişlerim',
@@ -160,7 +160,7 @@ class _userMenu extends StatelessWidget {
       'title': 'Dahil Olduğum Gruplar',
       'icon': Icons.group_outlined,
       'color': '#aa56ff',
-      'route': null,
+      'route': '/profil/groups',
     },
     {
       'title': 'İndirim Kuponlarım',
@@ -196,7 +196,7 @@ class _userMenu extends StatelessWidget {
       'title': 'Ayarlar',
       'icon': Icons.settings_outlined,
       'color': '#000000',
-      'route': null,
+      'route': '/profil/settings',
     },
   ];
 

@@ -71,6 +71,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/follow': (context) => FollowScreen(),
   '/profil/coupons': (context) => CouponsScreen(),
   '/profil/comments': (context) => CommentsScreen(),
+  '/profil/groups': (context) => GroupsScreen(),
+  '/profil/myProfile': (context) => const MyProfileScreen(),
+  '/profil/myProfile/edit': (context) => const MyProfileEditScreen(),
+  '/profil/settings': (context) => const SettingsScreen(),
   '/profil/adress': (context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;

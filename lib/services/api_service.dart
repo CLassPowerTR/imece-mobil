@@ -1060,4 +1060,42 @@ class ApiService {
           'Hikayeler alınamadı. Durum kodu: \\${response.statusCode}');
     }
   }
+
+  static Future<List<dynamic>> fetchUserGroups() async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse(config.userGroupsApiUrl),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return decoded;
+      } else if (decoded is Map<String, dynamic>) {
+        // Yaygın liste alanlarını kontrol et
+        final dynamic maybeList = decoded['results'] ??
+            decoded['data'] ??
+            decoded['items'] ??
+            decoded['groups'];
+        if (maybeList is List) {
+          return maybeList;
+        }
+        // Liste bulunamazsa tek öğe olarak sar
+        return [decoded];
+      } else {
+        // Beklenmeyen tip; stringe çevirip tek öğe olarak döndür
+        return [decoded.toString()];
+      }
+    } else {
+      throw Exception(
+          'Kullanıcı grupları alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
 }

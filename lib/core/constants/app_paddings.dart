@@ -26,6 +26,8 @@ class AppPaddings {
 
   static const EdgeInsets l10 = EdgeInsets.only(left: 10);
 
+  static const EdgeInsets b12 = EdgeInsets.only(bottom: 12);
+
   static const EdgeInsets textFormFieldPadding = EdgeInsets.symmetric(
     horizontal: 20,
     vertical: 16,
