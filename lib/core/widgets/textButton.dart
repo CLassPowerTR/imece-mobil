@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/widgets/richText.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
@@ -79,7 +80,7 @@ SizedBox textButton(
                 WidgetStateProperty.all<EdgeInsets>(padding ?? EdgeInsets.zero),
             shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
+              borderRadius: borderRadius ?? AppRadius.r8,
             )),
             minimumSize: WidgetStateProperty.all<Size?>(
                 Size(effectiveMinSizeWidth, effectiveMinSizeHeight)),

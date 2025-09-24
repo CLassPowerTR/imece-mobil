@@ -209,7 +209,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                                 text: '1 Adet: ',
                                 style: TextStyle(fontWeight: FontWeight.bold)),
                             TextSpan(
-                              text: ' ${product.urunMinFiyat} TL',
+                              text: ' ${product.urunParakendeFiyat} TL',
                             ),
                             TextSpan(
                                 text: '\nMaks: ',
@@ -221,7 +221,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                             fontSize: themeData.bodyMedium.fontSize,
                             textAlign: TextAlign.center,
                             context,
-                            maxLines: 3,
+                            maxLines: 6,
                             children: [
                               TextSpan(
                                   text: 'Ürün Tutarı',
@@ -229,7 +229,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                                       TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(
                                   text:
-                                      '\n${((double.tryParse(item['miktar'].toString()) ?? 0) * (double.tryParse(product.urunMinFiyat.toString()) ?? 0)).toStringAsFixed(2)} TL')
+                                      '\n${((double.tryParse(item['miktar'].toString()) ?? 0) * (double.tryParse(product.urunParakendeFiyat.toString()) ?? 0)).toStringAsFixed(2)} TL')
                             ]),
                       ),
                     ],

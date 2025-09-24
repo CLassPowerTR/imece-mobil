@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/iconButtons.dart';
@@ -99,18 +101,24 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
                     arguments: {'refresh': true});
               } else {
                 if (isLoggedIn) {
-                  try {
-                    await ApiService.fetchSepetEkle(
-                        1, widget.product.urunId ?? 0);
-                    showTemporarySnackBar(context, 'Sepete eklendi');
-                  } catch (e) {
+                  if (widget.product.stokDurumu! <= 0) {
                     showTemporarySnackBar(
-                        context, 'Sepete eklenirken bir hata oluştu: $e');
-                  } finally {
-                    setState(() async {
-                      await _checkGetSepet();
-                      await _checkLogin();
-                    });
+                        context, 'Bu ürün stokta bulunmamaktadır',
+                        type: SnackBarType.info);
+                  } else {
+                    try {
+                      await ApiService.fetchSepetEkle(
+                          1, widget.product.urunId ?? 0);
+                      showTemporarySnackBar(context, 'Sepete eklendi');
+                    } catch (e) {
+                      showTemporarySnackBar(
+                          context, 'Sepete eklenirken bir hata oluştu: $e');
+                    } finally {
+                      setState(() async {
+                        await _checkGetSepet();
+                        await _checkLogin();
+                      });
+                    }
                   }
                 } else {
                   showTemporarySnackBar(context, 'Lütfen giriş yapınız!');

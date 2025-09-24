@@ -204,18 +204,24 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                     context, '/home', (route) => false,
                     arguments: {'refresh': true});
               } else {
-                try {
-                  await ApiService.fetchSepetEkle(
-                      1, products[index].urunId ?? 0);
-                  showTemporarySnackBar(context, 'Sepete eklendi',
-                      type: SnackBarType.success);
-                } catch (e) {
+                if (products[index].stokDurumu <= 0) {
                   showTemporarySnackBar(
-                      context, 'Sepete eklenirken bir hata oluştu: $e',
-                      type: SnackBarType.error);
-                } finally {
-                  await _checkGetSepet();
-                  setState(() {});
+                      context, 'Bu ürün stokta bulunmamaktadır',
+                      type: SnackBarType.info);
+                } else {
+                  try {
+                    await ApiService.fetchSepetEkle(
+                        1, products[index].urunId ?? 0);
+                    showTemporarySnackBar(context, 'Sepete eklendi',
+                        type: SnackBarType.success);
+                  } catch (e) {
+                    showTemporarySnackBar(
+                        context, 'Sepete eklenirken bir hata oluştu: $e',
+                        type: SnackBarType.error);
+                  } finally {
+                    await _checkGetSepet();
+                    setState(() {});
+                  }
                 }
               }
             } else {

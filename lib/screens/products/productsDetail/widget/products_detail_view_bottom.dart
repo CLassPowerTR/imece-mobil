@@ -52,17 +52,33 @@ class _ProductsDetailViewBottomState
             buttonColor: Colors.orange, elevation: 4));
   }
 
-  Expanded _sepeteEkleButton(BuildContext context) {
+  Builder _sepeteEkleButton(BuildContext context) {
     final isInSepet = widget.sepetUrunIdList.contains(widget.product.urunId);
-    return Expanded(
-      child: textButton(
-        context,
-        isInSepet ? 'Sepete Git' : 'Sepete ekle',
-        elevation: 4,
-        buttonColor: isInSepet ? Colors.orangeAccent : null,
-        onPressed: widget.sepeteEkle,
-      ),
-    );
+
+    return Builder(builder: (context) {
+      if (widget.product.stokDurumu! <= 0) {
+        return Expanded(
+          child: container(context,
+              color: Colors.red,
+              borderRadius: AppRadius.r8,
+              boxShadowColor: Colors.red,
+              alignment: Alignment.center,
+              child: customText('Stokta Yok', context,
+                  color: AppColors.onPrimary(context),
+                  size: HomeStyle(context: context).bodyMedium.fontSize)),
+        );
+      } else {
+        return Expanded(
+          child: textButton(
+            context,
+            isInSepet ? 'Sepete Git' : 'Sepete ekle',
+            elevation: 4,
+            buttonColor: isInSepet ? Colors.orangeAccent : null,
+            onPressed: widget.sepeteEkle,
+          ),
+        );
+      }
+    });
   }
 
   Expanded _fiyatStokText(HomeStyle themeData) {
@@ -78,7 +94,7 @@ class _ProductsDetailViewBottomState
                 children: [
                   TextSpan(text: 'KG:'),
                   TextSpan(
-                      text: ' ${widget.product.urunMinFiyat} TL',
+                      text: ' ${widget.product.urunParakendeFiyat} TL',
                       style: TextStyle(color: themeData.secondary)),
                   TextSpan(text: '\nKalan:'),
                   TextSpan(

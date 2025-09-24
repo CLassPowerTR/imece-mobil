@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
@@ -171,7 +174,7 @@ class _productsCardState extends ConsumerState<productsCard> {
               ),
               customText('${widget.product.aciklama}', context,
                   size: 14, maxLines: 2),
-              customText("KG: ${widget.product.urunMinFiyat} TL", context,
+              customText("KG: ${widget.product.urunParakendeFiyat} TL", context,
                   size: HomeStyle(context: context).bodyLarge.fontSize,
                   color: HomeStyle(context: context).secondary),
               Row(
@@ -181,25 +184,50 @@ class _productsCardState extends ConsumerState<productsCard> {
                     flex: 4,
                     child: SizedBox(
                       height: 30,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: widget.isSepet
-                              ? Colors.orangeAccent[200]
-                              : HomeStyle(context: context).secondary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
-                        onPressed: widget.sepeteEkle,
-                        child: customText(
-                            widget.isSepet ? 'Sepete Git' : 'Sepete Ekle',
-                            context,
-                            color: Colors.white,
-                            weight: FontWeight.bold,
-                            size:
-                                HomeStyle(context: context).bodySmall.fontSize),
-                      ),
+                      child: Builder(builder: (context) {
+                        if (widget.product.stokDurumu! <= 0) {
+                          return TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: customText('Stokta Yok', context,
+                                color: Colors.white,
+                                weight: FontWeight.bold,
+                                textAlign: TextAlign.center,
+                                size: HomeStyle(context: context)
+                                    .bodySmall
+                                    .fontSize),
+                          );
+                        } else {
+                          return TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: widget.isSepet
+                                  ? Colors.orangeAccent[200]
+                                  : HomeStyle(context: context).secondary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                            onPressed: widget.product.stokDurumu! >= 0
+                                ? widget.sepeteEkle
+                                : null,
+                            child: customText(
+                                widget.isSepet ? 'Sepete Git' : 'Sepete Ekle',
+                                context,
+                                color: Colors.white,
+                                weight: FontWeight.bold,
+                                size: HomeStyle(context: context)
+                                    .bodySmall
+                                    .fontSize),
+                          );
+                        }
+                      }),
                     ),
                   ),
                   Expanded(

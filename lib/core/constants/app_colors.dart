@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class AppColors {
   AppColors._();
   static Color secondary(BuildContext context) =>
-      Theme.of(context).colorScheme.secondary;
+      HomeStyle(context: context).secondary;
   static Color surface(BuildContext context) =>
-      Theme.of(context).colorScheme.surface;
+      HomeStyle(context: context).surface;
+  static Color primary(BuildContext context) =>
+      HomeStyle(context: context).primary;
   static Color outline(BuildContext context) =>
-      Theme.of(context).colorScheme.outline;
+      HomeStyle(context: context).outline;
   static Color shadow(BuildContext context) =>
-      Theme.of(context).colorScheme.shadow;
+      HomeStyle(context: context).shadow;
+  static Color secondaryFixedDim(BuildContext context) =>
+      HomeStyle(context: context).secondaryFixedDim;
+  static Color error(BuildContext context) => HomeStyle(context: context).error;
   static Color tertiary(BuildContext context) =>
-      Theme.of(context).colorScheme.tertiary;
+      HomeStyle(context: context).tertiary;
   static Color surfaceContainer(BuildContext context) =>
-      Theme.of(context).colorScheme.surfaceContainer;
+      HomeStyle(context: context).surfaceContainer;
   static Color onPrimary(BuildContext context) =>
-      Theme.of(context).colorScheme.onPrimary;
+      HomeStyle(context: context).onPrimary;
   static Color onSecondary(BuildContext context) =>
-      Theme.of(context).colorScheme.onSecondary;
-  static Color onTertiary(BuildContext context) =>
-      Theme.of(context).colorScheme.onTertiary;
-  static Color onSurface(BuildContext context) =>
-      Theme.of(context).colorScheme.onSurface;
-  static Color onSurfaceVariant(BuildContext context) =>
-      Theme.of(context).colorScheme.onSurfaceVariant;
-  static Color onError(BuildContext context) =>
-      Theme.of(context).colorScheme.onError;
-  static Color onErrorContainer(BuildContext context) =>
-      Theme.of(context).colorScheme.onErrorContainer;
-  static Color onPrimaryContainer(BuildContext context) =>
-      Theme.of(context).colorScheme.onPrimaryContainer;
-  static Color onSecondaryContainer(BuildContext context) =>
-      Theme.of(context).colorScheme.onSecondaryContainer;
-  static Color onTertiaryContainer(BuildContext context) =>
-      Theme.of(context).colorScheme.onTertiaryContainer;
+      HomeStyle(context: context).onSecondary;
 }

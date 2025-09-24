@@ -1,6 +1,7 @@
 // lib/services/api_service.dart
 
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/products.dart';
@@ -1096,6 +1097,69 @@ class ApiService {
     } else {
       throw Exception(
           'Kullanıcı grupları alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> fetchPaymentSiparisOnayla({
+    required int teslimatAdresId,
+    required int faturaAdresId,
+  }) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    // URL boşsa fallback kullan
+    final String url = config.paymentSiparisApiUrl.isNotEmpty
+        ? config.paymentSiparisApiUrl
+        : 'https://imecehub.com/api/payment/siparisitem/siparisi-onayla/';
+
+    http.Response response;
+    try {
+      response = await http.post(
+        Uri.parse(url),
+        body: json.encode({
+          'teslimat_adres_id': teslimatAdresId,
+          'fatura_adres_id': faturaAdresId,
+        }),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      throw Exception(
+          'İstek zaman aşımına uğradı (10s). Lütfen tekrar deneyin.');
+    } catch (e) {
+      throw Exception('Sipariş onay isteği gönderilemedi: $e');
+    }
+
+    final String contentType =
+        response.headers['content-type']?.toLowerCase() ?? '';
+    final String bodyText = utf8.decode(response.bodyBytes);
+
+    Map<String, dynamic>? jsonData;
+    if (contentType.contains('application/json')) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        throw Exception('Cevap JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'raw': bodyText};
+    } else {
+      if (jsonData != null) {
+        throw Exception(json.encode(jsonData));
+      } else {
+        throw Exception(bodyText.isNotEmpty
+            ? bodyText
+            : 'Sipariş onay başarısız. Durum kodu: ${response.statusCode}');
+      }
     }
   }
 }

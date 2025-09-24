@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
+import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/userAdress.dart';
@@ -7,8 +12,12 @@ class AdressCard extends StatelessWidget {
   final UserAdress adres;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  const AdressCard({Key? key, required this.adres, this.onEdit, this.onDelete})
-      : super(key: key);
+  const AdressCard({
+    Key? key,
+    required this.adres,
+    this.onEdit,
+    this.onDelete,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -141,12 +150,16 @@ class AdressCardOrder extends StatelessWidget {
   final String ilIlce;
   final String adres;
   final String icMapUrl;
+  final String adresTipi;
   final VoidCallback? onLocationChange;
+  final String title;
   const AdressCardOrder({
     Key? key,
     required this.ilIlce,
     required this.adres,
     required this.icMapUrl,
+    required this.adresTipi,
+    required this.title,
     this.onLocationChange,
   }) : super(key: key);
 
@@ -179,15 +192,44 @@ class AdressCardOrder extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    ilIlce,
+                  customText(
+                    title,
+                    context,
                     textAlign: TextAlign.left,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w900, fontSize: 18),
+                    weight: FontWeight.bold,
+                    size: AppTextSizes.bodyMedium(context),
                   ),
-                  Text(
-                    adres,
+                  customText(
+                    ilIlce,
+                    context,
                     textAlign: TextAlign.left,
+                    weight: FontWeight.bold,
+                    size: 18,
+                  ),
+                  customText(
+                    adres,
+                    context,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                    textAlign: TextAlign.left,
+                  ),
+                  Card(
+                    color: Colors.grey[200],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.r8,
+                    ),
+                    child: Padding(
+                      padding: AppPaddings.all4,
+                      child: Text(
+                        adresTipi,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: AppTextSizes.bodyMedium(context),
+                            color: AppColors.primary(context),
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                   Container(
                     height: MediaQuery.of(context).size.height * 0.05,

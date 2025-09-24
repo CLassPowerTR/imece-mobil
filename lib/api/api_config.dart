@@ -31,6 +31,7 @@ class ApiConfig {
   final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String sellerProfileApiUrl = dotenv.env['SELLER_PROFILE_API_URL'] ?? '';
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
+  final String paymentSiparisApiUrl = dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';
   final String paymentTriggerApiUrl =
       dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';

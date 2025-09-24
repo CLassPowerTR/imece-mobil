@@ -30,8 +30,6 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       "https://cdn-icons-png.flaticon.com/512/7387/7387315.png";
 
   static Map<String, dynamic> sepetInfo = {};
-
-  int urunKg = 11;
   late Future<Map<String, dynamic>> _sepetFuture;
   final storage = FlutterSecureStorage();
   String? cardNumber;
@@ -39,6 +37,10 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   String? cvv;
   String? cartUserName;
   String? cartName;
+  int? _teslimatAdresId;
+  int? _faturaAdresId;
+  late final Future<List<UserAdress>> _adreslerFuture;
+  final ScrollController _scrollController = ScrollController();
 
   FocusNode _focusNode = FocusNode();
   String? selectedCard = "Visa Card";
@@ -56,6 +58,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     });
     _loadCardInfo();
     _fetchSepet();
+    _adreslerFuture = _awaitUserAndFetchAddresses();
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
@@ -139,10 +142,85 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
         final String? redirectUrl =
             data is Map<String, dynamic> ? (data['Url']?.toString()) : null;
         if (redirectUrl != null && redirectUrl.isNotEmpty) {
-          showTemporarySnackBar(context, '3D Secure yönlendiriliyor...');
-          final uri = Uri.parse(redirectUrl);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          bool shouldLaunch3DS = false;
+
+          // 3D Secure akışı doğruysa önce siparişi onayla
+          if (_teslimatAdresId == null || _faturaAdresId == null) {
+            showTemporarySnackBar(
+                context, 'Adres bilgisi bulunamadı. Lütfen adres ekleyin.');
+          } else {
+            try {
+              final orderResponse = await ApiService.fetchPaymentSiparisOnayla(
+                teslimatAdresId: _teslimatAdresId!,
+                faturaAdresId: _faturaAdresId!,
+              );
+
+              final durum = orderResponse['durum'];
+              if (durum == 'ONAYLANDI') {
+                final siparisId = orderResponse['siparis_id'];
+                final toplamFiyat = orderResponse['toplam_fiyat'];
+                showTemporarySnackBar(context,
+                    'Siparişiniz onaylandı! ID: $siparisId, Toplam: $toplamFiyat TL');
+                shouldLaunch3DS = true;
+                setState(() {});
+              } else if (durum == 'STOK_YETERSIZ') {
+                final List<dynamic> yetersiz =
+                    orderResponse['yetersiz_urunler'] ?? [];
+                final String msg = yetersiz
+                    .map((e) => (e is Map && e['urun_adi'] != null)
+                        ? e['urun_adi']
+                        : '')
+                    .where((e) => e.toString().isNotEmpty)
+                    .join(', ');
+                showTemporarySnackBar(context, 'Stok yetersizliği: $msg');
+              } else {
+                final String mesaj = (orderResponse['hata']?.toString() ??
+                    orderResponse['mesaj']?.toString() ??
+                    'Bilinmeyen hata.');
+                showTemporarySnackBar(
+                    context, 'Sipariş onaylama başarısız: $mesaj');
+              }
+            } catch (e) {
+              showTemporarySnackBar(
+                  context, 'Sipariş onaylanırken bir hata oluştu: $e');
+            }
+          }
+
+          if (shouldLaunch3DS) {
+            showTemporarySnackBar(context, '3D Secure yönlendiriliyor...');
+            final String redirect = redirectUrl.trim();
+            final Uri? uri = Uri.tryParse(redirect);
+            if (uri == null || !(uri.hasScheme && uri.hasAuthority)) {
+              showTemporarySnackBar(
+                  context, 'Geçersiz yönlendirme adresi: $redirect');
+              return;
+            }
+            bool launched = false;
+            try {
+              if (await canLaunchUrl(uri)) {
+                launched = await launchUrl(
+                  uri,
+                  mode: LaunchMode.inAppWebView,
+                  webViewConfiguration: const WebViewConfiguration(
+                    enableJavaScript: true,
+                  ),
+                );
+              }
+            } catch (_) {}
+            if (!launched) {
+              try {
+                if (await canLaunchUrl(uri)) {
+                  launched = await launchUrl(
+                    uri,
+                    mode: LaunchMode.externalApplication,
+                  );
+                }
+              } catch (_) {}
+            }
+            if (!launched) {
+              showTemporarySnackBar(
+                  context, '3D Secure sayfası açılamadı: $redirect');
+            }
           }
         } else {
           showTemporarySnackBar(context, 'Siparişiniz başarıyla alındı!');
@@ -252,6 +330,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             return Stack(
               children: [
                 SingleChildScrollView(
+                  controller: _scrollController,
                   child: Column(
                     children: [
                       container(
@@ -462,9 +541,16 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
                     value: _confirm,
                     onChanged: (bool? newValue) {
+                      final double? currentOffset = _scrollController.hasClients
+                          ? _scrollController.offset
+                          : null;
                       setState(() {
                         _confirm = newValue ?? false;
                       });
+                      if (currentOffset != null &&
+                          _scrollController.hasClients) {
+                        _scrollController.jumpTo(currentOffset);
+                      }
                     },
                     activeColor:
                         Color.fromARGB(255, 34, 255, 34), // Seçildiğinde rengi
@@ -490,10 +576,18 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                     child: textButton(context, 'Satın Al',
                         fontSize: themeData.bodyLarge.fontSize,
                         weight: FontWeight.bold,
+                        buttonColor: _confirm ? null : Colors.grey,
                         elevation: 6,
-                        shadowColor: themeData.secondary, onPressed: () async {
-                  await _handleSatinAl(context);
-                }))
+                        shadowColor: _confirm
+                            ? AppColors.secondary(context)
+                            : Colors.grey,
+                        onPressed: _confirm
+                            ? () async {
+                                if (_confirm) {
+                                  await _handleSatinAl(context);
+                                }
+                              }
+                            : null))
               ],
             )
           ],
@@ -867,25 +961,20 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   }
 
   Future<List<UserAdress>> _awaitUserAndFetchAddresses() async {
-    User? u = ref.read(userProvider);
-    while (mounted && (u == null)) {
+    User? currentUser = ref.read(userProvider);
+    if (currentUser == null) {
       try {
         await ref.read(userProvider.notifier).fetchUserMe();
       } catch (_) {}
-      await Future.delayed(const Duration(milliseconds: 250));
-      if (!mounted) break;
-      setState(() {});
-      u = ref.read(userProvider);
+      currentUser = ref.read(userProvider);
     }
-    if (u == null) {
-      return <UserAdress>[];
-    }
-    return ApiService.fetchUserAdress(userID: u.id);
+    if (currentUser == null) return <UserAdress>[];
+    return ApiService.fetchUserAdress(userID: currentUser.id);
   }
 
   FutureBuilder<List<UserAdress>> _FutureFetchUserAdress() {
     return FutureBuilder<List<UserAdress>>(
-      future: _awaitUserAndFetchAddresses(),
+      future: _adreslerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Padding(
@@ -918,10 +1007,14 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           if (hasVarsayilan) {
             final varsayilanAdres =
                 adresler.firstWhere((adres) => adres.varsayilanAdres == true);
+            _teslimatAdresId ??= varsayilanAdres.id;
+            _faturaAdresId ??= varsayilanAdres.id;
             return AdressCardOrder(
               ilIlce: '${varsayilanAdres.il} / ${varsayilanAdres.ilce}',
               adres: varsayilanAdres.adresSatiri1,
               icMapUrl: ic_map,
+              adresTipi: varsayilanAdres.baslik,
+              title: 'Teslimat Adresi:',
               onLocationChange: () {
                 // Konum değiştir fonksiyonu
               },
@@ -929,39 +1022,29 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           } else {
             // Varsayılan adres yok, ilk adresi göster ve buton ekle
             final ilkAdres = adresler.first;
+            _teslimatAdresId ??= ilkAdres.id;
+            _faturaAdresId ??= ilkAdres.id;
             return Column(
               children: [
                 AdressCardOrder(
                   ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
                   adres: ilkAdres.adresSatiri1,
                   icMapUrl: ic_map,
+                  title: 'Teslimat Adresi:',
+                  adresTipi: ilkAdres.baslik,
                   onLocationChange: () {
                     // Konum değiştir fonksiyonu
                   },
                 ),
-                Padding(
-                  padding: AppPaddings.all8,
-                  child: textButton(
-                    context,
-                    "Varsayılan adres olarak ayarla",
-                    onPressed: () async {
-                      await ApiService.updateUserAdress(
-                        ilkAdres.id,
-                        ilkAdres.ulke,
-                        ilkAdres.il,
-                        ilkAdres.ilce,
-                        ilkAdres.mahalle,
-                        ilkAdres.postaKodu,
-                        ilkAdres.adresSatiri1,
-                        ilkAdres.adresSatiri2,
-                        ilkAdres.baslik,
-                        ilkAdres.adresTipi,
-                        true,
-                        ilkAdres.kullanici,
-                      );
-                      setState(() {});
-                    },
-                  ),
+                AdressCardOrder(
+                  ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
+                  adres: ilkAdres.adresSatiri1,
+                  icMapUrl: ic_map,
+                  title: 'Fatura Adresi:',
+                  adresTipi: ilkAdres.baslik,
+                  onLocationChange: () {
+                    // Konum değiştir fonksiyonu
+                  },
                 ),
               ],
             );

@@ -51,7 +51,7 @@ class Product {
       urunBilgisiGuncellemeTarihi:
           json['urunbilgisi_guncelleme_tarihi'] as String? ?? '',
       imeceOnayli: json['imece_onayli'] as bool? ?? false,
-      urunParakendeFiyat: json['urun_parakende_fiyati'] as String? ?? '',
+      urunParakendeFiyat: json['urun_perakende_fiyati'] as String? ?? '',
       urunMinFiyat: json['urun_min_fiyati'] as String? ?? '',
       stokDurumu: json['stok_durumu'] as int? ?? 0,
       degerlendirmePuani: (() {
