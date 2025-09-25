@@ -176,7 +176,7 @@ class _ProductsDetailViewBodyState
             final filteredYorumlar = yorumSnapshot.data!;
 
             if (filteredYorumlar.yorumlar.isEmpty) {
-              return Center(child: Text('Bu mağazaya ait yorum bulunamadı'));
+              return Center(child: Text('Bu ürüne ait yorum bulunamadı'));
             }
 
             return container(
@@ -207,10 +207,11 @@ class _ProductsDetailViewBodyState
                         // Yorum verisini yorumContainer'a uygun Map'e çeviriyoruz
                         final yorumMap = {
                           'yorumName':
-                              '${yorum.kullaniciAd} ${yorum.kullaniciSoyad}'
+                              '${yorum.kullaniciAd == null ? null : 'User'} ${yorum.kullaniciSoyad == null ? null : 'Username'}'
                                   .trim(),
                           'rating': (yorum.puan).toDouble(),
                           'userImg': '',
+                          'resimler': yorum.resimler,
                           'yorum': yorum.yorum,
                         };
                         return yorumContainer(

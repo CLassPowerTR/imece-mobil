@@ -722,6 +722,28 @@ class ApiService {
     }
   }
 
+  static Future<UserAdress> fetchUserAdressById(int id) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.get(
+      Uri.parse('${config.userAdressApiUrl}$id/'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      return UserAdress.fromJson(jsonData as Map<String, dynamic>);
+    } else {
+      throw Exception(
+          'Adres bilgisi alınamadı. Durum kodu: \\${response.statusCode}');
+    }
+  }
+
   static Future<Map<String, dynamic>> updateUserAdress(
       int id,
       String ulke,
