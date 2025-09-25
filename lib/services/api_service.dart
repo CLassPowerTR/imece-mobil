@@ -175,7 +175,7 @@ class ApiService {
   }
 
   /// API'den Ürün Yorumlarını çekmek için metot.
-  static Future<List<UrunYorum>> fetchUrunYorumlar({int? urunId}) async {
+  static Future<List<UrunYorum>> fetchUrunYorumlara({int? urunId}) async {
     // Eğer urunId verilmişse, ilgili ürünün yorumlarını çek.
     final url = urunId == null
         ? config.urunYorumApiUrl
@@ -197,6 +197,36 @@ class ApiService {
     } else {
       throw Exception(
           'Ürün yorumları alınamadı. Durum kodu:  [31m [1m${response.statusCode} [0m');
+    }
+  }
+
+  /// API'den Ürün Yorumlarını çekmek için metot.
+  static Future<UrunYorumlarResponse> takeCommentsForProduct(
+      {int? urunId}) async {
+    final accessToken = await getAccessToken();
+    // Eğer urunId verilmişse, ilgili ürünün yorumlarını çek.
+
+    final response = await http.post(
+      Uri.parse(config.productsCommentsApiUrl),
+      body: json.encode({
+        'urun_id': urunId,
+      }),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Allow': 'Post',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+          json.decode(utf8.decode(response.bodyBytes));
+      return UrunYorumlarResponse.fromJson(data);
+    } else {
+      throw Exception(
+          'Ürün yorumları alınamadı. Durum kodu:  ${response.statusCode} ${response.body}');
     }
   }
 

@@ -29,7 +29,7 @@ class _ProductsDetailViewBodyState
         'Kesinlikle öyle bir durum yaşamazsınız hasadımız yeni gerçekleşti bütün çürükler ayrıştırıldı ve temizlendi',
   };
   late Future<User> _futureUser;
-  late Future<List<UrunYorum>> _futureUrunYorumlar;
+  late Future<UrunYorumlarResponse> _futureUrunYorumlar;
   bool isFavorite = false;
   int? favoriteProductId;
 
@@ -39,7 +39,7 @@ class _ProductsDetailViewBodyState
     _checkFavorite();
     _futureUser = ApiService.fetchUserId(widget.product.satici) as Future<User>;
     _futureUrunYorumlar =
-        ApiService.fetchUrunYorumlar(urunId: widget.product.urunId);
+        ApiService.takeCommentsForProduct(urunId: widget.product.urunId);
   }
 
   Future<void> _checkFavorite() async {
@@ -71,7 +71,7 @@ class _ProductsDetailViewBodyState
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    // double height = MediaQuery.of(context).size.height;
     final themeData = HomeStyle(context: context);
 
     return SingleChildScrollView(
@@ -153,9 +153,8 @@ class _ProductsDetailViewBodyState
         } else if (!userSnapshot.hasData) {
           return Center(child: Text('Satıcı bulunamadı'));
         }
-        final user = userSnapshot.data!;
 
-        return FutureBuilder<List<UrunYorum>>(
+        return FutureBuilder<UrunYorumlarResponse>(
           future: _futureUrunYorumlar,
           builder: (context, yorumSnapshot) {
             if (yorumSnapshot.connectionState == ConnectionState.waiting) {
@@ -169,16 +168,14 @@ class _ProductsDetailViewBodyState
             } else if (yorumSnapshot.hasError) {
               return Center(
                   child: Text('Yorumlar alınamadı: ${yorumSnapshot.error}'));
-            } else if (!yorumSnapshot.hasData || yorumSnapshot.data!.isEmpty) {
+            } else if (!yorumSnapshot.hasData) {
               return Center(child: Text('Yorum bulunamadı'));
             }
 
             // Filtreleme işlemi
-            final filteredYorumlar = yorumSnapshot.data!
-                .where((yorum) => yorum.magaza == user.saticiProfili?.id)
-                .toList();
+            final filteredYorumlar = yorumSnapshot.data!;
 
-            if (filteredYorumlar.isEmpty) {
+            if (filteredYorumlar.yorumlar.isEmpty) {
               return Center(child: Text('Bu mağazaya ait yorum bulunamadı'));
             }
 
@@ -204,14 +201,15 @@ class _ProductsDetailViewBodyState
                     height: 175,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: filteredYorumlar.length,
+                      itemCount: filteredYorumlar.yorumlar.length,
                       itemBuilder: (context, index) {
-                        final yorum = filteredYorumlar[index];
+                        final yorum = filteredYorumlar.yorumlar[index];
                         // Yorum verisini yorumContainer'a uygun Map'e çeviriyoruz
                         final yorumMap = {
-                          'yorumName': yorum.kullanici.toString() ??
-                              '', // Kullanıcı adı çekmek isterseniz ek sorgu gerekebilir
-                          'rating': (yorum.puan as num).toDouble(),
+                          'yorumName':
+                              '${yorum.kullaniciAd} ${yorum.kullaniciSoyad}'
+                                  .trim(),
+                          'rating': (yorum.puan).toDouble(),
                           'userImg': '',
                           'yorum': yorum.yorum,
                         };

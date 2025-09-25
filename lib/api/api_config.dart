@@ -26,12 +26,15 @@ class ApiConfig {
   final String productsStoriesApiUrl =
       dotenv.env['PRODUCTS_STORIES_API_URL'] ?? '';
   final String urunYorumApiUrl = dotenv.env['URUN_YORUM_API_URL'] ?? '';
+  final String productsCommentsApiUrl =
+      dotenv.env['COMMENTS_PRODUCTS_API_URL'] ?? '';
   final String sepetGetApiUrl = dotenv.env['SEPET_GET_API_URL'] ?? '';
   final String sepetEkleApiUrl = dotenv.env['SEPET_EKLE_API_URL'] ?? '';
   final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String sellerProfileApiUrl = dotenv.env['SELLER_PROFILE_API_URL'] ?? '';
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
-  final String paymentSiparisApiUrl = dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';
+  final String paymentSiparisApiUrl =
+      dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';
   final String paymentTriggerApiUrl =
       dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';

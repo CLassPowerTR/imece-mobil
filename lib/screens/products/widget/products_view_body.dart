@@ -11,7 +11,7 @@ class ProductsScreenBodyView extends ConsumerStatefulWidget {
 }
 
 class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, RouteAware {
   List<dynamic> productCategories = [
     {'name': 'Sırala', 'icon': Icon(Icons.compare_arrows_outlined)},
     {'name': 'Filtrele', 'icon': Icon(Icons.filter_alt_outlined)},
@@ -39,21 +39,39 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       _futureProducts = Future.value(cachedProducts);
     } else {
       // İlk açılışta veya cache boşsa API'den verileri çek
-      _futureProducts = ApiService.fetchProducts(id: widget.categoryId)
-          as Future<List<Product>>;
+      _futureProducts = ApiService.fetchProducts(id: widget.categoryId);
       _futureProducts.then((products) {
         // Gelen veriyi cache'e atıyoruz.
         cachedProducts = products;
       });
     }
-    _checkLogin();
+    _checkLogin().then((loggedIn) async {
+      if (loggedIn) {
+        await ref.read(userProvider.notifier).fetchUserMe();
+      }
+    });
     _checkGetSepet();
     _futureFavorites = _fetchFavorites();
+  }
+
+  // didChangeDependencies already exists below; keep one implementation only
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() async {
+    // Başka ekrandan geri gelindi
+    await _refreshProducts();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
     _checkGetSepet().then((_) {
       setState(() {});
     });
@@ -99,7 +117,10 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   Future<void> _refreshProducts() async {
     // API'den verileri çek ve cache'i güncelle
     List<Product> freshProducts =
-        await ApiService.fetchProducts(id: widget.categoryId) as List<Product>;
+        await ApiService.fetchProducts(id: widget.categoryId);
+    await _fetchFavorites();
+    _futureFavorites = _fetchFavorites();
+
     setState(() {
       cachedProducts = freshProducts;
       _futureProducts = Future.value(freshProducts);
@@ -112,6 +133,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
@@ -232,7 +254,17 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
           favoriEkle: () {
             setState(() async {
               if (isLoggedIn) {
-                final user = ref.read(userProvider);
+                var user = ref.read(userProvider);
+                if (user == null) {
+                  // Kullanıcı state'i henüz yüklenmemiş olabilir; yüklemeyi dene
+                  await ref.read(userProvider.notifier).fetchUserMe();
+                  user = ref.read(userProvider);
+                }
+                if (user == null) {
+                  showTemporarySnackBar(context, 'Lütfen giriş yapınız',
+                      type: SnackBarType.info);
+                  return;
+                }
                 if (favoriteProduct) {
                   // Favoriden çıkar
                   final favoriteProductId = productIdToFavoriteId[urunId];
@@ -253,9 +285,15 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   }
                 } else {
                   // Favoriye ekle
+                  final currentUrunId = products[index].urunId;
+                  if (currentUrunId == null) {
+                    showTemporarySnackBar(
+                        context, 'Ürün bilgisi eksik (urunId boş)');
+                    return;
+                  }
                   try {
                     await ApiService.fetchUserFavorites(
-                        null, user!.id, products[index].urunId, null);
+                        null, user.id, currentUrunId, null);
                     showTemporarySnackBar(context, 'Favoriye eklendi',
                         type: SnackBarType.success);
                   } catch (e) {
