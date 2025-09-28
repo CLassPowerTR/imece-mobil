@@ -14,6 +14,7 @@ import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/core/widgets/textButton.dart';
 import 'package:imecehub/core/widgets/turnBackTextIcon.dart';
+import 'package:imecehub/models/orders.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/userCoupons.dart';
 import 'package:imecehub/models/users.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/core/widgets/productsCard.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/core/widgets/orderCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'buyer_profil_view_header.dart';

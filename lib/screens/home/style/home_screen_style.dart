@@ -16,6 +16,7 @@ final class HomeStyle {
   Color get tertiary => Theme.of(_context).colorScheme.tertiary;
   Color get surfaceContainer => Theme.of(_context).colorScheme.surfaceContainer;
   Color get error => Theme.of(_context).colorScheme.error;
+  Color get cardColor => Theme.of(_context).cardColor;
 
   TextStyle get appBarTextStyle => Theme.of(_context).textTheme.headlineMedium!;
   TextStyle get headlineSmall => Theme.of(_context).textTheme.headlineSmall!;

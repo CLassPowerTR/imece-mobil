@@ -13,6 +13,7 @@ import 'package:imecehub/screens/profil/buyerProfil/menu/adress/adress_add_scree
 import 'package:imecehub/screens/profil/buyerProfil/menu/comments/comments_screen.dart';
 import 'package:imecehub/screens/profil/messaging/messaging_view.dart';
 import 'package:imecehub/screens/profil/messaging/private/messaging_private_screen.dart';
+import 'package:imecehub/screens/profil/buyerProfil/menu/orders/order_detail_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
 import 'package:imecehub/screens/profil/wallet/wallet_screen.dart';
@@ -52,11 +53,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/messaging': (context) => MessageBox(),
   '/profil/addProduct': (context) {
     final user = ModalRoute.of(context)!.settings.arguments as User;
-    if (user is User) {
-      return AddProductScreen(user: user);
-    } else {
-      return Text('user verisi boş');
-    }
+    return AddProductScreen(user: user);
   },
   '/profil/addPost': (context) => const AddPost(),
   '/profil/wallet': (context) => WalletScreen(),
@@ -68,6 +65,11 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/favorite': (context) => FavoriteScreen(),
   '/profil/cards': (context) => CardsScreen(),
   '/profil/orders': (context) => OrdersScreen(),
+  '/profil/orders/detail': (context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    return OrderDetailScreen(item: args);
+  },
   '/profil/follow': (context) => FollowScreen(),
   '/profil/coupons': (context) => CouponsScreen(),
   '/profil/comments': (context) => CommentsScreen(),
@@ -90,13 +92,10 @@ final Map<String, WidgetBuilder> appRoutes = {
     );
   },
   '/products/productsDetail': (context) {
-    return ProductsDetailScreen(
-      product: ModalRoute.of(context)!.settings.arguments as Product,
-    );
+    final product = ModalRoute.of(context)!.settings.arguments as Product;
+    return ProductsDetailScreen(product: product);
   },
   '/home/productsDetail': (context) {
-    final futureProduct =
-        ModalRoute.of(context)!.settings.arguments as Future<Product>;
     return HomeProductDetailRouter();
   },
   '/home/category': (context) {

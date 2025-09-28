@@ -956,14 +956,9 @@ class ApiService {
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
-    String url;
-    if (aliciID != null) {
-      url = '${config.logisticOrderApiUrl}?alici_id=$aliciID';
-    } else {
-      url = config.logisticOrderApiUrl;
-    }
+
     final response = await http.get(
-      Uri.parse(url),
+      Uri.parse(config.logisticOrderApiUrl),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
@@ -971,8 +966,17 @@ class ApiService {
       },
     );
     if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      return jsonData;
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return decoded;
+      } else if (decoded is Map<String, dynamic>) {
+        if (decoded['results'] is List) {
+          return (decoded['results'] as List);
+        }
+        return [decoded];
+      } else {
+        return [];
+      }
     } else {
       throw Exception(
           'Kargo bilgileri alınamadı. Durum kodu: \\${response.statusCode}');

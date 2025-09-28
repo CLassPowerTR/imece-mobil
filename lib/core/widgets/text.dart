@@ -13,18 +13,21 @@ Padding customText(
   TextAlign textAlign = TextAlign.start, // yazıyı ortalar
   TextOverflow overflow = TextOverflow.ellipsis, // taşarsa ... olarak gösterir
   EdgeInsetsGeometry padding = const EdgeInsets.all(0),
+  TextStyle? style,
 }) {
   final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
   return Padding(
     padding: padding,
     child: Text(
       text,
-      style: TextStyle(
-          color: effectiveColor,
-          fontSize: size ?? Theme.of(context).textTheme.bodyMedium!.fontSize,
-          fontWeight: weight,
-          decoration: decoration,
-          decorationColor: effectiveColor),
+      style: style ??
+          TextStyle(
+              color: effectiveColor,
+              fontSize:
+                  size ?? Theme.of(context).textTheme.bodyMedium!.fontSize,
+              fontWeight: weight,
+              decoration: decoration,
+              decorationColor: effectiveColor),
       softWrap: softWrap,
       maxLines: maxLines,
       overflow: overflow ?? null,
