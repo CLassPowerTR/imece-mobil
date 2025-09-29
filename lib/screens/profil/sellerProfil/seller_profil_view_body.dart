@@ -68,6 +68,41 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     }
   ];
 
+  // API'den çekilecek satıcı ürünleri
+  List<dynamic> _sellerProducts = [];
+  bool _isLoadingSellerProducts = false;
+  String? _sellerProductsError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSellerProducts();
+  }
+
+  Future<void> _loadSellerProducts() async {
+    setState(() {
+      _isLoadingSellerProducts = true;
+      _sellerProductsError = null;
+    });
+    try {
+      final list = await ApiService.fetchSellerProducts(widget.sellerProfil.id);
+      setState(() {
+        _sellerProducts = list;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        _sellerProductsError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingSellerProducts = false;
+        });
+      }
+    }
+  }
+
   Future<List<int>> _getFollowedSellerIds() async {
     final followList = await ApiService.fetchUserFollow();
     // Sadece satıcı id'lerini topla
@@ -88,6 +123,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
             children: [
               _profilGiris(width, context),
               _profilIstatikler(width, themeData),
+              _profilStories(context, width),
               _profilHakkinda(themeData, width, context),
               _profilGonderiler(context, themeData, width),
               _profilLastComment(context, width, themeData),
@@ -111,6 +147,60 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       ]),
     );
   }
+
+  Container _profilStories(BuildContext context, double width) =>
+      container(context,
+          color: AppColors.surfaceContainer(context),
+          margin: AppPaddings.h10,
+          borderRadius: AppRadius.r16,
+          padding: AppPaddings.all16,
+          width: width,
+          child: Column(
+            spacing: 18,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: customText('Hikayeler', context,
+                    textAlign: TextAlign.left,
+                    style: AppTextStyle.bodyLargeBold(context)),
+              ),
+              Column(
+                spacing: 6,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextButton.icon(
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.blue(context),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.r8,
+                        ),
+                      ),
+                      onPressed: () {},
+                      label: customText('Hikaye Ekle', context,
+                          style: AppTextStyle.bodyMedium(context,
+                              color: AppColors.onPrimary(context))),
+                      icon: Icon(Icons.add_outlined,
+                          color: AppColors.onPrimary(context))),
+                  TextButton.icon(
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.succesful(context),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.r8,
+                        ),
+                      ),
+                      onPressed: () {},
+                      label: customText('Kampanya Hikayesi Ekle', context,
+                          style: AppTextStyle.bodyMedium(context,
+                              color: AppColors.onPrimary(context))),
+                      icon: Icon(
+                        Icons.add_outlined,
+                        color: AppColors.onPrimary(context),
+                      )),
+                ],
+              )
+            ],
+          ));
 
   GridView _populerUrunlerCards(double height, double width) {
     return GridView.builder(
@@ -261,7 +351,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   size: themeData.bodyLarge.fontSize, weight: FontWeight.w800),
               customText(
                   widget.sellerProfil.saticiProfili?.profilTanitimYazisi == ''
-                      ? 'Noname'
+                      ? 'NoName'
                       : widget.sellerProfil.saticiProfili
                               ?.profilTanitimYazisi ??
                           '',
@@ -316,17 +406,90 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       if (widget.myProfile) {
         return container(
           context,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          margin: AppPaddings.h10,
+          borderRadius: AppRadius.r16,
+          padding: AppPaddings.all16,
           color: HomeStyle(context: context).surfaceContainer,
-          //height: 285,
           width: width,
           child: Column(
-            spacing: 5,
+            spacing: 18,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               customText('Profil istatistikleri', context,
                   size: themeData.bodyLarge.fontSize, weight: FontWeight.w800),
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: _statisticsInfoCard(context,
+                        title: 'Toplam Ürün',
+                        value: _isLoadingSellerProducts
+                            ? '...'
+                            : (_sellerProductsError != null
+                                ? '—'
+                                : '${_sellerProducts.length}'),
+                        icon: Icons.person,
+                        backgroundColor: AppColors.succesful(context),
+                        payload: _sellerProducts, onTap: (list) {
+                      if (list.isEmpty) return;
+                      Navigator.pushNamed(
+                        context,
+                        '/profil/seller-products',
+                        arguments: {
+                          'products': list,
+                          'filter': 'all',
+                          'sellerId': widget.sellerProfil.id,
+                        },
+                      );
+                    }),
+                  ),
+                  Expanded(
+                    child: _statisticsInfoCard(context,
+                        title: 'Aktif  Ürün',
+                        value: _isLoadingSellerProducts
+                            ? '...'
+                            : (_sellerProductsError != null
+                                ? '—'
+                                : '${_sellerProducts.where((e) => e.urunGorunurluluk == true).length}'),
+                        icon: Icons.add_task,
+                        backgroundColor: AppColors.succesful(context),
+                        payload: _sellerProducts
+                            .where((e) => e.urunGorunurluluk == true)
+                            .toList(), onTap: (list) {
+                      if (list.isEmpty) return;
+                      Navigator.pushNamed(
+                        context,
+                        '/profil/seller-products',
+                        arguments: {
+                          'products': list,
+                          'filter': 'active',
+                          'sellerId': widget.sellerProfil.id,
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: _statisticsInfoCard(context,
+                        title: 'Toplam Satış',
+                        value: '0',
+                        icon: Icons.shopping_bag_outlined,
+                        backgroundColor: AppColors.orange(context)),
+                  ),
+                  Expanded(
+                    child: _statisticsInfoCard(context,
+                        title: 'Aylık Gelir',
+                        value: '0 ₺',
+                        icon: Icons.attach_money,
+                        backgroundColor: AppColors.error(context)),
+                  ),
+                ],
+              )
             ],
           ),
         );
@@ -337,6 +500,71 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         );
       }
     });
+  }
+
+  Container _statisticsInfoCard(BuildContext context,
+      {String? title,
+      String? value,
+      IconData? icon,
+      Color? backgroundColor,
+      List<dynamic>? payload,
+      void Function(List<dynamic> list)? onTap}) {
+    final Color effectiveBackgroundColor = backgroundColor ??
+        HomeStyle(context: context).secondary.withOpacity(0.15);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.r16,
+        border: Border(
+          left: BorderSide(color: effectiveBackgroundColor, width: 4),
+        ),
+      ),
+      child: GestureDetector(
+        onTap: onTap == null
+            ? null
+            : () {
+                onTap(payload ?? const []);
+              },
+        child: container(
+          context,
+          color: AppColors.surfaceContainer(context),
+          padding: AppPaddings.all16,
+          borderRadius: AppRadius.r16,
+          child: Row(
+            spacing: 12,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: effectiveBackgroundColor.withOpacity(0.15),
+                  borderRadius: AppRadius.r18,
+                ),
+                child: Center(
+                  child: Icon(
+                    icon ?? Icons.info_outline,
+                    color: effectiveBackgroundColor,
+                  ),
+                ),
+              ),
+              RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${title ?? ''}\n',
+                        style: AppTextStyle.bodyMedium(context),
+                      ),
+                      TextSpan(
+                        text: value ?? '',
+                        style: AppTextStyle.bodyLargeBold(context),
+                      ),
+                    ],
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Column _profilGiris(double width, BuildContext context) {
@@ -639,10 +867,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       mainAxisSize: MainAxisSize.min,
       children: [
         customText(
-            widget.sellerProfil.firstName == ''
-                ? 'Noname'
-                : widget.sellerProfil.firstName,
-            context,
+            widget.sellerProfil.saticiProfili?.magazaAdi ?? 'NoName', context,
             weight: FontWeight.bold,
             size: HomeStyle(context: context).bodyLarge.fontSize),
         customText('çiftçi / hayvan üreticisi', context,

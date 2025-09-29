@@ -99,7 +99,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
     if (_lastUser == null) {
       return ProfileNotLogin();
     }
-    if (_lastUser!.aliciProfili == null && _lastUser!.saticiProfili != null) {
+    if (_lastUser!.saticiProfili != null) {
       return SellerProfilScreen(
         sellerProfil: _lastUser!,
         myProfile: true,

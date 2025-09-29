@@ -14,6 +14,8 @@ class ApiConfig {
   final String userFollowApiUrl = dotenv.env['USER_FOLLOW_API_URL'] ?? '';
   final String userCouponsApiUrl = dotenv.env['USER_COUPONS_API_URL'] ?? '';
   final String userGroupsApiUrl = dotenv.env['USER_GROUPS_API_URL'] ?? '';
+  final String sellerProductsApiUrl =
+      dotenv.env['SELLER_PRODUCTS_API_URL'] ?? '';
   final String productsCategoryApiUrl =
       dotenv.env['PRODUCTS_CATEGORY_API_URL'] ?? '';
   final String categoriesApiUrl = dotenv.env['CATEGORIES_API_URL'] ?? '';

@@ -26,4 +26,7 @@ class AppColors {
   static Color onSecondary(BuildContext context) =>
       HomeStyle(context: context).onSecondary;
   static Color cardColor(BuildContext context) => Colors.grey[100]!;
+  static Color succesful(BuildContext context) => Colors.green;
+  static Color orange(BuildContext context) => Colors.orange;
+  static Color blue(BuildContext context) => Colors.blue;
 }

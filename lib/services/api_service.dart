@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:imecehub/models/companies.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/models/sellerProducts.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/campaigns.dart';
 import 'package:imecehub/models/stories.dart';
@@ -1216,6 +1217,40 @@ class ApiService {
             ? bodyText
             : 'Sipariş onay başarısız. Durum kodu: ${response.statusCode}');
       }
+    }
+  }
+
+  static Future<List<SellerProducts>> fetchSellerProducts(int? id) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await http.post(
+      Uri.parse(config.sellerProductsApiUrl ??
+          'https://imecehub.com/users/seller-products/'),
+      body: json.encode({'kullanici_id': id}),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));
+      if (jsonData is List) {
+        return jsonData
+            .map((e) => SellerProducts.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else if (jsonData is Map && jsonData['results'] is List) {
+        return (jsonData['results'] as List)
+            .map((e) => SellerProducts.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Beklenmeyen yanıt formatı: ${jsonData.runtimeType}');
+      }
+    } else {
+      throw Exception(
+          'Ürünler alınamadı. Durum kodu: \\${response.statusCode}');
     }
   }
 }

@@ -5,114 +5,124 @@ class AppTextStyle {
   AppTextStyle._();
 
   // Headers
-  static TextStyle headerPrimary(BuildContext context) {
+  static TextStyle headerPrimary(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.headlineSmall.copyWith(
       fontWeight: FontWeight.w700,
-      color: style.primary,
+      color: color ?? style.primary,
     );
   }
 
-  static TextStyle headerSecondary(BuildContext context) {
+  static TextStyle headerSecondary(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.headlineSmall.copyWith(
       fontWeight: FontWeight.w700,
-      color: style.secondary,
+      color: color ?? style.secondary,
     );
   }
 
   // Titles
-  static TextStyle titlePrimary(BuildContext context) {
+  static TextStyle titlePrimary(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.titleMedium.copyWith(
       fontWeight: FontWeight.w700,
-      color: style.primary,
+      color: color ?? style.primary,
     );
   }
 
-  static TextStyle titleSecondary(BuildContext context) {
+  static TextStyle titleSecondary(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.titleMedium.copyWith(
       fontWeight: FontWeight.w700,
-      color: style.secondary,
+      color: color ?? style.secondary,
     );
   }
 
   // Subtitles
-  static TextStyle subtitle(BuildContext context) {
+  static TextStyle subtitle(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.titleSmall.copyWith(
       fontWeight: FontWeight.w600,
+      color: color ?? style.outline,
     );
   }
 
-  static TextStyle subtitleMuted(BuildContext context) {
+  static TextStyle subtitleMuted(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.titleSmall.copyWith(
       fontWeight: FontWeight.w500,
-      color: style.outline,
+      color: color ?? style.outline,
     );
   }
 
   // Body
-  static TextStyle bodyMedium(BuildContext context) {
-    final style = HomeStyle(context: context);
-    return style.bodyMedium;
-  }
-
-  static TextStyle bodyMediumBold(BuildContext context) {
+  static TextStyle bodyMedium(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodyMedium.copyWith(
-      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
     );
   }
 
-  static TextStyle bodyMediumMuted(BuildContext context) {
+  static TextStyle bodyMediumBold(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodyMedium.copyWith(
-      color: style.outline,
+      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
+    );
+  }
+
+  static TextStyle bodyMediumMuted(BuildContext context, {Color? color}) {
+    final style = HomeStyle(context: context);
+    return style.bodyMedium.copyWith(
+      color: color ?? style.outline,
       fontWeight: FontWeight.w400,
     );
   }
 
   // Body
-  static TextStyle bodySmall(BuildContext context) {
-    final style = HomeStyle(context: context);
-    return style.bodySmall;
-  }
-
-  static TextStyle bodySmallBold(BuildContext context) {
+  static TextStyle bodySmall(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodySmall.copyWith(
-      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
     );
   }
 
-  static TextStyle bodySmallMuted(BuildContext context) {
+  static TextStyle bodySmallBold(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodySmall.copyWith(
-      color: style.outline,
+      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
+    );
+  }
+
+  static TextStyle bodySmallMuted(BuildContext context, {Color? color}) {
+    final style = HomeStyle(context: context);
+    return style.bodySmall.copyWith(
+      color: color ?? style.outline,
       fontWeight: FontWeight.w400,
     );
   }
 
   // Body
-  static TextStyle bodyLarge(BuildContext context) {
-    final style = HomeStyle(context: context);
-    return style.bodyLarge;
-  }
-
-  static TextStyle bodyLargeBold(BuildContext context) {
+  static TextStyle bodyLarge(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodyLarge.copyWith(
-      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
     );
   }
 
-  static TextStyle bodyLargeMuted(BuildContext context) {
+  static TextStyle bodyLargeBold(BuildContext context, {Color? color}) {
     final style = HomeStyle(context: context);
     return style.bodyLarge.copyWith(
-      color: style.outline,
+      fontWeight: FontWeight.w700,
+      color: color ?? style.primary,
+    );
+  }
+
+  static TextStyle bodyLargeMuted(BuildContext context, {Color? color}) {
+    final style = HomeStyle(context: context);
+    return style.bodyLarge.copyWith(
+      color: color ?? style.outline,
       fontWeight: FontWeight.w400,
     );
   }
