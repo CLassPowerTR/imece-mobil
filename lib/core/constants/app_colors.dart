@@ -29,4 +29,5 @@ class AppColors {
   static Color succesful(BuildContext context) => Colors.green;
   static Color orange(BuildContext context) => Colors.orange;
   static Color blue(BuildContext context) => Colors.blue;
+  static Color purple(BuildContext context) => Colors.purple;
 }

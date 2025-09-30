@@ -119,11 +119,12 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 20,
+            //spacing: 20,
             children: [
               _profilGiris(width, context),
               _profilIstatikler(width, themeData),
               _profilStories(context, width),
+              _profilDetailCards(width, themeData),
               _profilHakkinda(themeData, width, context),
               _profilGonderiler(context, themeData, width),
               _profilLastComment(context, width, themeData),
@@ -148,59 +149,194 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     );
   }
 
-  Container _profilStories(BuildContext context, double width) =>
-      container(context,
-          color: AppColors.surfaceContainer(context),
-          margin: AppPaddings.h10,
-          borderRadius: AppRadius.r16,
-          padding: AppPaddings.all16,
-          width: width,
-          child: Column(
-            spacing: 18,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: customText('Hikayeler', context,
-                    textAlign: TextAlign.left,
-                    style: AppTextStyle.bodyLargeBold(context)),
-              ),
-              Column(
-                spacing: 6,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+  Builder _profilDetailCards(double width, HomeStyle themeData) {
+    final List<dynamic> detailCards = [
+      {
+        'title': 'Yeni Ürün Ekle',
+        'subtitle':
+            'Mağzanıza yeni bir ürünler ekleyin ve satışlarınızı arttırın',
+        'icon': Icons.add,
+        'iconColor': AppColors.succesful(context),
+        'router': null,
+      },
+      {
+        'title': 'Ürünlerimi Görüntüle',
+        'subtitle': 'Mevcut ürünlerinizi yönetin ve güncelleyin',
+        'icon': Icons.view_in_ar,
+        'iconColor': AppColors.secondary(context),
+        'router': null,
+      },
+      {
+        'title': 'Siparişlerim',
+        'subtitle': 'Siparişlerinizi takip edin ve kargo işlemlerini yönetin',
+        'icon': Icons.shopping_bag_outlined,
+        'iconColor': AppColors.error(context),
+        'router': null,
+      },
+      {
+        'title': 'Finansal Dashboard',
+        'subtitle': 'Satış Raporlarınızı ve finansal durumunuzu takip edin',
+        'icon': Icons.stacked_line_chart,
+        'iconColor': AppColors.purple(context),
+        'router': '/profil/wallet',
+      },
+      {
+        'title': 'Profil Ayarları',
+        'subtitle': 'Profil bilgilerinizi düzenleyin ve güncelleyin',
+        'icon': Icons.person_2_outlined,
+        'iconColor': AppColors.orange(context),
+        'router': null,
+      }
+    ];
+    return Builder(builder: (context) {
+      if (widget.myProfile) {
+        return container(context,
+            color: AppColors.surfaceContainer(context),
+            margin: AppPaddings.h10v10,
+            borderRadius: AppRadius.r16,
+            padding: AppPaddings.all16,
+            width: width, child: LayoutBuilder(builder: (context, constraints) {
+          final double totalWidth = constraints.maxWidth;
+          const double horizontalSpacing = 12;
+          const double runSpacing = 12;
+          final double itemWidth = (totalWidth - horizontalSpacing) / 2;
+          return Wrap(
+            spacing: horizontalSpacing,
+            runSpacing: runSpacing,
+            children: List.generate(detailCards.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  if (detailCards[index]['router'] != null) {
+                    Navigator.pushNamed(
+                      context,
+                      detailCards[index]['router']!,
+                      arguments: widget.sellerProfil,
+                    );
+                  }
+                },
+                child: SizedBox(
+                  width: itemWidth,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: container(context,
+                        color: AppColors.surfaceContainer(context),
+                        padding: AppPaddings.all16,
+                        borderRadius: AppRadius.r16,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                mainAxisSize: MainAxisSize.max,
+                                spacing: 6,
+                                children: [
+                                  customText(
+                                      detailCards[index]['title'], context,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.start,
+                                      style:
+                                          AppTextStyle.bodyMediumBold(context)),
+                                  customText(
+                                      detailCards[index]['subtitle'], context,
+                                      textAlign: TextAlign.start,
+                                      style:
+                                          AppTextStyle.bodySmallMuted(context),
+                                      maxLines: 5),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                height: 36,
+                                width: 36,
+                                decoration: BoxDecoration(
+                                  color: detailCards[index]['iconColor']
+                                      .withOpacity(0.1),
+                                  borderRadius: AppRadius.r18,
+                                ),
+                                child: Center(
+                                  child: Icon(detailCards[index]['icon'],
+                                      color: detailCards[index]['iconColor']),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                  ),
+                ),
+              );
+            }),
+          );
+        }));
+      } else {
+        return SizedBox(height: 0, width: 0);
+      }
+    });
+  }
+
+  Builder _profilStories(BuildContext context, double width) =>
+      Builder(builder: (context) {
+        if (widget.myProfile) {
+          return container(context,
+              color: AppColors.surfaceContainer(context),
+              margin: AppPaddings.h10v10,
+              borderRadius: AppRadius.r16,
+              padding: AppPaddings.all16,
+              width: width,
+              child: Column(
+                spacing: 18,
                 children: [
-                  TextButton.icon(
-                      style: TextButton.styleFrom(
-                        backgroundColor: AppColors.blue(context),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.r8,
-                        ),
-                      ),
-                      onPressed: () {},
-                      label: customText('Hikaye Ekle', context,
-                          style: AppTextStyle.bodyMedium(context,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: customText('Hikayeler', context,
+                        textAlign: TextAlign.left,
+                        style: AppTextStyle.bodyLargeBold(context)),
+                  ),
+                  Column(
+                    spacing: 6,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppColors.blue(context),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppRadius.r8,
+                            ),
+                          ),
+                          onPressed: () {},
+                          label: customText('Hikaye Ekle', context,
+                              style: AppTextStyle.bodyMedium(context,
+                                  color: AppColors.onPrimary(context))),
+                          icon: Icon(Icons.add_outlined,
                               color: AppColors.onPrimary(context))),
-                      icon: Icon(Icons.add_outlined,
-                          color: AppColors.onPrimary(context))),
-                  TextButton.icon(
-                      style: TextButton.styleFrom(
-                        backgroundColor: AppColors.succesful(context),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.r8,
-                        ),
-                      ),
-                      onPressed: () {},
-                      label: customText('Kampanya Hikayesi Ekle', context,
-                          style: AppTextStyle.bodyMedium(context,
-                              color: AppColors.onPrimary(context))),
-                      icon: Icon(
-                        Icons.add_outlined,
-                        color: AppColors.onPrimary(context),
-                      )),
+                      TextButton.icon(
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppColors.succesful(context),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppRadius.r8,
+                            ),
+                          ),
+                          onPressed: () {},
+                          label: customText('Kampanya Hikayesi Ekle', context,
+                              style: AppTextStyle.bodyMedium(context,
+                                  color: AppColors.onPrimary(context))),
+                          icon: Icon(
+                            Icons.add_outlined,
+                            color: AppColors.onPrimary(context),
+                          )),
+                    ],
+                  )
                 ],
-              )
-            ],
-          ));
+              ));
+        } else {
+          return SizedBox(height: 0, width: 0);
+        }
+      });
 
   GridView _populerUrunlerCards(double height, double width) {
     return GridView.builder(
@@ -273,7 +409,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       BuildContext context, HomeStyle themeData, double width) {
     return container(context,
         color: themeData.surfaceContainer,
-        margin: EdgeInsets.symmetric(horizontal: 20),
+        borderRadius: AppRadius.r16,
+        margin: AppPaddings.h10v10,
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +476,9 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           context,
           color: themeData.surfaceContainer,
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          borderRadius: AppRadius.r16,
           width: width,
+          margin: AppPaddings.h10v10,
           //height: 268,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,7 +545,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       if (widget.myProfile) {
         return container(
           context,
-          margin: AppPaddings.h10,
+          margin: AppPaddings.h10v10,
           borderRadius: AppRadius.r16,
           padding: AppPaddings.all16,
           color: HomeStyle(context: context).surfaceContainer,
@@ -573,6 +712,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       children: [
         container(
           context,
+
           color: HomeStyle(context: context).surfaceContainer,
           //height: 306,
           padding: EdgeInsets.only(bottom: 10),
@@ -891,7 +1031,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           width: profileSize,
           height: profileSize,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppRadius.r12,
               border: Border.all(color: Colors.white, width: 2),
               image: DecorationImage(
                   image: NetworkImage(
@@ -906,8 +1046,10 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
             width: 13,
             height: 13,
             decoration: BoxDecoration(
-                color: widget.sellerProfil.isActive ? Colors.red : Colors.green,
-                borderRadius: BorderRadius.circular(8)),
+                color: widget.sellerProfil.isOnline
+                    ? AppColors.succesful(context)
+                    : AppColors.error(context),
+                borderRadius: AppRadius.r8),
           ),
         )
       ]),
@@ -924,7 +1066,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   widget.sellerProfil.saticiProfili?.profilBanner == ''
                       ? notFoundImageUrl
                       : widget.sellerProfil.saticiProfili?.profilBanner ?? ''),
-              fit: BoxFit.cover)),
+              fit: BoxFit.cover,
+              alignment: Alignment.center)),
     );
   }
 }

@@ -29,7 +29,7 @@ class SellerProfil {
     return SellerProfil(
       id: json['id'] ?? 0,
       profilBanner: json['profil_banner'],
-      profilTanitimYazisi: json['profil_tanitim_yazisi'],
+      profilTanitimYazisi: json['profil_tanitim_yazisi'] ?? '',
       degerlendirmePuani: json['degerlendirme_puani'],
       magazaAdi: json['magaza_adi'],
       saticiVergiNumarasi: json['satici_vergi_numarasi'],
