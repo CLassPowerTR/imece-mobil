@@ -131,7 +131,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               _BenzerUrunlerText(context, themeData),
               //_populerUrunlerCards(height, width) //Backend yapımından dolayı deployed
               SizedBox(
-                height: 100,
+                height: MediaQuery.of(context).size.height * 0.1,
               )
             ],
           ),
@@ -157,7 +157,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
             'Mağzanıza yeni bir ürünler ekleyin ve satışlarınızı arttırın',
         'icon': Icons.add,
         'iconColor': AppColors.succesful(context),
-        'router': null,
+        'router': '/profil/addProduct',
       },
       {
         'title': 'Ürünlerimi Görüntüle',

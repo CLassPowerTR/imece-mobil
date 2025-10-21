@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/richText.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/messaging/private/widget/private_view_body_circleAvatar.dart';

@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/core/widgets/creditCart.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:u_credit_card/u_credit_card.dart';

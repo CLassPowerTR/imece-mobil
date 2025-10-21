@@ -143,28 +143,56 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    // Zorunlu alan doğrulamaları ve güvenli parse
+    final dynamic idRaw = json['id'];
+    final int parsedId =
+        idRaw is int ? idRaw : int.tryParse(idRaw?.toString() ?? '') ?? 0;
+
+    final String username = (json['username'] ?? '').toString();
+    final String email = (json['email'] ?? '').toString();
+
+    final String? lastLoginStr = json['last_login']?.toString();
+    final DateTime? lastLogin =
+        (lastLoginStr != null && lastLoginStr.isNotEmpty)
+            ? DateTime.tryParse(lastLoginStr)
+            : null;
+
+    final String dateJoinedStr = (json['date_joined'] ?? '').toString();
+    final DateTime dateJoined =
+        DateTime.tryParse(dateJoinedStr) ?? DateTime.now();
+
+    final bool isSuperuser = json['is_superuser'] == true;
+    final bool isStaff = json['is_staff'] == true;
+    final bool isActive = json['is_active'] == true;
+    final bool isOnline = json['is_online'] == true;
+
+    final String hataYapmaOrani =
+        (json['hata_yapma_orani'] ?? '0.00').toString();
+    final String bakiye = (json['bakiye'] ?? '0.00').toString();
+
+    final List<dynamic> groups = json['groups'] is List ? json['groups'] : [];
+    final List<dynamic> userPermissions =
+        json['user_permissions'] is List ? json['user_permissions'] : [];
+
     return User(
-      id: json['id'] ?? 0,
-      lastLogin: json['last_login'] != null && json['last_login'] != ''
-          ? DateTime.tryParse(json['last_login'])
-          : null,
-      isSuperuser: json['is_superuser'] ?? false,
-      username: json['username'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      email: json['email'] ?? '',
-      isStaff: json['is_staff'] ?? false,
-      isActive: json['is_active'] ?? false,
-      dateJoined: DateTime.tryParse(json['date_joined']) ?? DateTime.now(),
-      rol: json['rol'] ?? '',
-      telno: json['telno'],
-      isOnline: json['is_online'] ?? false,
-      profilFotograf: json['profil_fotograf'],
-      hataYapmaOrani: json['hata_yapma_orani'] ?? '0.00',
-      bakiye: json['bakiye'] ?? '0.00',
-      groups: json['groups'] is List ? json['groups'] : [],
-      userPermissions:
-          json['user_permissions'] is List ? json['user_permissions'] : [],
+      id: parsedId,
+      lastLogin: lastLogin,
+      isSuperuser: isSuperuser,
+      username: username,
+      firstName: (json['first_name'] ?? '').toString(),
+      lastName: (json['last_name'] ?? '').toString(),
+      email: email,
+      isStaff: isStaff,
+      isActive: isActive,
+      dateJoined: dateJoined,
+      rol: (json['rol'] ?? '').toString(),
+      telno: json['telno']?.toString(),
+      isOnline: isOnline,
+      profilFotograf: json['profil_fotograf']?.toString(),
+      hataYapmaOrani: hataYapmaOrani,
+      bakiye: bakiye,
+      groups: groups,
+      userPermissions: userPermissions,
       saticiProfili: json['satici_profili'] != null
           ? SellerProfil.fromJson(json['satici_profili'])
           : null,

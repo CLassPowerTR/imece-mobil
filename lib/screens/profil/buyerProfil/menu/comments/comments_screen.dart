@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
-import 'package:imecehub/core/widgets/turnBackTextIcon.dart';
+import 'package:imecehub/core/widgets/buttons/turnBackTextIcon.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/services/api_service.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/richText.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';

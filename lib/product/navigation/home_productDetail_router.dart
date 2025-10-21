@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/screens/products/productsDetail/products_detail_screen.dart';

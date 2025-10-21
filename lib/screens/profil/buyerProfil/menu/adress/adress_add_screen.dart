@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/widgets/dropdownBox.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/users.dart';

@@ -3,16 +3,21 @@ import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
+import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/stories.dart';
+import 'package:shimmer/shimmer.dart';
 
 class StoryCampaingsCard extends StatefulWidget {
   final double width;
   final double height;
-  const StoryCampaingsCard(
-      {super.key, required this.width, required this.height});
+  const StoryCampaingsCard({
+    super.key,
+    required this.width,
+    required this.height,
+  });
 
   @override
   State<StoryCampaingsCard> createState() => _StoryCampaingsCardState();
@@ -100,18 +105,12 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: AppPaddings.all12,
-            child: _buildTabs(theme),
-          ),
+          Padding(padding: AppPaddings.all12, child: _buildTabs(theme)),
           SizedBox(
             height: widget.height * 0.22,
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildCampaigns(theme),
-                _buildStories(theme),
-              ],
+              children: [_buildCampaigns(theme), _buildStories(theme)],
             ),
           ),
         ],
@@ -142,11 +141,7 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
         ),
         unselectedLabelColor: theme.primary,
         tabs: [
-          Tab(
-              child: Center(
-                  child: Text(
-            'Kampanyalar',
-          ))),
+          Tab(child: Center(child: Text('Kampanyalar'))),
           Tab(child: Center(child: Text('Hikayeler'))),
         ],
       ),
@@ -158,19 +153,27 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
       future: ApiService.fetchCampaignsStories(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: theme.primary));
+          return CampaignsStoriesShimmer();
         }
         if (snapshot.hasError) {
           return Center(
-              child: customText('Hata: ${snapshot.error}', context,
-                  color: theme.error));
+            child: customText(
+              'Hata: ${snapshot.error}',
+              context,
+              color: theme.error,
+            ),
+          );
         }
         final data = snapshot.data;
         final items = data?.data ?? [];
         if (items.isEmpty) {
           return Center(
-              child: customText('Kampanya bulunamadı', context,
-                  color: theme.outline));
+            child: customText(
+              'Kampanya bulunamadı',
+              context,
+              color: theme.outline,
+            ),
+          );
         }
         return ListView.separated(
           padding: AppPaddings.all12,
@@ -187,7 +190,8 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
                 children: [
                   GestureDetector(
                     onTap: () => _showFullScreenImage(
-                        '${ApiConfig().baseUrl}${c.photo}'),
+                      '${ApiConfig().baseUrl}${c.photo}',
+                    ),
                     child: Container(
                       padding: EdgeInsets.all(2),
                       decoration: BoxDecoration(
@@ -198,8 +202,9 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
                         ),
                       ),
                       child: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage('${ApiConfig().baseUrl}${c.photo}'),
+                        backgroundImage: NetworkImage(
+                          '${ApiConfig().baseUrl}${c.photo}',
+                        ),
                         radius: 36,
                       ),
                     ),
@@ -232,19 +237,27 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
       future: ApiService.fetchStories(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: theme.primary));
+          return CampaignsStoriesShimmer(subtitle: 'Hikayeler');
         }
         if (snapshot.hasError) {
           return Center(
-              child: customText('Hata: ${snapshot.error}', context,
-                  color: theme.error));
+            child: customText(
+              'Hata: ${snapshot.error}',
+              context,
+              color: theme.error,
+            ),
+          );
         }
         final data = snapshot.data;
         final items = data?.data ?? [];
         if (items.isEmpty) {
           return Center(
-              child: customText('Hikaye bulunamadı', context,
-                  color: theme.outline));
+            child: customText(
+              'Hikaye bulunamadı',
+              context,
+              color: theme.outline,
+            ),
+          );
         }
         return ListView.separated(
           padding: AppPaddings.all12,
@@ -261,7 +274,8 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
                 children: [
                   GestureDetector(
                     onTap: () => _showFullScreenImage(
-                        '${ApiConfig().baseUrl}${s.photo}'),
+                      '${ApiConfig().baseUrl}${s.photo}',
+                    ),
                     child: Container(
                       padding: EdgeInsets.all(2),
                       decoration: BoxDecoration(
@@ -272,8 +286,9 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
                         ),
                       ),
                       child: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage('${ApiConfig().baseUrl}${s.photo}'),
+                        backgroundImage: NetworkImage(
+                          '${ApiConfig().baseUrl}${s.photo}',
+                        ),
                         radius: 36,
                       ),
                     ),

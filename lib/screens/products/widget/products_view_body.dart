@@ -16,7 +16,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     {'name': 'Sırala', 'icon': Icon(Icons.compare_arrows_outlined)},
     {'name': 'Filtrele', 'icon': Icon(Icons.filter_alt_outlined)},
     {'name': 'Satıcı', 'icon': Icon(Icons.home_filled)},
-    {'name': 'Fiyat', 'icon': Icon(Icons.price_change_outlined)}
+    {'name': 'Fiyat', 'icon': Icon(Icons.price_change_outlined)},
   ];
   String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
   // Statik cache değişkeni: Tüm örnekler arasında paylaşılır.
@@ -100,12 +100,17 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
 
   Future<void> _fetchFavorites() async {
     try {
-      final favorites =
-          await ApiService.fetchUserFavorites(null, null, null, null);
-      favoriteProductIds =
-          favorites.map<int>((item) => item['urun'] as int).toList();
+      final favorites = await ApiService.fetchUserFavorites(
+        null,
+        null,
+        null,
+        null,
+      );
+      favoriteProductIds = favorites
+          .map<int>((item) => item['urun'] as int)
+          .toList();
       productIdToFavoriteId = {
-        for (var item in favorites) item['urun'] as int: item['id'] as int
+        for (var item in favorites) item['urun'] as int: item['id'] as int,
       };
     } catch (e) {
       favoriteProductIds = [];
@@ -116,8 +121,9 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshProducts() async {
     // API'den verileri çek ve cache'i güncelle
-    List<Product> freshProducts =
-        await ApiService.fetchProducts(id: widget.categoryId);
+    List<Product> freshProducts = await ApiService.fetchProducts(
+      id: widget.categoryId,
+    );
     await _fetchFavorites();
     _futureFavorites = _fetchFavorites();
 
@@ -128,8 +134,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   }
 
   @override
-  bool get wantKeepAlive =>
-      true; // Ekran arası geçişte state'in korunmasını sağlar
+  bool get wantKeepAlive => true; // Ekran arası geçişte state'in korunmasını sağlar
 
   @override
   Widget build(BuildContext context) {
@@ -148,13 +153,15 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                Builder(builder: (context) {
-                  if (widget.categoryId == null) {
-                    return _categoryButtons(context, height);
-                  } else {
-                    return SizedBox();
-                  }
-                }),
+                Builder(
+                  builder: (context) {
+                    if (widget.categoryId == null) {
+                      return _categoryButtons(context, height);
+                    } else {
+                      return SizedBox();
+                    }
+                  },
+                ),
                 _futureProductsItems(height, width),
               ],
             ),
@@ -165,7 +172,9 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   }
 
   FutureBuilder<List<Product>> _futureProductsItems(
-      double height, double width) {
+    double height,
+    double width,
+  ) {
     return FutureBuilder<List<Product>>(
       future: _futureProducts,
       builder: (context, snapshot) {
@@ -173,7 +182,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              buildLoadingBar(context),
+              const ProductsGridShimmer(itemCount: 4),
               const SizedBox(height: 16),
             ],
           );
@@ -189,9 +198,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _productCards(height, width, products),
-              SizedBox(
-                height: height * 0.12,
-              )
+              SizedBox(height: height * 0.12),
             ],
           );
         }
@@ -203,10 +210,10 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     return GridView.builder(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        mainAxisExtent: height * 0.4,
-        crossAxisCount: 2, // İki sütun
-        crossAxisSpacing: 10, // Sütunlar arası yatay boşluk
-        mainAxisSpacing: 10, // Satırlar arası dikey boşluk
+        crossAxisCount: 2,
+        childAspectRatio: 0.68,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
       itemCount: products.length,
       shrinkWrap: true,
@@ -223,23 +230,35 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
               if (isInSepet) {
                 ref.read(bottomNavIndexProvider.notifier).state = 2;
                 Navigator.pushNamedAndRemoveUntil(
-                    context, '/home', (route) => false,
-                    arguments: {'refresh': true});
+                  context,
+                  '/home',
+                  (route) => false,
+                  arguments: {'refresh': true},
+                );
               } else {
                 if (products[index].stokDurumu <= 0) {
                   showTemporarySnackBar(
-                      context, 'Bu ürün stokta bulunmamaktadır',
-                      type: SnackBarType.info);
+                    context,
+                    'Bu ürün stokta bulunmamaktadır',
+                    type: SnackBarType.info,
+                  );
                 } else {
                   try {
                     await ApiService.fetchSepetEkle(
-                        1, products[index].urunId ?? 0);
-                    showTemporarySnackBar(context, 'Sepete eklendi',
-                        type: SnackBarType.success);
+                      1,
+                      products[index].urunId ?? 0,
+                    );
+                    showTemporarySnackBar(
+                      context,
+                      'Sepete eklendi',
+                      type: SnackBarType.success,
+                    );
                   } catch (e) {
                     showTemporarySnackBar(
-                        context, 'Sepete eklenirken bir hata oluştu: $e',
-                        type: SnackBarType.error);
+                      context,
+                      'Sepete eklenirken bir hata oluştu: $e',
+                      type: SnackBarType.error,
+                    );
                   } finally {
                     await _checkGetSepet();
                     setState(() {});
@@ -247,8 +266,11 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                 }
               }
             } else {
-              showTemporarySnackBar(context, 'Lütfen giriş yapınız',
-                  type: SnackBarType.info);
+              showTemporarySnackBar(
+                context,
+                'Lütfen giriş yapınız',
+                type: SnackBarType.info,
+              );
             }
           },
           favoriEkle: () {
@@ -261,8 +283,11 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   user = ref.read(userProvider);
                 }
                 if (user == null) {
-                  showTemporarySnackBar(context, 'Lütfen giriş yapınız',
-                      type: SnackBarType.info);
+                  showTemporarySnackBar(
+                    context,
+                    'Lütfen giriş yapınız',
+                    type: SnackBarType.info,
+                  );
                   return;
                 }
                 if (favoriteProduct) {
@@ -272,12 +297,22 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   if (favoriteProductId != null) {
                     try {
                       await ApiService.fetchUserFavorites(
-                          null, null, null, favoriteProductId);
-                      showTemporarySnackBar(context, 'Favoriden çıkarıldı',
-                          type: SnackBarType.success);
+                        null,
+                        null,
+                        null,
+                        favoriteProductId,
+                      );
+                      showTemporarySnackBar(
+                        context,
+                        'Favoriden çıkarıldı',
+                        type: SnackBarType.success,
+                      );
                     } catch (e) {
-                      showTemporarySnackBar(context, 'Hata: $e',
-                          type: SnackBarType.error);
+                      showTemporarySnackBar(
+                        context,
+                        'Hata: $e',
+                        type: SnackBarType.error,
+                      );
                     } finally {
                       await _fetchFavorites();
                       setState(() {});
@@ -288,17 +323,29 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   final currentUrunId = products[index].urunId;
                   if (currentUrunId == null) {
                     showTemporarySnackBar(
-                        context, 'Ürün bilgisi eksik (urunId boş)');
+                      context,
+                      'Ürün bilgisi eksik (urunId boş)',
+                    );
                     return;
                   }
                   try {
                     await ApiService.fetchUserFavorites(
-                        null, user.id, currentUrunId, null);
-                    showTemporarySnackBar(context, 'Favoriye eklendi',
-                        type: SnackBarType.success);
+                      null,
+                      user.id,
+                      currentUrunId,
+                      null,
+                    );
+                    showTemporarySnackBar(
+                      context,
+                      'Favoriye eklendi',
+                      type: SnackBarType.success,
+                    );
                   } catch (e) {
-                    showTemporarySnackBar(context, 'Hata: $e',
-                        type: SnackBarType.error);
+                    showTemporarySnackBar(
+                      context,
+                      'Hata: $e',
+                      type: SnackBarType.error,
+                    );
                   } finally {
                     await _fetchFavorites();
                     setState(() {});
@@ -309,8 +356,11 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   setState(() {});
                 });
               } else {
-                showTemporarySnackBar(context, 'Lütfen giriş yapınız',
-                    type: SnackBarType.info);
+                showTemporarySnackBar(
+                  context,
+                  'Lütfen giriş yapınız',
+                  type: SnackBarType.info,
+                );
               }
             });
           },
@@ -331,9 +381,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       transformAlignment: Alignment.topCenter,
       decoration: BoxDecoration(
         color: HomeStyle(context: context).surface,
-        boxShadow: [
-          boxShadow(context),
-        ],
+        boxShadow: [boxShadow(context)],
       ),
       height: height * 0.07,
       padding: EdgeInsets.symmetric(vertical: 10),
@@ -344,11 +392,9 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
           final items = productCategories[index];
           return Padding(
             padding: const EdgeInsets.only(
-                left: 16), // Butonlar arasında yatay boşluk
-            child: ProductsCategoryButtons(
-              index: index,
-              items: items,
-            ),
+              left: 16,
+            ), // Butonlar arasında yatay boşluk
+            child: ProductsCategoryButtons(index: index, items: items),
           );
         },
       ),

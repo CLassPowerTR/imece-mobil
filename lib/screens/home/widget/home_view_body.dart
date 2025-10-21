@@ -68,26 +68,29 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         backgroundColor: Colors.white,
         onRefresh: _refreshFutures,
         child: SafeArea(
-            child: Padding(
-                padding: HomeStyle(context: context).bodyPadding,
-                child: SingleChildScrollView(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                      _futureCategories(width, height),
-                      _kampanyalarItems(width, height),
-                      //_saticilarList(height, context, width),
-                      SizedBox(height: 16),
-                      StoryCampaingsCard(height: height, width: width),
-                      _futureSellersView(height, width, themeData),
-                      _alimTipiContainer(height, context),
-                      //_populerUrunCards(width, height),
-                      _futurePopulerProductsView(width, height),
-                      _onerilerContainer(height, context, width),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.14,
-                      ),
-                    ])))),
+          child: Padding(
+            padding: HomeStyle(context: context).bodyPadding,
+            child: SingleChildScrollView(
+              child: Column(
+                spacing: 12,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _futureCategories(width, height),
+                  _kampanyalarItems(width, height),
+                  //_saticilarList(height, context, width),
+                  //SizedBox(height: 16),
+                  StoryCampaingsCard(height: height, width: width),
+                  _futureSellersView(height, width, themeData),
+                  _alimTipiContainer(height, context),
+                  //_populerUrunCards(width, height),
+                  _futurePopulerProductsView(width, height),
+                  _onerilerContainer(height, context, width),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.14),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -103,13 +106,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
           future: _futurePopulerProducts,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  buildLoadingBar(context),
-                  const SizedBox(height: 16),
-                ],
-              );
+              return ProductsGridShimmer(itemCount: 2);
             } else if (snapshot.hasError) {
               return Text("Hata oluştu: ${snapshot.error}");
             } else if (snapshot.hasData) {
@@ -132,29 +129,31 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         future: _futureSellers,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
-              children: [
-                Container(
-                    //margin: EdgeInsets.only(top: height * 0.5),
-                    color: Colors.transparent),
-              ],
-            );
+            return SellersShimmer();
           } else if (snapshot.hasError) {
-            return container(context,
-                color: themeData.surfaceContainer,
-                borderRadius: BorderRadius.circular(8),
-                isBoxShadow: true,
-                margin: EdgeInsets.only(bottom: 15),
-                padding: EdgeInsets.all(8),
-                child: customText("Hata oluştu: ${snapshot.error}", context,
-                    color: themeData.secondary));
+            return container(
+              context,
+              color: themeData.surfaceContainer,
+              borderRadius: BorderRadius.circular(8),
+              isBoxShadow: true,
+              margin: EdgeInsets.only(bottom: 15),
+              padding: EdgeInsets.all(8),
+              child: customText(
+                "Hata oluştu: ${snapshot.error}",
+                context,
+                color: themeData.secondary,
+              ),
+            );
           } else if (snapshot.hasData) {
             double saticiContainerWidth = width * 0.2;
             double avatarContainerHeight = 87;
             List<Company> sellers = snapshot.data!;
 
             return _sellerList(
-                sellers, avatarContainerHeight, saticiContainerWidth);
+              sellers,
+              avatarContainerHeight,
+              saticiContainerWidth,
+            );
           } else {
             return SizedBox();
           }
@@ -163,8 +162,11 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     );
   }
 
-  ListView _sellerList(List<Company> sellers, double avatarContainerHeight,
-      double saticiContainerWidth) {
+  ListView _sellerList(
+    List<Company> sellers,
+    double avatarContainerHeight,
+    double saticiContainerWidth,
+  ) {
     return ListView.builder(
       itemCount: sellers.length,
       scrollDirection: Axis.horizontal,
@@ -187,14 +189,15 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
-                    backgroundColor: HomeStyle(context: context).secondary,
-                    child: SvgPicture.network(
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(Icons.person_outline_sharp);
-                      },
-                      sellers[index].logo,
-                      fit: BoxFit.cover,
-                    )),
+                  backgroundColor: HomeStyle(context: context).secondary,
+                  child: SvgPicture.network(
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.person_outline_sharp);
+                    },
+                    sellers[index].logo,
+                    fit: BoxFit.cover,
+                  ),
+                ),
                 customText(
                   '${sellers[index].adi}',
                   context,
@@ -202,7 +205,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                   softWrap: true,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
-                )
+                ),
               ],
             ),
           ),
@@ -217,19 +220,20 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _categoriesText(context),
+        //_categoriesText(context),
         SizedBox(
           height: height * 0.14,
           child: FutureBuilder<List<Category>>(
             future: _futureCategory,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    buildLoadingBar(context),
-                    const SizedBox(height: 16),
-                  ],
+                return CategoriesShimmer(
+                  padding: HomeStyle(context: context).bodyPadding,
+                  crossAxisCount: 4,
+                  childAspectRatio: 1,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  itemCount: 4,
                 );
               } else if (snapshot.hasError) {
                 return Text("Hata oluştu: ${snapshot.error}");
@@ -267,28 +271,44 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       spacing: 15,
       children: [
         Expanded(
-            flex: 1,
-            child: _imageContainer(
-                height, context, width, 'İndirimli', ' Ürünleri İncele')),
+          flex: 1,
+          child: _imageContainer(
+            height,
+            context,
+            width,
+            'İndirimli',
+            ' Ürünleri İncele',
+          ),
+        ),
         Expanded(
-            flex: 1,
-            child: _imageContainer(
-                height, context, width, 'Bizim', 'seçtiklerimiz'))
+          flex: 1,
+          child: _imageContainer(
+            height,
+            context,
+            width,
+            'Bizim',
+            'seçtiklerimiz',
+          ),
+        ),
       ],
     );
   }
 
-  Container _imageContainer(double height, BuildContext context, double width,
-      String title, String title2) {
+  Container _imageContainer(
+    double height,
+    BuildContext context,
+    double width,
+    String title,
+    String title2,
+  ) {
     return Container(
       margin: EdgeInsets.only(top: 15),
       height: height * 0.15,
       decoration: BoxDecoration(
-        boxShadow: [
-          boxShadow(context),
-        ],
-        borderRadius:
-            HomeStyle(context: context).bodyCategoryContainerBorderRadius,
+        boxShadow: [boxShadow(context)],
+        borderRadius: HomeStyle(
+          context: context,
+        ).bodyCategoryContainerBorderRadius,
         image: const DecorationImage(
           image: AssetImage('assets/image/grupalim.jpg'),
           fit: BoxFit.cover,
@@ -300,43 +320,53 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           RichText(
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                fontWeight: FontWeight.bold,
+                color: HomeStyle(context: context).secondary,
+              ),
+              children: [
+                TextSpan(
+                  text: title,
                   style: TextStyle(
-                    fontSize: HomeStyle(context: context).bodyLarge.fontSize,
                     fontWeight: FontWeight.bold,
-                    color: HomeStyle(context: context).secondary,
+                    fontSize: HomeStyle(
+                      context: context,
+                    ).headlineSmall.fontSize,
+                    color: HomeStyle(
+                      context: context,
+                    ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
                   ),
-                  children: [
-                    TextSpan(
-                      text: title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize:
-                            HomeStyle(context: context).headlineSmall.fontSize,
-                        color: HomeStyle(context: context)
-                            .secondary, // "Alıcı" kelimesinin istediğiniz rengi
-                      ),
-                    ),
-                    TextSpan(
-                      text: title2,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize:
-                            HomeStyle(context: context).headlineSmall.fontSize,
-                        color: HomeStyle(context: context)
-                            .surface, // "Alıcı" kelimesinin istediğiniz rengi
-                      ),
-                    ),
-                  ])),
+                ),
+                TextSpan(
+                  text: title2,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: HomeStyle(
+                      context: context,
+                    ).headlineSmall.fontSize,
+                    color: HomeStyle(
+                      context: context,
+                    ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                  ),
+                ),
+              ],
+            ),
+          ),
           Align(
-              alignment: Alignment.bottomCenter,
-              child: customText('Tıkla...', context,
-                  size: HomeStyle(context: context).bodyLarge.fontSize,
-                  weight: FontWeight.bold,
-                  color: HomeStyle(context: context).secondary)),
+            alignment: Alignment.bottomCenter,
+            child: customText(
+              'Tıkla...',
+              context,
+              size: HomeStyle(context: context).bodyLarge.fontSize,
+              weight: FontWeight.bold,
+              color: HomeStyle(context: context).secondary,
+            ),
+          ),
         ],
       ),
     );
@@ -344,31 +374,36 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
 
   Widget _populerUrunCards(double width, double height, populerProducts) {
     return GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          mainAxisExtent: height * 0.4,
-          crossAxisCount: 2, // İki sütun
-          crossAxisSpacing: 10, // Sütunlar arası yatay boşluk
-          mainAxisSpacing: 10, // Satırlar arası dikey boşluk
-        ),
-        itemCount: populerProducts.length,
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          return productsCard2(
-              product: populerProducts[index],
-              width: width,
-              context: context,
-              height: height);
-        });
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        mainAxisExtent: height * 0.4,
+        crossAxisCount: 2, // İki sütun
+        crossAxisSpacing: 10, // Sütunlar arası yatay boşluk
+        mainAxisSpacing: 10, // Satırlar arası dikey boşluk
+      ),
+      itemCount: populerProducts.length,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return productsCard2(
+          product: populerProducts[index],
+          width: width,
+          context: context,
+          height: height,
+        );
+      },
+    );
   }
 
   Padding _populerUrunlerText(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 10),
-      child: customText('Popüler ürünler', context,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
-          weight: FontWeight.bold,
-          color: HomeStyle(context: context).primary),
+      child: customText(
+        'Popüler ürünler',
+        context,
+        size: HomeStyle(context: context).bodyLarge.fontSize,
+        weight: FontWeight.bold,
+        color: HomeStyle(context: context).primary,
+      ),
     );
   }
 
@@ -381,11 +416,10 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
           child: Container(
             height: height * 0.15,
             decoration: BoxDecoration(
-              boxShadow: [
-                boxShadow(context),
-              ],
-              borderRadius:
-                  HomeStyle(context: context).bodyCategoryContainerBorderRadius,
+              boxShadow: [boxShadow(context)],
+              borderRadius: HomeStyle(
+                context: context,
+              ).bodyCategoryContainerBorderRadius,
               image: const DecorationImage(
                 image: AssetImage('assets/image/saticiOl.png'),
                 fit: BoxFit.cover,
@@ -396,30 +430,33 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 RichText(
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                      fontWeight: FontWeight.bold,
+                      color: HomeStyle(context: context).secondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Grup alım için',
                         style: TextStyle(
-                          fontSize:
-                              HomeStyle(context: context).bodyLarge.fontSize,
-                          fontWeight: FontWeight.bold,
+                          color: HomeStyle(
+                            context: context,
+                          ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' tıkla',
+                        style: TextStyle(
                           color: HomeStyle(context: context).secondary,
                         ),
-                        children: [
-                          TextSpan(
-                            text: 'Grup alım için',
-                            style: TextStyle(
-                              color: HomeStyle(context: context)
-                                  .surface, // "Alıcı" kelimesinin istediğiniz rengi
-                            ),
-                          ),
-                          TextSpan(
-                              text: ' tıkla',
-                              style: TextStyle(
-                                color: HomeStyle(context: context).secondary,
-                              )),
-                        ]))
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -429,11 +466,10 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
           child: Container(
             height: height * 0.15,
             decoration: BoxDecoration(
-              boxShadow: [
-                boxShadow(context),
-              ],
-              borderRadius:
-                  HomeStyle(context: context).bodyCategoryContainerBorderRadius,
+              boxShadow: [boxShadow(context)],
+              borderRadius: HomeStyle(
+                context: context,
+              ).bodyCategoryContainerBorderRadius,
               image: const DecorationImage(
                 image: AssetImage('assets/image/saticiOl.png'),
                 fit: BoxFit.cover,
@@ -444,30 +480,33 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 RichText(
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                      fontWeight: FontWeight.bold,
+                      color: HomeStyle(context: context).secondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Tekil alım için',
                         style: TextStyle(
-                          fontSize:
-                              HomeStyle(context: context).bodyLarge.fontSize,
-                          fontWeight: FontWeight.bold,
+                          color: HomeStyle(
+                            context: context,
+                          ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' tıkla',
+                        style: TextStyle(
                           color: HomeStyle(context: context).secondary,
                         ),
-                        children: [
-                          TextSpan(
-                            text: 'Tekil alım için',
-                            style: TextStyle(
-                              color: HomeStyle(context: context)
-                                  .surface, // "Alıcı" kelimesinin istediğiniz rengi
-                            ),
-                          ),
-                          TextSpan(
-                              text: ' tıkla',
-                              style: TextStyle(
-                                color: HomeStyle(context: context).secondary,
-                              )),
-                        ]))
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -483,9 +522,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
         future: ApiService.fetchProductsCampaings(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Row(children: [
-              Expanded(child: buildLoadingBar(context)),
-            ]);
+            return CampaignsShimmer(height: height * 0.3);
           } else if (snapshot.hasError) {
             return Center(child: Text("Hata oluştu: ${snapshot.error}"));
           } else if (snapshot.hasData) {
@@ -521,10 +558,13 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
   Padding _categoriesText(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: customText('Kategoriler', context,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
-          weight: FontWeight.bold,
-          color: HomeStyle(context: context).primary),
+      child: customText(
+        'Kategoriler',
+        context,
+        size: HomeStyle(context: context).bodyLarge.fontSize,
+        weight: FontWeight.bold,
+        color: HomeStyle(context: context).primary,
+      ),
     );
   }
 
@@ -539,93 +579,101 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             flex: 1,
             child: Container(
               decoration: BoxDecoration(
-                boxShadow: [
-                  boxShadow(context),
-                ],
-                borderRadius: HomeStyle(context: context)
-                    .bodyCategoryContainerBorderRadius,
+                boxShadow: [boxShadow(context)],
+                borderRadius: HomeStyle(
+                  context: context,
+                ).bodyCategoryContainerBorderRadius,
                 image: const DecorationImage(
                   image: AssetImage('assets/image/saticiOl.png'),
                   fit: BoxFit.cover,
                 ),
               ),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    RichText(
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                            style: TextStyle(
-                              fontSize: HomeStyle(context: context)
-                                  .headlineSmall
-                                  .fontSize,
-                              fontWeight: FontWeight.bold,
-                              color: HomeStyle(context: context).secondary,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Satıcı',
-                                style: TextStyle(
-                                  color: HomeStyle(context: context)
-                                      .secondary, // "Alıcı" kelimesinin istediğiniz rengi
-                                ),
-                              ),
-                              TextSpan(
-                                  text: ' olarak kayıt ol',
-                                  style: TextStyle(
-                                    color: HomeStyle(context: context).surface,
-                                  )),
-                            ]))
-                  ]),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  RichText(
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: HomeStyle(
+                          context: context,
+                        ).headlineSmall.fontSize,
+                        fontWeight: FontWeight.bold,
+                        color: HomeStyle(context: context).secondary,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Satıcı',
+                          style: TextStyle(
+                            color: HomeStyle(
+                              context: context,
+                            ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' olarak kayıt ol',
+                          style: TextStyle(
+                            color: HomeStyle(context: context).surface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             flex: 1,
             child: Container(
               decoration: BoxDecoration(
-                boxShadow: [
-                  boxShadow(context),
-                ],
-                borderRadius: HomeStyle(context: context)
-                    .bodyCategoryContainerBorderRadius,
+                boxShadow: [boxShadow(context)],
+                borderRadius: HomeStyle(
+                  context: context,
+                ).bodyCategoryContainerBorderRadius,
                 image: const DecorationImage(
                   image: AssetImage('assets/image/aliciOl.png'),
                   fit: BoxFit.cover,
                 ),
               ),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    RichText(
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                            style: TextStyle(
-                              fontSize: HomeStyle(context: context)
-                                  .headlineSmall
-                                  .fontSize,
-                              fontWeight: FontWeight.bold,
-                              color: HomeStyle(context: context).secondary,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Alıcı',
-                                style: TextStyle(
-                                  color: HomeStyle(context: context)
-                                      .secondary, // "Alıcı" kelimesinin istediğiniz rengi
-                                ),
-                              ),
-                              TextSpan(
-                                  text: ' olarak kayıt ol',
-                                  style: TextStyle(
-                                    color: HomeStyle(context: context).surface,
-                                  )),
-                            ]))
-                  ]),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  RichText(
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: HomeStyle(
+                          context: context,
+                        ).headlineSmall.fontSize,
+                        fontWeight: FontWeight.bold,
+                        color: HomeStyle(context: context).secondary,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Alıcı',
+                          style: TextStyle(
+                            color: HomeStyle(
+                              context: context,
+                            ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' olarak kayıt ol',
+                          style: TextStyle(
+                            color: HomeStyle(context: context).surface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -639,22 +687,25 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 5,
       children: [
+        _categoriesText(context),
         GestureDetector(
           onTap: () {
             setState(() {
-              Navigator.pushNamed(context, '/home/category',
-                  arguments: category.kategoriId);
+              Navigator.pushNamed(
+                context,
+                '/home/category',
+                arguments: category.kategoriId,
+              );
             });
           },
           child: Container(
             width: width * 0.20,
             height: height * 0.08,
             decoration: BoxDecoration(
-              boxShadow: [
-                boxShadow(context),
-              ],
-              borderRadius:
-                  HomeStyle(context: context).bodyCategoryContainerBorderRadius,
+              boxShadow: [boxShadow(context)],
+              borderRadius: HomeStyle(
+                context: context,
+              ).bodyCategoryContainerBorderRadius,
               image: DecorationImage(
                 image: category.gorsel.isNotEmpty
                     ? NetworkImage(category.gorsel)
@@ -664,11 +715,14 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             ),
           ),
         ),
-        customText(category.altKategoriAdi.toString(), context,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            color: HomeStyle(context: context).primary,
-            size: HomeStyle(context: context).bodyLarge.fontSize)
+        customText(
+          category.altKategoriAdi.toString(),
+          context,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          color: HomeStyle(context: context).primary,
+          size: HomeStyle(context: context).bodyLarge.fontSize,
+        ),
       ],
     );
   }

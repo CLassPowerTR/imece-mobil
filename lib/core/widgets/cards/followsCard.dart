@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/core/widgets/textButton.dart';
+import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 

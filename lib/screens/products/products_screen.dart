@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 // import 'package:imecehub/core/function/actions.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
-import 'package:imecehub/core/widgets/productsCard.dart';
+import 'package:imecehub/core/widgets/cards/productsCard.dart';
 import 'package:imecehub/main.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
@@ -14,6 +14,8 @@ import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:imecehub/core/widgets/shimmer/products_shimmer.dart';
 // duplicate import removed
 
 part 'widget/products_view_body.dart';
@@ -29,9 +31,6 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: HomeHeaderAppBar(),
-      body: ProductsScreenBodyView(),
-    );
+    return Scaffold(appBar: HomeHeaderAppBar(), body: ProductsScreenBodyView());
   }
 }
