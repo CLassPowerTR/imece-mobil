@@ -122,16 +122,16 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     );
   }
 
-  SizedBox _futureSellersView(double height, double width, themeData) {
-    return SizedBox(
-      height: height * 0.14,
-      child: FutureBuilder<List<Company>>(
-        future: _futureSellers,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return SellersShimmer();
-          } else if (snapshot.hasError) {
-            return container(
+  Widget _futureSellersView(double height, double width, themeData) {
+    return FutureBuilder<List<Company>>(
+      future: _futureSellers,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox(height: height * 0.14, child: SellersShimmer());
+        } else if (snapshot.hasError) {
+          return SizedBox(
+            height: height * 0.14,
+            child: container(
               context,
               color: themeData.surfaceContainer,
               borderRadius: BorderRadius.circular(8),
@@ -143,22 +143,25 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                 context,
                 color: themeData.secondary,
               ),
-            );
-          } else if (snapshot.hasData) {
-            double saticiContainerWidth = width * 0.2;
-            double avatarContainerHeight = 87;
-            List<Company> sellers = snapshot.data!;
+            ),
+          );
+        } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          double saticiContainerWidth = width * 0.2;
+          double avatarContainerHeight = 87;
+          List<Company> sellers = snapshot.data!;
 
-            return _sellerList(
+          return SizedBox(
+            height: height * 0.14,
+            child: _sellerList(
               sellers,
               avatarContainerHeight,
               saticiContainerWidth,
-            );
-          } else {
-            return SizedBox();
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return SizedBox.shrink();
+        }
+      },
     );
   }
 
@@ -222,7 +225,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       children: [
         //_categoriesText(context),
         SizedBox(
-          height: height * 0.14,
+          height: 130,
           child: FutureBuilder<List<Category>>(
             future: _futureCategory,
             builder: (context, snapshot) {
@@ -237,24 +240,38 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                 );
               } else if (snapshot.hasError) {
                 return Text("Hata oluştu: ${snapshot.error}");
+              } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+                return SizedBox.shrink();
               } else if (snapshot.hasData) {
                 List<Category> categories = snapshot.data!;
 
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    //final category = categories[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _categoriesText(context),
+                    Expanded(
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          //final category = categories[index];
 
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: index == categories.length - 1 ? 0 : 8,
-                        ),
-                        child: _categories(categories[index], width, height),
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: index == categories.length - 1 ? 0 : 8,
+                            ),
+                            child: _categories(
+                              categories[index],
+                              width,
+                              height,
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 );
               } else {
                 return Text("Veri bulunamadı");
@@ -515,22 +532,22 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     );
   }
 
-  Container _kampanyalarItems(double width, double height) {
-    return Container(
-      height: height * 0.3,
-      child: FutureBuilder<Campaigns>(
-        future: ApiService.fetchProductsCampaings(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CampaignsShimmer(height: height * 0.3);
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Hata oluştu: ${snapshot.error}"));
-          } else if (snapshot.hasData) {
-            final campaigns = snapshot.data!;
-            if (campaigns.data.isEmpty) {
-              return SizedBox();
-            }
-            return ListView.builder(
+  Widget _kampanyalarItems(double width, double height) {
+    return FutureBuilder<Campaigns>(
+      future: ApiService.fetchProductsCampaings(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox(height: 200, child: CampaignsShimmer(height: 200));
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Hata oluştu: ${snapshot.error}"));
+        } else if (snapshot.hasData) {
+          final campaigns = snapshot.data!;
+          if (campaigns.data.isEmpty) {
+            return SizedBox.shrink();
+          }
+          return SizedBox(
+            height: 200,
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: campaigns.data.length,
               itemBuilder: (context, index) {
@@ -546,12 +563,12 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                   ),
                 );
               },
-            );
-          } else {
-            return SizedBox();
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return SizedBox.shrink();
+        }
+      },
     );
   }
 
@@ -561,6 +578,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       child: customText(
         'Kategoriler',
         context,
+        maxLines: 1,
         size: HomeStyle(context: context).bodyLarge.fontSize,
         weight: FontWeight.bold,
         color: HomeStyle(context: context).primary,
@@ -681,13 +699,12 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     );
   }
 
-  Column _categories(Category category, double width, double height) {
+  Widget _categories(Category category, double width, double height) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 5,
       children: [
-        _categoriesText(context),
         GestureDetector(
           onTap: () {
             setState(() {
@@ -715,13 +732,15 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
             ),
           ),
         ),
-        customText(
-          category.altKategoriAdi.toString(),
-          context,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          color: HomeStyle(context: context).primary,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
+        Expanded(
+          child: customText(
+            category.altKategoriAdi.toString(),
+            context,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            color: HomeStyle(context: context).primary,
+            size: HomeStyle(context: context).bodyMedium.fontSize,
+          ),
         ),
       ],
     );
