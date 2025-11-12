@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:imecehub/core/constants/app_colors.dart';
-import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/variables/url.dart';
-import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/cards/productsCard2.dart';
 import 'package:imecehub/core/widgets/cards/campaings_card.dart';
@@ -26,7 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imecehub/core/widgets/shimmer/categories_shimmer.dart';
 import 'package:imecehub/core/widgets/shimmer/campaigns_shimmer.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 
 import '../../services/api_service.dart';
 
@@ -53,14 +50,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late int _selectedIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedIndex = 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,22 +57,28 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Consumer(
             builder: (context, ref, _) {
+              final user = ref.watch(userProvider);
+              final bool isSeller = user?.rol == 'satici';
+
+              final screens = <Widget>[
+                _HomeViewBody(),
+                Center(child: ProductsScreen()),
+                if (!isSeller) OrderScreen(),
+                ProfileScreen(),
+              ];
+
               final selectedIndex = ref.watch(bottomNavIndexProvider);
-              Widget body;
-              switch (selectedIndex) {
-                case 0:
-                  body = _HomeViewBody();
-                  break;
-                case 1:
-                  body = Center(child: ProductsScreen());
-                  break;
-                case 2:
-                  body = OrderScreen();
-                  break;
-                default:
-                  body = ProfileScreen();
+              final safeIndex = selectedIndex < screens.length
+                  ? selectedIndex
+                  : screens.length - 1;
+
+              if (safeIndex != selectedIndex) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.read(bottomNavIndexProvider.notifier).setIndex(safeIndex);
+                });
               }
-              return body;
+
+              return screens[safeIndex];
             },
           ),
           Positioned(

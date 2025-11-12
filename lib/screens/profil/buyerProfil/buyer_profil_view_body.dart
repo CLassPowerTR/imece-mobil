@@ -32,7 +32,8 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final expandedHeight = height * 0.3;
-    final isCollapsed = _scrollController.hasClients &&
+    final isCollapsed =
+        _scrollController.hasClients &&
         _scrollController.offset > (expandedHeight - kToolbarHeight);
     final titleColor = isCollapsed
         ? HomeStyle(context: context).primary
@@ -48,18 +49,18 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
           floating: false,
           snap: false,
           backgroundColor: Colors.white,
-          title: customText('Hesabım', context,
-              size: HomeStyle(context: context).bodyLarge.fontSize,
-              color: titleColor,
-              weight: FontWeight.w600),
+          title: customText(
+            'Hesabım',
+            context,
+            size: HomeStyle(context: context).bodyLarge.fontSize,
+            color: titleColor,
+            weight: FontWeight.w600,
+          ),
           centerTitle: true,
           elevation: 4,
           shadowColor: Colors.grey[300],
           actions: [
-            IconButton(
-              icon: Icon(Icons.notification_add),
-              onPressed: () {},
-            ),
+            IconButton(icon: Icon(Icons.notification_add), onPressed: () {}),
           ],
           actionsIconTheme: IconThemeData(color: titleColor),
           actionsPadding: EdgeInsets.only(right: 16),
@@ -81,17 +82,18 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 24),
-                _userMenu(
-                  buyerProfil: widget.buyerProfil,
-                ),
+                _userMenu(buyerProfil: widget.buyerProfil),
                 SizedBox(height: 24),
                 Divider(),
                 _logoutButton(
                   onLogout: () {
-                    ref.read(bottomNavIndexProvider.notifier).state = 3;
+                    ref.read(bottomNavIndexProvider.notifier).setIndex(3);
                     Navigator.pushNamedAndRemoveUntil(
-                        context, '/home', (route) => false,
-                        arguments: {'refresh': true});
+                      context,
+                      '/home',
+                      (route) => false,
+                      arguments: {'refresh': true},
+                    );
                   },
                 ),
                 SizedBox(height: height * 0.2),

@@ -23,7 +23,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   void _validatePasswords() {
-// Her iki alan boşsa, kontrolü atla
+    // Her iki alan boşsa, kontrolü atla
     if (newPasswordController.text.isEmpty &&
         confirmPasswordController.text.isEmpty) {
       return;
@@ -51,44 +51,55 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Scaffold(
       appBar: SignInAppBar(context),
       body: SafeArea(
-          child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 25),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 20,
-          children: [
-            headText(context),
-            passwordContainer(width, context,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 20,
+            children: [
+              headText(context),
+              passwordContainer(
+                width,
+                context,
                 hintText: 'Enter new password',
                 containerText: 'New password',
                 textFieldHeight: 50,
                 containerHeight: 80,
                 showSuffixIcon: true,
-                obscureText: showNewPasswordText, onTap: () {
-              setState(() {
-                showNewPasswordText = !showNewPasswordText;
-              });
-            }, textFieldController: newPasswordController),
-            passwordContainer(width, context,
+                obscureText: showNewPasswordText,
+                onTap: () {
+                  setState(() {
+                    showNewPasswordText = !showNewPasswordText;
+                  });
+                },
+                textFieldController: newPasswordController,
+              ),
+              passwordContainer(
+                width,
+                context,
                 hintText: 'Enter new password again',
                 containerText: 'Countinue new password',
                 textFieldHeight: 50,
                 containerHeight: 80,
                 obscureText: showConfirmPasswordText,
                 showSuffixIcon: true,
-                textFieldController: confirmPasswordController, onTap: () {
-              setState(() {
-                showConfirmPasswordText = !showConfirmPasswordText;
-              });
-            }),
-            NextButton(
-              context,
-              isTextsSame,
-              onPressed: isTextsSame ?? false ? () {} : null,
-            ),
-          ],
+                textFieldController: confirmPasswordController,
+                onTap: () {
+                  setState(() {
+                    showConfirmPasswordText = !showConfirmPasswordText;
+                  });
+                },
+              ),
+              NextButton(
+                context,
+                'Şifre Değiştir',
+                isTextsSame,
+                onPressed: isTextsSame ?? false ? () {} : null,
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
 }

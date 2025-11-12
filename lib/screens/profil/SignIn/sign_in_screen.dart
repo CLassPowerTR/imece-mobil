@@ -8,7 +8,7 @@ import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 // import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
-import 'package:imecehub/services/api_service.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
@@ -60,153 +60,160 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
           false, // Klavye açıldığında UI'nın kaymasını engeller
       appBar: SignInAppBar(context),
       body: SafeArea(
-          child: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25),
-            child: Column(
-              spacing: 20,
-              //crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                headText(context),
-                emailAdressContainer(
-                  width,
-                  context,
-                  controller: emailController,
-                  errorText: fieldErrors?['email'] != null
-                      ? (fieldErrors?['email'] is List
-                          ? (fieldErrors?['email'] as List).join(', ')
-                          : fieldErrors?['email'].toString())
-                      : null,
-                ),
-                passwordContainer(width, context,
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25),
+              child: Column(
+                spacing: 20,
+                //crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  headText(context),
+                  emailAdressContainer(
+                    width,
+                    context,
+                    controller: emailController,
+                    errorText: fieldErrors?['email'] != null
+                        ? (fieldErrors?['email'] is List
+                              ? (fieldErrors?['email'] as List).join(', ')
+                              : fieldErrors?['email'].toString())
+                        : null,
+                  ),
+                  passwordContainer(
+                    width,
+                    context,
                     textFieldController: passwordController,
-                    obscureText: showPassword, onTap: () {
-                  setState(() {
-                    showPassword = !showPassword;
-                  });
-                },
+                    obscureText: showPassword,
+                    onTap: () {
+                      setState(() {
+                        showPassword = !showPassword;
+                      });
+                    },
                     showSuffixIcon: true,
                     errorText: fieldErrors?['password'] != null
                         ? (fieldErrors?['password'] is List
-                            ? (fieldErrors?['password'] as List).join(', ')
-                            : fieldErrors?['password'].toString())
-                        : null),
-                checkContract(
-                  width,
-                  context,
-                  isCheckedContract,
-                  (value) {
+                              ? (fieldErrors?['password'] as List).join(', ')
+                              : fieldErrors?['password'].toString())
+                        : null,
+                  ),
+                  checkContract(width, context, isCheckedContract, (value) {
                     setState(() {
                       isCheckedContract = value!;
                     });
-                  },
-                ),
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxHeight: 100, // Maksimum yükseklik belirleyin
-                      ),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+                  }),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxHeight: 100, // Maksimum yükseklik belirleyin
+                        ),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            errorMessage!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                NextButton(
-                  context,
-                  isCheckedContract,
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                      errorMessage = null;
-                      fieldErrors = null;
-                    });
-                    try {
-                      await ApiService.fetchUserLogin(
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                      );
+                  NextButton(
+                    context,
+                    'Giriş Yap',
+                    isCheckedContract,
+                    onPressed: () async {
                       setState(() {
-                        isLoading = false;
+                        isLoading = true;
+                        errorMessage = null;
+                        fieldErrors = null;
                       });
-                      if (mounted) {
-                        showTemporarySnackBar(context, 'Giriş başarılı!',
-                            type: SnackBarType.success);
-
-                        ref.read(bottomNavIndexProvider.notifier).state = 3;
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/home', (route) => false,
-                            arguments: {'refresh': true});
-
-                        //Navigator.pushReplacementNamed(context, '/home');
-                      }
-                    } catch (e) {
-                      final s = e.toString();
-                      if (s.contains('Invalid email or password')) {
+                      try {
+                        await ref
+                            .read(userProvider.notifier)
+                            .login(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
                         setState(() {
                           isLoading = false;
-                          errorMessage = null;
-                          fieldErrors = null;
                         });
-                        showTemporarySnackBar(
-                            context, 'Kullanıcı adı veya şifre hatalı.',
-                            type: SnackBarType.error);
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                          Map<String, dynamic>? parsed;
-                          try {
-                            final start = s.indexOf('{');
-                            final end = s.lastIndexOf('}');
-                            if (start != -1 && end != -1 && end > start) {
-                              parsed = json.decode(s.substring(start, end + 1))
-                                  as Map<String, dynamic>;
-                            }
-                          } catch (_) {
-                            parsed = null;
-                          }
-                          if (parsed != null) {
-                            fieldErrors = parsed;
+                        if (mounted) {
+                          showTemporarySnackBar(
+                            context,
+                            'Giriş başarılı!',
+                            type: SnackBarType.success,
+                          );
+
+                          ref.read(bottomNavIndexProvider.notifier).setIndex(3);
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/home',
+                            (route) => false,
+                            arguments: {'refresh': true},
+                          );
+
+                          //Navigator.pushReplacementNamed(context, '/home');
+                        }
+                      } catch (e) {
+                        final s = e.toString();
+                        if (s.contains('Invalid email or password')) {
+                          setState(() {
+                            isLoading = false;
                             errorMessage = null;
-                          } else {
-                            errorMessage = s;
-                          }
-                        });
+                            fieldErrors = null;
+                          });
+                          showTemporarySnackBar(
+                            context,
+                            'Kullanıcı adı veya şifre hatalı.',
+                            type: SnackBarType.error,
+                          );
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                            Map<String, dynamic>? parsed;
+                            try {
+                              final start = s.indexOf('{');
+                              final end = s.lastIndexOf('}');
+                              if (start != -1 && end != -1 && end > start) {
+                                parsed =
+                                    json.decode(s.substring(start, end + 1))
+                                        as Map<String, dynamic>;
+                              }
+                            } catch (_) {
+                              parsed = null;
+                            }
+                            if (parsed != null) {
+                              fieldErrors = parsed;
+                              errorMessage = null;
+                            } else {
+                              errorMessage = s;
+                            }
+                          });
+                        }
                       }
-                    }
-                  },
-                ),
-                orLine(width, context),
-                signInWithGoogle(context, width),
-                //SizedBox(height: 5),
-                signUpText(
-                  context,
-                  () {
+                    },
+                  ),
+                  orLine(width, context),
+                  signInWithGoogle(context, width),
+                  //SizedBox(height: 5),
+                  signUpText(context, () {
                     setState(() {
                       Navigator.pushNamed(context, '/profil/signUp');
                     });
-                  },
-                ),
-              ],
-            ),
-          ),
-          if (isLoading)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-                child: Center(
-                  child: buildLoadingBar(context),
-                ),
+                  }),
+                ],
               ),
             ),
-        ],
-      )),
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
+                  child: Center(child: buildLoadingBar(context)),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
-import 'package:imecehub/services/api_service.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 
 Widget settingsIconButton(BuildContext context) {
   return PopupMenuButton<String>(
@@ -26,8 +27,9 @@ Widget settingsIconButton(BuildContext context) {
         );
         if (confirm != true) return;
 
+        final container = ProviderScope.containerOf(context, listen: false);
         try {
-          final result = await ApiService.fetchUserLogout();
+          final result = await container.read(userProvider.notifier).logout();
           showTemporarySnackBar(context, result);
         } catch (e) {
           showTemporarySnackBar(context, e.toString());

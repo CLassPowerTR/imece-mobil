@@ -15,6 +15,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
+import 'package:http/http.dart' as http;
 
 part 'widget/add_product_view_body.dart';
 part 'widget/add_product_extensions.dart';

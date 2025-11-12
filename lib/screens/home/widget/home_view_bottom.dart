@@ -1,7 +1,7 @@
 part of '../home_screen.dart';
 
 class _HomeBottomNavigationBarTest extends ConsumerStatefulWidget {
-  const _HomeBottomNavigationBarTest({super.key});
+  const _HomeBottomNavigationBarTest();
 
   @override
   ConsumerState<_HomeBottomNavigationBarTest> createState() =>
@@ -10,16 +10,30 @@ class _HomeBottomNavigationBarTest extends ConsumerStatefulWidget {
 
 class _HomeBottomNavigationBarTestState
     extends ConsumerState<_HomeBottomNavigationBarTest> {
-  int selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedIndex = 0;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final bool isSeller = user?.rol == 'satici';
+
+    final itemsData = <Map<String, String>>[
+      {'label': 'Anasayfa', 'iconPath': 'assets/vectors/homePage.svg'},
+      {'label': 'Ürünler', 'iconPath': 'assets/vectors/urunler.svg'},
+      if (!isSeller)
+        {'label': 'Sepetim', 'iconPath': 'assets/vectors/sepet.svg'},
+      {'label': 'Profilim', 'iconPath': 'assets/vectors/profil.svg'},
+    ];
+
+    final selectedIndex = ref.watch(bottomNavIndexProvider);
+    final safeIndex = selectedIndex < itemsData.length
+        ? selectedIndex
+        : itemsData.length - 1;
+
+    if (safeIndex != selectedIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(bottomNavIndexProvider.notifier).setIndex(safeIndex);
+      });
+    }
+
     return Padding(
       padding: HomeStyle(context: context).bottomNavigationBarPadding,
       child: ClipRRect(
@@ -36,40 +50,19 @@ class _HomeBottomNavigationBarTestState
           unselectedLabelStyle: TextStyle(
             color: HomeStyle(context: context).primary,
           ),
-          currentIndex: ref.watch(bottomNavIndexProvider),
+          currentIndex: safeIndex,
           items: [
-            _buildBottomNavigationBarItem(
-              context,
-              'Anasayfa',
-              'assets/vectors/homePage.svg',
-              0,
-              selectedIndex,
-            ),
-            _buildBottomNavigationBarItem(
-              context,
-              'Ürünler',
-              'assets/vectors/urunler.svg',
-              1,
-              selectedIndex,
-            ),
-            _buildBottomNavigationBarItem(
-              context,
-              'Sepetim',
-              'assets/vectors/sepet.svg',
-              2,
-              selectedIndex,
-            ),
-            _buildBottomNavigationBarItem(
-              context,
-              'Profilim',
-              'assets/vectors/profil.svg',
-              3,
-              selectedIndex,
-            ),
+            for (final item in itemsData)
+              _buildBottomNavigationBarItem(
+                context,
+                item['label'] ?? '',
+                item['iconPath'] ?? '',
+              ),
           ],
           type: BottomNavigationBarType.fixed,
-          onTap: (index) =>
-              ref.read(bottomNavIndexProvider.notifier).setIndex(index),
+          onTap: (index) {
+            ref.read(bottomNavIndexProvider.notifier).setIndex(index);
+          },
         ),
       ),
     );
@@ -79,8 +72,6 @@ class _HomeBottomNavigationBarTestState
     BuildContext context,
     String label,
     String iconPath,
-    int index,
-    int selectedIndex,
   ) {
     final primary = HomeStyle(context: context).primary;
     final secondary = HomeStyle(context: context).secondary;

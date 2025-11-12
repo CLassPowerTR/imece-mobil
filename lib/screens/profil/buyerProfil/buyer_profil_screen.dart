@@ -14,7 +14,6 @@ import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/buttons/turnBackTextIcon.dart';
-import 'package:imecehub/models/orders.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/userCoupons.dart';
 import 'package:imecehub/models/users.dart';
@@ -44,23 +43,16 @@ part 'menu/adress/adress_screen.dart';
 part 'menu/cards_screen.dart';
 part 'menu/orders/order_screen_body.dart';
 
-class BuyerProfilScreen extends StatefulWidget {
+class BuyerProfilScreen extends ConsumerWidget {
   final User buyerProfil;
 
   const BuyerProfilScreen({super.key, required this.buyerProfil});
 
   @override
-  State<BuyerProfilScreen> createState() => _BuyerProfilScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(userProvider);
+    final user = currentUser ?? buyerProfil;
 
-class _BuyerProfilScreenState extends State<BuyerProfilScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //appBar: BuyerProfilViewHeader(buyerProfil: widget.buyerProfil),
-      body: BuyerProfilViewBody(
-        buyerProfil: widget.buyerProfil,
-      ),
-    );
+    return Scaffold(body: BuyerProfilViewBody(buyerProfil: user));
   }
 }

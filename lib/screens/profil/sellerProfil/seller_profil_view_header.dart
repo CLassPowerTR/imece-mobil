@@ -58,8 +58,9 @@ Future<bool?> _confirmLogoutDialog(BuildContext context) async {
 }
 
 Future<void> _handleLogout(BuildContext context) async {
+  final container = ProviderScope.containerOf(context, listen: false);
   try {
-    final result = await ApiService.fetchUserLogout();
+    final result = await container.read(userProvider.notifier).logout();
     showTemporarySnackBar(context, result);
   } catch (e) {
     showTemporarySnackBar(context, e.toString());

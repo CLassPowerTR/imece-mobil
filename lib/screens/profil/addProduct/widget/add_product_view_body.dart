@@ -34,6 +34,8 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
   // Sertifika/Lab PDF dosyaları
   String? urunSertifikaPdfName;
   String? urunLabSonucPdfName;
+  PlatformFile? _kapakGorselFile;
+  Uint8List? _kapakGorselPreviewBytes;
 
   // Kategori veri kümesi
   static const List<Map<String, Object>> kategoriler = [
@@ -142,6 +144,26 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
       setState(() {
         isNextButtonThird = false;
       });
+    }
+  }
+
+  Future<void> _pickKapakGorsel() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['png', 'jpg', 'jpeg'],
+        withData: true,
+      );
+      if (!mounted) return;
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
+        setState(() {
+          _kapakGorselFile = file;
+          _kapakGorselPreviewBytes = file.bytes;
+        });
+      }
+    } catch (e) {
+      debugPrint('Kapak görseli seçilirken hata: $e');
     }
   }
 
@@ -324,19 +346,64 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                     case 3:
                       return AddProductPhotosSection(
                         width: width,
+                        previewBytes: _kapakGorselPreviewBytes,
+                        onPickImage: _pickKapakGorsel,
                         onConfirm: () async {
                           try {
                             final int satisTuru = selectedSatisTuru ?? 1;
-                            final int saticiId = widget.profileName.id ?? 0;
+                            final int saticiId = widget.profileName.id;
                             final int kategoriId = _resolveSelectedCategoryId();
+                            if (selectedCategoryName == null ||
+                                selectedCategoryName!.isEmpty) {
+                              showTemporarySnackBar(
+                                context,
+                                'Lütfen bir ana kategori seçin.',
+                                type: SnackBarType.warning,
+                              );
+                              return;
+                            }
+                            if (selectedSubcategoryName == null ||
+                                selectedSubcategoryName!.isEmpty) {
+                              showTemporarySnackBar(
+                                context,
+                                'Lütfen bir alt kategori seçin.',
+                                type: SnackBarType.warning,
+                              );
+                              return;
+                            }
+                            if (_kapakGorselFile == null ||
+                                _kapakGorselFile!.bytes == null) {
+                              showTemporarySnackBar(
+                                context,
+                                'Lütfen kapak görseli ekleyin.',
+                                type: SnackBarType.warning,
+                              );
+                              return;
+                            }
+                            http.MultipartFile? kapakGorselMultipart;
+                            if (_kapakGorselFile != null &&
+                                _kapakGorselFile!.bytes != null) {
+                              kapakGorselMultipart =
+                                  http.MultipartFile.fromBytes(
+                                    'kapak_gorsel',
+                                    _kapakGorselFile!.bytes!,
+                                    filename: _kapakGorselFile!.name,
+                                  );
+                            }
 
                             final Map<String, dynamic> productPayload = {
+                              'satici_id': saticiId,
                               'urun_adi': _controllerUrunAdi.text.trim(),
-                              'aciklama': _controllerUrunAciklama.text.trim(),
-                              'urun_uretim_tarihi': DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(DateTime.now()),
-                              'imece_onayli': false,
+                              'urun_aciklama': _controllerUrunAciklama.text
+                                  .trim(),
+                              'ana_kategori': selectedCategoryName ?? '',
+                              'alt_kategori': selectedSubcategoryName ?? '',
+                              'stok_miktari':
+                                  int.tryParse(
+                                    _controllerUrunMiktari.text.trim(),
+                                  ) ??
+                                  0,
+                              'satis_turu': satisTuru,
                               'urun_perakende_fiyati':
                                   _controllerUrunFiyati.text.trim().isEmpty
                                   ? '0'
@@ -345,21 +412,22 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                                   _controllerMinFiyati.text.trim().isEmpty
                                   ? '0'
                                   : _controllerMinFiyati.text.trim(),
-                              'stok_durumu':
-                                  int.tryParse(
-                                    _controllerUrunMiktari.text.trim(),
-                                  ) ??
-                                  0,
-                              'degerlendirme_puani': '4',
-                              'lab_sonuc_pdf': urunLabSonucPdfName ?? 'string',
                               'urun_sertifika_pdf':
-                                  urunSertifikaPdfName ?? 'string',
-                              'kapak_gorseli': 'string',
-                              'urun_gorunurluluk': true,
-                              'satis_turu': satisTuru,
-                              'satici': saticiId,
-                              'kategori': kategoriId,
+                                  urunSertifikaPdfName ?? null,
+                              'lab_sonuc_pdf': urunLabSonucPdfName ?? null,
+                              'kategori_id': kategoriId,
+                              //'urun_uretim_tarihi': DateFormat(
+                              //  'yyyy-MM-dd',
+                              //).format(DateTime.now()),
+                              //'imece_onayli': false,
+                              //'degerlendirme_puani': '4',
+                              //'urun_gorunurluluk': true,
+                              //'kategori': kategoriId,
                             };
+                            if (kapakGorselMultipart != null) {
+                              productPayload['kapak_gorsel'] =
+                                  kapakGorselMultipart;
+                            }
 
                             await ApiService.postSellerAddProduct(
                               productPayload,
@@ -711,10 +779,14 @@ class AddProductFeaturesSection extends StatelessWidget {
 
 class AddProductPhotosSection extends StatelessWidget {
   final double width;
+  final Uint8List? previewBytes;
+  final VoidCallback onPickImage;
   final VoidCallback onConfirm;
   const AddProductPhotosSection({
     super.key,
     required this.width,
+    required this.previewBytes,
+    required this.onPickImage,
     required this.onConfirm,
   });
 
@@ -728,7 +800,11 @@ class AddProductPhotosSection extends StatelessWidget {
       children: [
         AddProductHeadlineText(text: 'Ürün Görseli Yükleyin'),
         SizedBox(height: 15),
-        _PhotoUploadArea(width: width),
+        _PhotoUploadArea(
+          width: width,
+          previewBytes: previewBytes,
+          onPickImage: onPickImage,
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: textButton(
@@ -744,35 +820,18 @@ class AddProductPhotosSection extends StatelessWidget {
   }
 }
 
-class _PhotoUploadArea extends StatefulWidget {
+class _PhotoUploadArea extends StatelessWidget {
   final double width;
-  const _PhotoUploadArea({required this.width});
-
-  @override
-  State<_PhotoUploadArea> createState() => _PhotoUploadAreaState();
-}
-
-class _PhotoUploadAreaState extends State<_PhotoUploadArea> {
-  Uint8List? _previewBytes;
-
-  Future<void> _pickImage() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['png', 'jpg', 'jpeg'],
-        withData: true,
-      );
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          _previewBytes = result.files.single.bytes;
-        });
-      }
-    } catch (_) {}
-  }
+  final Uint8List? previewBytes;
+  final VoidCallback onPickImage;
+  const _PhotoUploadArea({
+    required this.width,
+    required this.previewBytes,
+    required this.onPickImage,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final width = widget.width;
     return container(
       context,
       color: HomeStyle(context: context).surfaceContainer,
@@ -786,7 +845,7 @@ class _PhotoUploadAreaState extends State<_PhotoUploadArea> {
         spacing: 20,
         children: [
           GestureDetector(
-            onTap: _pickImage,
+            onTap: onPickImage,
             child: Container(
               width: width,
               height: width * 0.45,
@@ -800,7 +859,7 @@ class _PhotoUploadAreaState extends State<_PhotoUploadArea> {
                 color: Colors.grey.shade50,
               ),
               alignment: Alignment.center,
-              child: _previewBytes == null
+              child: previewBytes == null
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -815,7 +874,7 @@ class _PhotoUploadAreaState extends State<_PhotoUploadArea> {
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.memory(
-                        _previewBytes!,
+                        previewBytes!,
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.contain,

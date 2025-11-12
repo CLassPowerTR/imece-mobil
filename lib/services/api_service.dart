@@ -31,6 +31,11 @@ class ApiService {
     return _deps.tokenStorage.getAccessToken();
   }
 
+  static Future<String> getRefreshToken() async {
+    // Konsola token yazma (güvenlik) kaldırıldı
+    return _deps.tokenStorage.getRefreshToken();
+  }
+
   /// API'den User verisini çekmek için metot.
   static Future<List<Company>> fetchSellers() async {
     final response = await _deps.httpClient.get(
@@ -250,59 +255,67 @@ class ApiService {
     }
   }
 
-  static Future fetchUserRegister(
+  static Future<void> fetchUserRegister(
     String email,
     String userName,
     String password,
   ) async {
-    final response = await _deps.httpClient.post(
-      Uri.parse(config.userRqRegisterApiUrl),
-      body: json.encode({
-        'email': email,
-        'username': userName,
-        'password': password,
-        'rol': 'alici',
-      }),
-      headers: {
-        'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
-        'Allow': 'Post',
-      },
-    );
-    final contentType = response.headers.entries
-        .firstWhere(
-          (e) => e.key.toLowerCase() == 'content-type',
-          orElse: () => MapEntry('', ''),
-        )
-        .value;
-    final isJson = contentType.contains('application/json');
-    dynamic jsonData;
-    if (isJson) {
-      jsonData = json.decode(utf8.decode(response.bodyBytes));
-    } else {
-      jsonData = null;
+    http.Response response;
+    try {
+      response = await _deps.httpClient.post(
+        Uri.parse(config.userRqRegisterApiUrl),
+        body: json.encode({
+          'email': email,
+          'username': userName,
+          'password': password,
+          'rol': 'alici',
+        }),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+          'Allow': 'Post',
+        },
+      );
+    } catch (e) {
+      debugPrint('fetchUserRegister isteği başarısız: $e');
+      rethrow;
     }
-    if (response.statusCode == 200 && jsonData != null) {
-      // Tokenları kaydet
-      if (jsonData['tokens'] != null) {
-        final accessToken = jsonData['tokens']['access'] ?? '';
-        final refreshToken = jsonData['tokens']['refresh'] ?? '';
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        debugPrint('fetchUserRegister JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (jsonData?['tokens'] is Map) {
+        final tokens = jsonData!['tokens'] as Map;
+        final accessToken = tokens['access']?.toString() ?? '';
+        final refreshToken = tokens['refresh']?.toString() ?? '';
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accesToken', accessToken);
         await prefs.setString('refreshToken', refreshToken);
       }
-    } else {
-      // Sunucu JSON dönerse map olarak ilet; değilse metni döndür
-      if (jsonData is Map<String, dynamic>) {
-        // Beklenen örnek: { email: [..], password: [..], username: [..] }
-        throw Exception(json.encode(jsonData));
-      } else {
-        final errorMessage = jsonData != null
-            ? (jsonData['errors'] ?? 'Kullanıcı kaydı başarısız.')
-            : response.body;
-        throw Exception('$errorMessage');
-      }
+      return;
     }
+
+    if (jsonData != null) {
+      if (jsonData['errors'] != null) {
+        throw Exception(json.encode(jsonData['errors']));
+      }
+      throw Exception(json.encode(jsonData));
+    }
+
+    throw Exception(
+      bodyText.isNotEmpty ? bodyText : 'Kullanıcı kaydı başarısız.',
+    );
   }
 
   static Future fetchUserLogin(String email, String password) async {
@@ -354,34 +367,55 @@ class ApiService {
   }
 
   static Future<String> fetchUserLogout() async {
-    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+    http.Response response;
     try {
-      final response = await _deps.httpClient.delete(
+      response = await _deps.httpClient.delete(
         Uri.parse(config.userLogoutApiUrl),
-        body: json.encode({'refresh_token': accessToken}),
+        body: json.encode({'refresh_token': refreshToken}),
         headers: {
           'X-API-Key': config.apiKey,
           'Content-Type': 'application/json',
           'Allow': 'Post',
         },
       );
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
-        final jsonData = json.decode(utf8.decode(response.bodyBytes));
-        if (jsonData is Map && jsonData['status'] == 'success') {
-          return jsonData['message'];
-        } else {
-          throw Exception(
-            'Çıkış başarısız: ${jsonData['message'] ?? 'Bilinmeyen hata'}',
-          );
-        }
-      } else {
-        throw Exception('${response.body}');
-      }
+    } catch (e) {
+      debugPrint('fetchUserLogout isteği başarısız: $e');
+      rethrow;
     } finally {
-      await SharedPreferences.getInstance().then(
-        (prefs) => prefs.remove('accesToken'),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('accesToken');
+      await prefs.remove('refreshToken');
     }
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    Map<String, dynamic>? jsonData;
+
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        debugPrint('fetchUserLogout JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode == 200) {
+      if (jsonData != null) {
+        if (jsonData['status'] == 'success') {
+          return (jsonData['message'] as String?) ?? 'Başarıyla çıkış yapıldı.';
+        }
+        return jsonData['message']?.toString() ?? 'Başarıyla çıkış yapıldı.';
+      }
+      return bodyText.isNotEmpty ? bodyText : 'Başarıyla çıkış yapıldı.';
+    }
+
+    final errorMessage = jsonData != null
+        ? jsonData['message'] ?? jsonData['detail'] ?? jsonData.toString()
+        : (bodyText.isNotEmpty ? bodyText : 'Çıkış işlemi başarısız.');
+    throw Exception(errorMessage);
   }
 
   static Future fetchSepetEkle(int? miktar, int urunId) async {
@@ -1341,21 +1375,88 @@ class ApiService {
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
-    final response = await _deps.httpClient.post(
-      Uri.parse(config.sellerAddProductApiUrl),
-      body: json.encode(productPayload),
+
+    final uri = Uri.parse(config.sellerAddProductApiUrl);
+    final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+      });
+
+    productPayload.forEach((key, value) {
+      if (value == null) return;
+
+      if (value is http.MultipartFile) {
+        request.files.add(value);
+      } else if (value is List<http.MultipartFile>) {
+        request.files.addAll(value);
+      } else if (value is List) {
+        for (final item in value) {
+          if (item == null) continue;
+          request.fields[key] = item.toString();
+        }
+      } else {
+        request.fields[key] = value.toString();
+      }
+    });
+
+    http.StreamedResponse streamedResponse;
+    try {
+      streamedResponse = await _deps.httpClient.send(request);
+    } catch (e) {
+      debugPrint('postSellerAddProduct isteği başarısız: $e');
+      rethrow;
+    }
+
+    final response = await http.Response.fromStream(streamedResponse);
+    final bodyText = utf8.decode(response.bodyBytes);
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        debugPrint('postSellerAddProduct JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'raw': bodyText};
+    }
+
+    final errorMessage =
+        jsonData?['message'] ??
+        jsonData?['detail'] ??
+        jsonData?.toString() ??
+        (bodyText.isNotEmpty ? bodyText : 'Ürün ekleme başarısız.');
+    throw Exception(errorMessage);
+  }
+
+  static Future<Map<String, dynamic>> postUserUpdate(
+    Map<String, dynamic> userPayload,
+  ) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    final response = await _deps.httpClient.put(
+      Uri.parse(config.userUpdateApiUrl),
+      body: json.encode(userPayload),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json',
       },
     );
+
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     } else {
-      print(response.statusCode);
-      print(response.body);
       throw Exception(
-        'Ürün ekleme başarısız. Durum kodu: ${response.statusCode} ${response.body}',
+        'Kullanıcı güncellenirken bir hata oluştu. Durum kodu: ${response.statusCode}',
       );
     }
   }
