@@ -26,7 +26,6 @@ class DropdownBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final secondary = Theme.of(context).colorScheme.secondary;
-    final onSecondary = Theme.of(context).colorScheme.onSecondary;
     return Theme(
       data: Theme.of(context).copyWith(
         canvasColor: Theme.of(context).colorScheme.surface,
@@ -72,11 +71,12 @@ class DropdownBox extends StatelessWidget {
                             horizontal: 8, vertical: 4),
                         child: Text(
                           label,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: secondary,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
                         ),
                       );
@@ -84,6 +84,18 @@ class DropdownBox extends StatelessWidget {
                   ),
                 ))
             .toList(),
+        selectedItemBuilder: (context) => items.map((tip) {
+              final label =
+                  itemLabelBuilder != null ? itemLabelBuilder!(tip) : tip;
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
         onChanged: onChanged,
         icon: Icon(Icons.arrow_drop_down, color: secondary),
         dropdownColor: Theme.of(context).colorScheme.surface,

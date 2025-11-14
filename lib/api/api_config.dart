@@ -24,10 +24,11 @@ class ApiConfig {
   final String categoriesApiUrl = dotenv.env['CATEGORIES_API_URL'] ?? '';
   final String populerProductsApiUrl =
       dotenv.env['POPULER_PRODUCTS_API_URL'] ?? '';
-  final String productsCampaingsApiUrl = dotenv.env['PRODUCTS_CAMPAINGS'] ?? '';
+  final String productsCampaingsApiUrl =
+      dotenv.env['PRODUCTS_CAMPAINGS_API_URL'] ?? '';
   final String companiesApiUrl = dotenv.env['COMPANIES_API_URL'] ?? '';
   final String productsCampaignsStoriesApiUrl =
-      dotenv.env['PRODUCTS_CAMPAIGNS_STORIES_API_URL'] ?? '';
+      dotenv.env['PRODUCTS_CAMPAINGS_API_URL'] ?? '';
   final String productsStoriesApiUrl =
       dotenv.env['PRODUCTS_STORIES_API_URL'] ?? '';
   final String urunYorumApiUrl = dotenv.env['URUN_YORUM_API_URL'] ?? '';
@@ -37,6 +38,8 @@ class ApiConfig {
   final String sepetEkleApiUrl = dotenv.env['SEPET_EKLE_API_URL'] ?? '';
   final String sepetInfoApiUrl = dotenv.env['SEPET_INFO_API_URL'] ?? '';
   final String sellerProfileApiUrl = dotenv.env['SELLER_PROFILE_API_URL'] ?? '';
+  final String sellerProfileUpdateApiUrl =
+      dotenv.env['SELLER_UPDATE_ME_API_URL'] ?? '';
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
   final String paymentSiparisApiUrl =
       dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';

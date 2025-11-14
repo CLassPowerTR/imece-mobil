@@ -16,6 +16,7 @@ import 'package:imecehub/screens/profil/messaging/private/messaging_private_scre
 import 'package:imecehub/screens/profil/buyerProfil/menu/orders/order_detail_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
+
 import 'package:imecehub/screens/profil/wallet/wallet_screen.dart';
 import 'package:imecehub/screens/profil/wallet/widget/past_payments_more_view.dart';
 import 'package:imecehub/screens/shoppingCart/addCreditCart/add_credit_cart.dart';
@@ -45,22 +46,28 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/changePassword': (context) => ChangePasswordScreen(),
   '/profil/sellerProfile': (context) {
     final args = ModalRoute.of(context)!.settings.arguments as List;
-    return SellerProfilScreen(
-      sellerProfil: args[0],
-      myProfile: args[1],
-    );
+    return SellerProfilScreen(sellerProfil: args[0], myProfile: args[1]);
   },
   '/profil/messaging': (context) => MessageBox(),
   '/profil/addProduct': (context) {
     final user = ModalRoute.of(context)!.settings.arguments as User;
     return AddProductScreen(user: user);
   },
-  '/profil/addPost': (context) => const AddPost(),
+  '/profil/addPost': (context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    return AddPost(
+      sellerProfil: args['user'] as User,
+      isStory: args['isStory'] as bool,
+    );
+  },
   '/profil/wallet': (context) => WalletScreen(),
   '/profil/wallet/pastPayments': (context) {
     return PastPaymentsMoreView(
-        pastPayments: ModalRoute.of(context)!.settings.arguments
-            as List<Map<String, dynamic>>);
+      pastPayments:
+          ModalRoute.of(context)!.settings.arguments
+              as List<Map<String, dynamic>>,
+    );
   },
   '/profil/favorite': (context) => FavoriteScreen(),
   '/profil/cards': (context) => CardsScreen(),
@@ -77,6 +84,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/myProfile': (context) => const MyProfileScreen(),
   '/profil/myProfile/edit': (context) => const MyProfileEditScreen(),
   '/profil/settings': (context) => const SettingsScreen(),
+  '/profil/settings/seller': (context) => const SellerProfileSettingsScreen(),
   '/profil/adress': (context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
@@ -100,8 +108,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   },
   '/home/category': (context) {
     return CategoriesScreen(
-        categoryId: ModalRoute.of(context)!.settings.arguments as int);
+      categoryId: ModalRoute.of(context)!.settings.arguments as int,
+    );
   },
   '/messaging/private': (context) => MessagingPrivateScreen(
-      item: ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>),
+    item: ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>,
+  ),
 };

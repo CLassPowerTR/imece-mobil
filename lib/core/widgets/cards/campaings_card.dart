@@ -3,6 +3,7 @@ import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/core/widgets/text.dart';
@@ -12,27 +13,33 @@ class CampaingsCard extends StatelessWidget {
   final Campaign item;
   final double width;
   final double height;
-  const CampaingsCard(
-      {super.key,
-      required this.item,
-      required this.width,
-      required this.height});
+  const CampaingsCard({
+    super.key,
+    required this.item,
+    required this.width,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
     final double containerWidth = width * 0.95;
     final String title = item.title;
+    final String banner = '${ApiConfig().baseUrl}${item.banner}';
 
     return Container(
       width: containerWidth,
       padding: AppPaddings.all16,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('${ApiConfig().baseUrl}${item.banner}'),
+          image: NetworkImage(
+            item.banner.isEmpty ? NotFound.defaultBannerImageUrl : banner,
+          ),
+
           fit: BoxFit.cover,
         ),
-        borderRadius:
-            HomeStyle(context: context).bodyCategoryContainerBorderRadius,
+        borderRadius: HomeStyle(
+          context: context,
+        ).bodyCategoryContainerBorderRadius,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -47,8 +54,8 @@ class CampaingsCard extends StatelessWidget {
                 borderRadius: AppRadius.r24,
                 color: HomeStyle(context: context).primary.withOpacity(0.3),
                 border: BoxBorder.all(
-                    color:
-                        HomeStyle(context: context).onPrimary.withOpacity(0.3)),
+                  color: HomeStyle(context: context).onPrimary.withOpacity(0.3),
+                ),
               ),
               child: customText(
                 "Kampanya",
@@ -88,8 +95,8 @@ class CampaingsCard extends StatelessWidget {
                 borderRadius: AppRadius.r12,
                 color: HomeStyle(context: context).primary.withOpacity(0.7),
                 border: BoxBorder.all(
-                    color:
-                        HomeStyle(context: context).onPrimary.withOpacity(0.7)),
+                  color: HomeStyle(context: context).onPrimary.withOpacity(0.7),
+                ),
               ),
               child: customText(
                 item.campaignType,
@@ -100,35 +107,33 @@ class CampaingsCard extends StatelessWidget {
               ),
             ),
             TextButton.icon(
-                iconAlignment: IconAlignment.end,
-                style: ButtonStyle(
-                  padding:
-                      WidgetStateProperty.all<EdgeInsets>(AppPaddings.all8),
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.red,
-                  ),
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: AppRadius.r18,
-                    ),
-                  ),
+              iconAlignment: IconAlignment.end,
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsets>(AppPaddings.all8),
+                backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(borderRadius: AppRadius.r18),
                 ),
-                icon: Icon(
-                  Icons.arrow_forward,
-                  color: AppColors.onPrimary(context),
-                ),
-                onPressed: () {
-                  showTemporarySnackBar(
-                      context, "${item.id} Kampanya detayına git",
-                      type: SnackBarType.info);
-                },
-                label: customText(
-                  "Detayları Gör",
+              ),
+              icon: Icon(
+                Icons.arrow_forward,
+                color: AppColors.onPrimary(context),
+              ),
+              onPressed: () {
+                showTemporarySnackBar(
                   context,
-                  color: AppColors.onPrimary(context),
-                  size: HomeStyle(context: context).labelSmall.fontSize,
-                  maxLines: 1,
-                ))
+                  "${item.id} Kampanya detayına git",
+                  type: SnackBarType.info,
+                );
+              },
+              label: customText(
+                "Detayları Gör",
+                context,
+                color: AppColors.onPrimary(context),
+                size: HomeStyle(context: context).labelSmall.fontSize,
+                maxLines: 1,
+              ),
+            ),
           ],
         ),
       ),

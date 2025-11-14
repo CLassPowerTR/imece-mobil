@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
+import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart'
+    as shimmer;
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
@@ -24,7 +27,6 @@ class StoryCampaingsCard extends StatefulWidget {
 class _StoryCampaingsCardState extends State<StoryCampaingsCard>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _dialogOpen = false;
 
   @override
   void initState() {
@@ -35,13 +37,12 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
     });
   }
 
-  void _showFullScreenImage(String url) {
-    if (_dialogOpen) return;
-    _dialogOpen = true;
-    showGeneralDialog(
+  Future<void> _showFullScreenImage(String url) async {
+    final navigator = Navigator.of(context);
+    await showGeneralDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      barrierDismissible: true,
       barrierLabel: 'story-image',
       pageBuilder: (context, anim1, anim2) {
         return Stack(
@@ -70,16 +71,15 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
           ],
         );
       },
-    ).then((_) {
-      // Diyalog kapandıktan sonra state'i sıfırla
-      if (mounted) {
-        setState(() {
-          _dialogOpen = false;
-        });
-      } else {
-        _dialogOpen = false;
-      }
-    });
+    ).timeout(
+      const Duration(minutes: 5),
+      onTimeout: () {
+        if (navigator.canPop()) {
+          navigator.pop();
+        }
+        return;
+      },
+    );
   }
 
   @override
@@ -98,11 +98,9 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
         ApiService.fetchStories(),
       ]),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox.shrink();
-        }
         if (snapshot.hasError) {
-          return SizedBox.shrink();
+          debugPrint('${snapshot.error}');
+          return Text(snapshot.error.toString());
         }
         if (snapshot.hasData) {
           final campaignsData = snapshot.data![0];
@@ -200,12 +198,13 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
       padding: AppPaddings.all12,
       scrollDirection: Axis.horizontal,
       itemCount: items.length,
-      separatorBuilder: (_, __) => SizedBox(width: 12),
+      separatorBuilder: (context, _) => SizedBox(width: 12),
       itemBuilder: (context, index) => _storyItem(theme, items[index]),
     );
   }
 
   Widget _storyItem(HomeStyle theme, Story story) {
+    final photoUrl = _buildImageUrl(story.photo);
     return SizedBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -213,8 +212,7 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            onTap: () =>
-                _showFullScreenImage('${ApiConfig().baseUrl}${story.photo}'),
+            onTap: () => _showFullScreenImage(photoUrl),
             child: Container(
               padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
@@ -225,9 +223,7 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
                 ),
               ),
               child: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  '${ApiConfig().baseUrl}${story.photo}',
-                ),
+                backgroundImage: NetworkImage(photoUrl),
                 radius: 36,
               ),
             ),
@@ -244,5 +240,24 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
         ],
       ),
     );
+  }
+
+  String _buildImageUrl(String rawPath) {
+    if (rawPath.isEmpty) {
+      return NotFound.defaultBannerImageUrl;
+    }
+    final uri = Uri.tryParse(rawPath);
+    if (uri != null && uri.hasScheme && uri.host.isNotEmpty) {
+      return rawPath;
+    }
+    final base = ApiConfig().baseUrl;
+    if (base.isEmpty) {
+      return NotFound.defaultBannerImageUrl;
+    }
+    final normalizedBase = base.endsWith('/')
+        ? base.substring(0, base.length - 1)
+        : base;
+    final normalizedPath = rawPath.startsWith('/') ? rawPath : '/$rawPath';
+    return '$normalizedBase$normalizedPath';
   }
 }

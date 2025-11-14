@@ -1435,15 +1435,95 @@ class ApiService {
     throw Exception(errorMessage);
   }
 
-  static Future<Map<String, dynamic>> postUserUpdate(
-    Map<String, dynamic> userPayload,
-  ) async {
+  static Future<Map<String, dynamic>> postStories(
+    Map<String, dynamic> payload, {
+    required bool isStories,
+  }) async {
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
       throw Exception('Kullanıcı oturumu kapalı.');
     }
+
+    final uri = Uri.parse(
+      isStories ? config.productsStoriesApiUrl : config.productsCampaingsApiUrl,
+    );
+    final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'X-API-Key': config.apiKey,
+      });
+
+    payload.forEach((key, value) {
+      if (value == null) return;
+
+      if (value is http.MultipartFile) {
+        request.files.add(value);
+      } else if (value is List<http.MultipartFile>) {
+        request.files.addAll(value);
+      } else if (value is List) {
+        for (final item in value) {
+          if (item == null) continue;
+          request.fields[key] = item.toString();
+        }
+      } else {
+        request.fields[key] = value.toString();
+      }
+    });
+
+    http.StreamedResponse streamedResponse;
+    try {
+      streamedResponse = await _deps.httpClient.send(request);
+    } catch (e) {
+      debugPrint('postStories isteği başarısız: $e');
+      rethrow;
+    }
+
+    final response = await http.Response.fromStream(streamedResponse);
+    final bodyText = utf8.decode(response.bodyBytes);
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (e) {
+        debugPrint('postStories JSON parse hatası: $e');
+      }
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'raw': bodyText};
+    }
+
+    final errorMessage =
+        jsonData?['message'] ??
+        jsonData?['detail'] ??
+        jsonData?.toString() ??
+        (bodyText.isNotEmpty ? bodyText : 'Hikaye gönderimi başarısız.');
+    debugPrint(
+      'postStories hata: status=${response.statusCode}, body=$bodyText, error=$errorMessage',
+    );
+    throw Exception(errorMessage);
+  }
+
+  static Future<Map<String, dynamic>> putUserUpdate(
+    Map<String, dynamic> userPayload, {
+    bool? isSeller,
+  }) async {
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+    Uri? uri;
+    if (isSeller == true) {
+      uri = Uri.parse(config.sellerProfileUpdateApiUrl);
+    } else {
+      uri = Uri.parse(config.userUpdateApiUrl);
+    }
     final response = await _deps.httpClient.put(
-      Uri.parse(config.userUpdateApiUrl),
+      uri,
       body: json.encode(userPayload),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -1455,6 +1535,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     } else {
+      print('Kullanıcı güncellenirken bir hata oluştu: ${response.body}');
       throw Exception(
         'Kullanıcı güncellenirken bir hata oluştu. Durum kodu: ${response.statusCode}',
       );

@@ -22,14 +22,14 @@ class UserNotifier extends Notifier<User?> {
         onResumed: () async {
           if (state != null) {
             try {
-              await ApiService.postUserUpdate({'is_online': true});
+              await ApiService.putUserUpdate({'is_online': true});
             } catch (_) {}
           }
         },
         onPausedOrInactive: () async {
           if (state != null) {
             try {
-              await ApiService.postUserUpdate({'is_online': false});
+              await ApiService.putUserUpdate({'is_online': false});
             } catch (_) {}
           }
         },
@@ -61,14 +61,14 @@ class UserNotifier extends Notifier<User?> {
     await fetchUserMe();
     if (state != null) {
       try {
-        await ApiService.postUserUpdate({'is_online': true});
+        await ApiService.putUserUpdate({'is_online': true});
       } catch (_) {}
     }
   }
 
   Future<void> login({required String email, required String password}) async {
     await ApiService.fetchUserLogin(email, password);
-    await ApiService.postUserUpdate({'is_online': true});
+    await ApiService.putUserUpdate({'is_online': true});
     await fetchUserMe();
   }
 
@@ -78,12 +78,15 @@ class UserNotifier extends Notifier<User?> {
     required String password,
   }) async {
     await ApiService.fetchUserRegister(email, username, password);
-    await ApiService.postUserUpdate({'is_online': true});
+    await ApiService.putUserUpdate({'is_online': true});
     await fetchUserMe();
   }
 
-  Future<void> updateUser(Map<String, dynamic> payload) async {
-    await ApiService.postUserUpdate(payload);
+  Future<void> updateUser(
+    Map<String, dynamic> payload, {
+    bool? isSeller,
+  }) async {
+    await ApiService.putUserUpdate(payload, isSeller: isSeller);
     await fetchUserMe();
   }
 
@@ -99,7 +102,7 @@ class UserNotifier extends Notifier<User?> {
   Future<String> logout() async {
     String message = 'Başarıyla çıkış yapıldı.';
     try {
-      await ApiService.postUserUpdate({'is_online': false});
+      await ApiService.putUserUpdate({'is_online': false});
       final result = await ApiService.fetchUserLogout();
       if (result.isNotEmpty) {
         message = result;

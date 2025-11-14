@@ -10,15 +10,7 @@ AppBar _AddPostViewAppBar(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
-          children: [
-            customText('Gönderi Oluştur', context,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
-                weight: FontWeight.bold),
-            IconButton(
-              icon: Icon(Icons.close_outlined, size: 30),
-              onPressed: () => Navigator.pop(context),
-            )
-          ],
+          children: [TurnBackTextIcon()],
         ),
       ),
     ),
