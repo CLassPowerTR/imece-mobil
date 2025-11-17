@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/buttons/iconButtons.dart';
@@ -21,9 +20,7 @@ import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/models/urunYorum.dart';
-import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/variables/mainCategoryNames.dart';
 
@@ -90,44 +87,52 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
       right: true,
       child: Scaffold(
         appBar: _productsDetailAppBar(context),
-        body: ProductsDetailViewBody(
-            product: widget.product, isLoggedIn: isLoggedIn),
+        body: ProductsDetailViewBody(product: widget.product),
         bottomNavigationBar: ProductsDetailViewBottom(
-            sepeteEkle: () async {
-              if (sepetUrunIdList.contains(widget.product.urunId)) {
-                ref.read(bottomNavIndexProvider.notifier).state = 2;
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/home', (route) => false,
-                    arguments: {'refresh': true});
-              } else {
-                if (isLoggedIn) {
-                  if (widget.product.stokDurumu! <= 0) {
-                    showTemporarySnackBar(
-                        context, 'Bu ürün stokta bulunmamaktadır',
-                        type: SnackBarType.info);
-                  } else {
-                    try {
-                      await ApiService.fetchSepetEkle(
-                          1, widget.product.urunId ?? 0);
-                      showTemporarySnackBar(context, 'Sepete eklendi');
-                    } catch (e) {
-                      showTemporarySnackBar(
-                          context, 'Sepete eklenirken bir hata oluştu: $e');
-                    } finally {
-                      setState(() async {
-                        await _checkGetSepet();
-                        await _checkLogin();
-                      });
-                    }
-                  }
+          sepeteEkle: () async {
+            if (sepetUrunIdList.contains(widget.product.urunId)) {
+              ref.read(bottomNavIndexProvider.notifier).setIndex(2);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+                arguments: {'refresh': true},
+              );
+            } else {
+              if (isLoggedIn) {
+                if (widget.product.stokDurumu! <= 0) {
+                  showTemporarySnackBar(
+                    context,
+                    'Bu ürün stokta bulunmamaktadır',
+                    type: SnackBarType.info,
+                  );
                 } else {
-                  showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
+                  try {
+                    await ApiService.fetchSepetEkle(
+                      1,
+                      widget.product.urunId ?? 0,
+                    );
+                    showTemporarySnackBar(context, 'Sepete eklendi');
+                  } catch (e) {
+                    showTemporarySnackBar(
+                      context,
+                      'Sepete eklenirken bir hata oluştu: $e',
+                    );
+                  } finally {
+                    setState(() async {
+                      await _checkGetSepet();
+                      await _checkLogin();
+                    });
+                  }
                 }
+              } else {
+                showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
               }
-            },
-            product: widget.product,
-            isLoggedIn: isLoggedIn,
-            sepetUrunIdList: sepetUrunIdList),
+            }
+          },
+          product: widget.product,
+          sepetUrunIdList: sepetUrunIdList,
+        ),
       ),
     );
   }

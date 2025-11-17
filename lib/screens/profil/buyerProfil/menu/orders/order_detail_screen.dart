@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
@@ -10,15 +11,14 @@ import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/buttons/turnBackTextIcon.dart';
-import 'package:imecehub/services/api_service.dart';
-import 'package:imecehub/models/products.dart';
+import 'package:imecehub/providers/products_provider.dart';
 
-class OrderDetailScreen extends StatelessWidget {
+class OrderDetailScreen extends ConsumerWidget {
   final Map<String, dynamic> item;
   const OrderDetailScreen({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final String siparisId = (item['siparis_id'] ?? item['id'] ?? '-')
         .toString();
     final String siparisTarihi =
@@ -173,7 +173,7 @@ class OrderDetailScreen extends StatelessWidget {
                 itemCount: item['urunler'].length,
                 itemBuilder: (context, index) {
                   final urun = item['urunler'][index];
-                  return _orderProcutsInfoCard(context, urun);
+                  return _orderProcutsInfoCard(context, ref, urun);
                 },
               ),
             ),
@@ -226,7 +226,7 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  Container _orderProcutsInfoCard(BuildContext context, urun) {
+  Container _orderProcutsInfoCard(BuildContext context, WidgetRef ref, urun) {
     return container(
       context,
       padding: AppPaddings.all12,
@@ -288,6 +288,16 @@ class OrderDetailScreen extends StatelessWidget {
                     size: AppTextSizes.bodyLarge(context),
                   ),
                   onPressed: () async {
+                    final rawId = urun['urun_bilgileri']?['urun_id'];
+                    final productId = int.tryParse(rawId?.toString() ?? '');
+                    if (productId == null) {
+                      showTemporarySnackBar(
+                        context,
+                        'Ürün bulunamadı',
+                        type: SnackBarType.info,
+                      );
+                      return;
+                    }
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -300,33 +310,22 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
                     );
                     try {
-                      final String id = urun['urun_bilgileri']['urun_id']
-                          .toString();
-                      final Product product = await ApiService.fetchProduct(
-                        int.parse(id),
+                      final product = await ref.read(
+                        productProvider(productId).future,
                       );
                       Navigator.of(context).pop();
-                      if (product != null) {
-                        Navigator.pushNamed(
-                          context,
-                          '/products/productsDetail',
-                          arguments: product,
-                        );
-                      }
-                      if (product == null) {
-                        showTemporarySnackBar(
-                          context,
-                          'Ürün bulunamadı',
-                          type: SnackBarType.info,
-                        );
-                      }
+                      Navigator.pushNamed(
+                        context,
+                        '/products/productsDetail',
+                        arguments: product,
+                      );
                     } catch (e) {
+                      Navigator.of(context).pop();
                       showTemporarySnackBar(
                         context,
                         'Hata: $e',
                         type: SnackBarType.error,
                       );
-                      Navigator.of(context).pop();
                     }
                   },
                   label: customText(

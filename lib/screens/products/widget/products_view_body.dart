@@ -18,11 +18,6 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     {'name': 'Satıcı', 'icon': Icon(Icons.home_filled)},
     {'name': 'Fiyat', 'icon': Icon(Icons.price_change_outlined)},
   ];
-  String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
-  // Statik cache değişkeni: Tüm örnekler arasında paylaşılır.
-
-  static List<Product>? cachedProducts;
-  late Future<List<Product>> _futureProducts;
   static List<int> sepetUrunIdList = [];
   bool isLoggedIn = false;
   List<int> favoriteProductIds = [];
@@ -32,19 +27,6 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   @override
   void initState() {
     super.initState();
-    // Aşağıdaki kodu initState içine ekleyerek, eğer cachedProducts dolu ise
-    // API çağrısı yapmadan cache'den verileri kullanıyoruz.
-    if (cachedProducts != null && cachedProducts!.isNotEmpty) {
-      // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
-      _futureProducts = Future.value(cachedProducts);
-    } else {
-      // İlk açılışta veya cache boşsa API'den verileri çek
-      _futureProducts = ApiService.fetchProducts(id: widget.categoryId);
-      _futureProducts.then((products) {
-        // Gelen veriyi cache'e atıyoruz.
-        cachedProducts = products;
-      });
-    }
     _checkLogin().then((loggedIn) async {
       if (loggedIn) {
         await ref.read(userProvider.notifier).fetchUserMe();
@@ -120,17 +102,14 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
 
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshProducts() async {
-    // API'den verileri çek ve cache'i güncelle
-    List<Product> freshProducts = await ApiService.fetchProducts(
-      id: widget.categoryId,
-    );
-    await _fetchFavorites();
-    _futureFavorites = _fetchFavorites();
-
+    final repository = ref.read(productsRepositoryProvider);
+    repository.invalidateProducts(categoryId: widget.categoryId);
+    final _ = await ref.refresh(productsProvider(widget.categoryId).future);
+    final favoritesFuture = _fetchFavorites();
     setState(() {
-      cachedProducts = freshProducts;
-      _futureProducts = Future.value(freshProducts);
+      _futureFavorites = favoritesFuture;
     });
+    await favoritesFuture;
   }
 
   @override
@@ -142,6 +121,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    final productsAsync = ref.watch(productsProvider(widget.categoryId));
     return FutureBuilder<void>(
       future: _futureFavorites,
       builder: (context, snapshot) {
@@ -162,7 +142,8 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                     }
                   },
                 ),
-                _futureProductsItems(height, width),
+                _productsSection(productsAsync, height, width),
+                SizedBox(height: height * 0.1),
               ],
             ),
           ),
@@ -171,64 +152,54 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     );
   }
 
-  FutureBuilder<List<Product>> _futureProductsItems(
+  Widget _productsSection(
+    AsyncValue<List<Product>> productsAsync,
     double height,
     double width,
   ) {
-    return FutureBuilder<List<Product>>(
-      future: _futureProducts,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const ProductsGridShimmer(itemCount: 4),
-              const SizedBox(height: 16),
-            ],
-          );
-        } else if (snapshot.hasError) {
-          // Hata durumu
-          return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
-        } else {
-          // Veri başarıyla alındı
-
-          final products = snapshot.data!;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _productCards(height, width, products),
-              SizedBox(height: height * 0.12),
-            ],
-          );
-        }
-      },
+    return productsAsync.when(
+      loading: () => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          ProductsGridShimmer(itemCount: 4),
+          SizedBox(height: 16),
+        ],
+      ),
+      error: (error, _) => Center(child: Text('Bir hata oluştu: $error')),
+      data: (products) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _productCards(height, width, products),
+          SizedBox(height: height * 0.12),
+        ],
+      ),
     );
   }
 
-  GridView _productCards(double height, double width, products) {
+  GridView _productCards(double height, double width, List<Product> products) {
     return GridView.builder(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        mainAxisExtent: height * 0.4,
         crossAxisCount: 2,
-        childAspectRatio: 0.68,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
       ),
       itemCount: products.length,
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        int? urunId = products[index].urunId ?? products[index]['urun_id'];
-        bool isInSepet = urunId != null && sepetUrunIdList.contains(urunId);
-        bool isInFavorites =
+        final product = products[index];
+        final urunId = product.urunId;
+        final bool isInSepet =
+            urunId != null && sepetUrunIdList.contains(urunId);
+        final bool favoriteProduct =
             urunId != null && favoriteProductIds.contains(urunId);
-        bool favoriteProduct = isInFavorites;
         return productsCard(
           sepeteEkle: () async {
             if (isLoggedIn) {
               if (isInSepet) {
-                ref.read(bottomNavIndexProvider.notifier).state = 2;
+                ref.read(bottomNavIndexProvider.notifier).setIndex(2);
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/home',
@@ -236,7 +207,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   arguments: {'refresh': true},
                 );
               } else {
-                if (products[index].stokDurumu <= 0) {
+                if ((product.stokDurumu ?? 0) <= 0) {
                   showTemporarySnackBar(
                     context,
                     'Bu ürün stokta bulunmamaktadır',
@@ -244,10 +215,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   );
                 } else {
                   try {
-                    await ApiService.fetchSepetEkle(
-                      1,
-                      products[index].urunId ?? 0,
-                    );
+                    await ApiService.fetchSepetEkle(1, product.urunId ?? 0);
                     showTemporarySnackBar(
                       context,
                       'Sepete eklendi',
@@ -320,7 +288,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
                   }
                 } else {
                   // Favoriye ekle
-                  final currentUrunId = products[index].urunId;
+                  final currentUrunId = product.urunId;
                   if (currentUrunId == null) {
                     showTemporarySnackBar(
                       context,
@@ -366,7 +334,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
           },
           isSepet: isInSepet,
           isFavorite: favoriteProduct,
-          product: products[index],
+          product: product,
           width: width,
           context: context,
           height: height,

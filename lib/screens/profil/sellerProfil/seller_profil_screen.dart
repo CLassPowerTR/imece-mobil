@@ -1,3 +1,5 @@
+import 'package:imecehub/core/variables/url.dart';
+
 import 'seller_profil_screen_library.dart';
 
 part 'views/seller_profil_view_header.dart';

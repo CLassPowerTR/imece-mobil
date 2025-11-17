@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
@@ -7,24 +8,28 @@ import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart'
     as shimmer;
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/services/api_service.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/stories.dart';
+import 'package:imecehub/providers/stories_campaings_provider.dart';
+import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
-class StoryCampaingsCard extends StatefulWidget {
+class StoryCampaingsCard extends ConsumerStatefulWidget {
   final double width;
   final double height;
+  final int? sellerId;
+  final EdgeInsetsGeometry? margin;
   const StoryCampaingsCard({
     super.key,
     required this.width,
     required this.height,
+    this.sellerId,
+    this.margin,
   });
 
   @override
-  State<StoryCampaingsCard> createState() => _StoryCampaingsCardState();
+  ConsumerState<StoryCampaingsCard> createState() => _StoryCampaingsCardState();
 }
 
-class _StoryCampaingsCardState extends State<StoryCampaingsCard>
+class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -51,7 +56,7 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
             Container(color: Colors.black),
             Center(
               child: InteractiveViewer(
-                child: Image.network(url, fit: BoxFit.contain),
+                child: Image.network(url, fit: BoxFit.cover),
               ),
             ),
             Positioned(
@@ -91,56 +96,50 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
   @override
   Widget build(BuildContext context) {
     final theme = HomeStyle(context: context);
+    final dataAsync = widget.sellerId == null
+        ? ref.watch(storiesCampaignsProvider)
+        : ref.watch(storiesCampaignsBySellerProvider(widget.sellerId!));
 
-    return FutureBuilder<List<Stories>>(
-      future: Future.wait([
-        ApiService.fetchCampaignsStories(),
-        ApiService.fetchStories(),
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          debugPrint('${snapshot.error}');
-          return Text(snapshot.error.toString());
+    return dataAsync.when(
+      loading: () =>
+          shimmer.CampaignsStoriesShimmer(height: widget.height * 0.22),
+      error: (error, _) {
+        debugPrint('$error');
+        return Text(error.toString());
+      },
+      data: (data) {
+        final campaignsItems = data.campaigns;
+        final storiesItems = data.stories;
+
+        if (!data.hasContent) {
+          return SizedBox.shrink();
         }
-        if (snapshot.hasData) {
-          final campaignsData = snapshot.data![0];
-          final storiesData = snapshot.data![1];
-          final campaignsItems = campaignsData.data;
-          final storiesItems = storiesData.data;
 
-          // Her iki liste de boşsa hiçbir şey gösterme
-          if (campaignsItems.isEmpty && storiesItems.isEmpty) {
-            return SizedBox.shrink();
-          }
-
-          // En az birinde veri varsa Container'ı göster
-          return Container(
-            padding: AppPaddings.all4,
-            margin: AppPaddings.h10,
-            decoration: BoxDecoration(
-              color: theme.surface,
-              borderRadius: AppRadius.r12,
-              boxShadow: [boxShadow(context)],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(padding: AppPaddings.all12, child: _buildTabs(theme)),
-                SizedBox(
-                  height: widget.height * 0.22,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildCampaigns(theme, campaignsItems),
-                      _buildStories(theme, storiesItems),
-                    ],
-                  ),
+        return Container(
+          padding: AppPaddings.all4,
+          margin: widget.margin ?? AppPaddings.h10,
+          decoration: BoxDecoration(
+            color: theme.surface,
+            borderRadius: AppRadius.r12,
+            boxShadow: [boxShadow(context)],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(padding: AppPaddings.all12, child: _buildTabs(theme)),
+              SizedBox(
+                height: widget.height * 0.22,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildCampaigns(theme, campaignsItems),
+                    _buildStories(theme, storiesItems),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
-        return SizedBox.shrink();
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -204,8 +203,11 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
   }
 
   Widget _storyItem(HomeStyle theme, Story story) {
-    final photoUrl = _buildImageUrl(story.photo);
+    String imageUrl = story.photo.isEmpty ? story.banner : story.photo;
+    final photoUrl = _buildImageUrl('${ApiConfig().baseUrl}$imageUrl');
     return SizedBox(
+      width: 100,
+      height: 100,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -229,14 +231,25 @@ class _StoryCampaingsCardState extends State<StoryCampaingsCard>
             ),
           ),
           SizedBox(height: 8),
-          customText(
-            story.description,
-            context,
-            color: theme.primary,
-            weight: FontWeight.bold,
-            maxLines: 1,
+          Expanded(
+            child: customText(
+              story.description,
+              context,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              color: theme.primary,
+              weight: FontWeight.bold,
+              maxLines: 2,
+            ),
           ),
-          customText(story.type, context, color: theme.outline, maxLines: 1),
+          Expanded(
+            child: customText(
+              story.type,
+              context,
+              color: theme.outline,
+              maxLines: 1,
+            ),
+          ),
         ],
       ),
     );

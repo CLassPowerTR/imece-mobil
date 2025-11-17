@@ -16,10 +16,10 @@ class SellerProfilBody extends ConsumerStatefulWidget {
 }
 
 class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
-  double coverHeight = 111; // Kapak fotoğrafının yüksekliği
+  double coverHeight = 133; // Kapak fotoğrafının yüksekliği
   double profileSize = 81; // Profil resminin boyutları
   String sonKullanimTarihi = "2025/09/29";
-  String notFoundImageUrl = 'https://www.halifuryasi.com/Upload/null.png';
+
   String hakkinda =
       "Ben, Anadolu'nın bereketli topraklarında doğmuş, ömrünü bu topraklara adamış bir çiftçiyim. Yıllar önce babamın nasihatleriyle başladığım bu yolda, hem tohum ektim hem de hayatın türlü zorluklarıyla mücadele ettim. Tarla sürmekten hasat toplamaya, hayvan yetiştirmekten kışa hazırlık yapmaya kadar her işte emeğimi verdim. Bu topraklar bana hem geçimimi sağladı hem de sabrın, çalışkanlığın ne demek olduğunu öğretti. Şimdi ise, yılların birikimiyle, bilgimi ve tecrübemi sizin damağınızı şenlik ettirecek meyveler için kullanacağım.";
   Map<dynamic, dynamic> profil = {
@@ -71,51 +71,13 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     },
   ];
 
-  // API'den çekilecek satıcı ürünleri
-  List<dynamic> _sellerProducts = [];
-  bool _isLoadingSellerProducts = false;
-  String? _sellerProductsError;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSellerProducts();
-  }
-
-  Future<void> _loadSellerProducts() async {
-    setState(() {
-      _isLoadingSellerProducts = true;
-      _sellerProductsError = null;
-    });
-    try {
-      final list = await ApiService.fetchSellerProducts(widget.sellerProfil.id);
-      setState(() {
-        _sellerProducts = list;
-      });
-    } catch (e) {
-      print(e);
-      setState(() {
-        _sellerProductsError = e.toString();
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingSellerProducts = false;
-        });
-      }
-    }
-  }
-
-  Future<List<int>> _getFollowedSellerIds() async {
-    final followList = await ApiService.fetchUserFollow();
-    // Sadece satıcı id'lerini topla
-    return followList.map<int>((item) => item['satici'] as int).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final themeData = HomeStyle(context: context);
+    final sellerProductsAsync = ref.watch(
+      sellerProductsProvider(widget.sellerProfil.id),
+    );
     return Scaffold(
       backgroundColor: Colors.grey[100]!.withOpacity(0.7),
       body: Stack(
@@ -126,10 +88,10 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               //spacing: 20,
               children: [
                 _profilGiris(width, context),
-                _profilIstatikler(width, themeData),
+                _profilHakkinda(themeData, width, context),
+                _profilIstatikler(width, themeData, sellerProductsAsync),
                 _profilStories(context, width),
                 _profilDetailCards(width, themeData),
-                _profilHakkinda(themeData, width, context),
                 _profilGonderiler(context, themeData, width),
                 _profilLastComment(context, width, themeData),
                 _BenzerUrunlerText(context, themeData),
@@ -137,15 +99,6 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.1),
               ],
             ),
-          ),
-          Builder(
-            builder: (context) {
-              if (widget.myProfile) {
-                return ShortcutCenter(user: widget.sellerProfil);
-              } else {
-                return SizedBox();
-              }
-            },
           ),
         ],
       ),
@@ -167,7 +120,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         'subtitle': 'Mevcut ürünlerinizi yönetin ve güncelleyin',
         'icon': Icons.view_in_ar,
         'iconColor': AppColors.secondary(context),
-        'router': null,
+        'router': '/profil/myProducts',
       },
       {
         'title': 'Siparişlerim',
@@ -301,32 +254,65 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
 
   Builder _profilStories(BuildContext context, double width) => Builder(
     builder: (context) {
-      if (widget.myProfile) {
-        return container(
-          context,
-          color: AppColors.surfaceContainer(context),
-          margin: AppPaddings.h10v10,
-          borderRadius: AppRadius.r16,
-          padding: AppPaddings.all16,
-          width: width,
-          child: Column(
-            spacing: 18,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: customText(
-                  'Hikayeler',
-                  context,
-                  textAlign: TextAlign.left,
-                  style: AppTextStyle.bodyLargeBold(context),
-                ),
-              ),
-              Column(
-                spacing: 6,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextButton.icon(
+      final sellerId = widget.sellerProfil.id;
+      final dataAsync = sellerId != 0
+          ? ref.watch(storiesCampaignsBySellerProvider(sellerId))
+          : ref.watch(storiesCampaignsProvider);
+
+      return dataAsync.when(
+        loading: () => widget.myProfile
+            ? _storiesSectionContent(context, width, showButtons: true)
+            : SizedBox.shrink(),
+        error: (_, __) => widget.myProfile
+            ? _storiesSectionContent(context, width, showButtons: true)
+            : SizedBox.shrink(),
+        data: (data) {
+          final shouldShow = widget.myProfile || data.hasContent;
+          if (!shouldShow) {
+            return SizedBox.shrink();
+          }
+          return _storiesSectionContent(
+            context,
+            width,
+            showButtons: widget.myProfile,
+          );
+        },
+      );
+    },
+  );
+
+  Widget _storiesSectionContent(
+    BuildContext context,
+    double width, {
+    required bool showButtons,
+  }) {
+    return container(
+      context,
+      color: AppColors.surfaceContainer(context),
+      margin: AppPaddings.h10v10,
+      borderRadius: AppRadius.r16,
+      padding: AppPaddings.all16,
+      width: width,
+      child: Column(
+        spacing: 18,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: customText(
+              'Hikayeler',
+              context,
+              textAlign: TextAlign.left,
+              style: AppTextStyle.bodyLargeBold(context),
+            ),
+          ),
+          if (showButtons)
+            Row(
+              spacing: 6,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: TextButton.icon(
                     style: TextButton.styleFrom(
                       backgroundColor: AppColors.blue(context),
                       shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
@@ -354,7 +340,9 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       color: AppColors.onPrimary(context),
                     ),
                   ),
-                  TextButton.icon(
+                ),
+                Expanded(
+                  child: TextButton.icon(
                     style: TextButton.styleFrom(
                       backgroundColor: AppColors.succesful(context),
                       shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
@@ -370,7 +358,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       );
                     },
                     label: customText(
-                      'Kampanya Hikayesi Ekle',
+                      'Kampanya Ekle',
                       context,
                       style: AppTextStyle.bodyMedium(
                         context,
@@ -382,17 +370,21 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       color: AppColors.onPrimary(context),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
+          StoryCampaingsCard(
+            width: width,
+            height: MediaQuery.of(context).size.height,
+            sellerId: widget.sellerProfil.id,
+            margin: EdgeInsets.zero,
           ),
-        );
-      } else {
-        return SizedBox(height: 0, width: 0);
-      }
-    },
-  );
+        ],
+      ),
+    );
+  }
 
+  // ignore: unused_element
   GridView _populerUrunlerCards(double height, double width) {
     return GridView.builder(
       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -638,10 +630,29 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     );
   }
 
-  Builder _profilIstatikler(double width, HomeStyle themeData) {
+  Builder _profilIstatikler(
+    double width,
+    HomeStyle themeData,
+    AsyncValue<List<SellerProducts>> sellerProductsAsync,
+  ) {
     return Builder(
       builder: (context) {
         if (widget.myProfile) {
+          String _buildStatValue(
+            int Function(List<SellerProducts> list) resolver,
+          ) {
+            return sellerProductsAsync.when(
+              data: (list) => '${resolver(list)}',
+              loading: () => '...',
+              error: (_, __) => '—',
+            );
+          }
+
+          final sellerProducts = sellerProductsAsync.asData?.value ?? [];
+          final activeProducts = sellerProducts
+              .where((e) => e.urunGorunurluluk == true)
+              .toList();
+
           return container(
             context,
             margin: AppPaddings.h10v10,
@@ -667,14 +678,10 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       child: _statisticsInfoCard(
                         context,
                         title: 'Toplam Ürün',
-                        value: _isLoadingSellerProducts
-                            ? '...'
-                            : (_sellerProductsError != null
-                                  ? '—'
-                                  : '${_sellerProducts.length}'),
+                        value: _buildStatValue((list) => list.length),
                         icon: Icons.person,
                         backgroundColor: AppColors.succesful(context),
-                        payload: _sellerProducts,
+                        payload: sellerProducts.cast<dynamic>(),
                         onTap: (list) {
                           if (list.isEmpty) return;
                           Navigator.pushNamed(
@@ -693,16 +700,14 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       child: _statisticsInfoCard(
                         context,
                         title: 'Aktif  Ürün',
-                        value: _isLoadingSellerProducts
-                            ? '...'
-                            : (_sellerProductsError != null
-                                  ? '—'
-                                  : '${_sellerProducts.where((e) => e.urunGorunurluluk == true).length}'),
+                        value: _buildStatValue(
+                          (list) => list
+                              .where((e) => e.urunGorunurluluk == true)
+                              .length,
+                        ),
                         icon: Icons.add_task,
                         backgroundColor: AppColors.succesful(context),
-                        payload: _sellerProducts
-                            .where((e) => e.urunGorunurluluk == true)
-                            .toList(),
+                        payload: activeProducts.cast<dynamic>(),
                         onTap: (list) {
                           if (list.isEmpty) return;
                           Navigator.pushNamed(
@@ -889,7 +894,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                 );
                               },
                             )
-                          : FutureBuilder<List<dynamic>>(
+                          : widget.sellerProfil.rol != 'satici'
+                          ? FutureBuilder<List<dynamic>>(
                               future: ApiService.fetchUserFollow(),
                               builder: (context, snapshot) {
                                 final kullanici = ref.read(userProvider);
@@ -968,7 +974,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                   );
                                 }
                               },
-                            ),
+                            )
+                          : SizedBox.shrink(),
                     ),
                     Expanded(
                       flex: 1,
@@ -1176,8 +1183,6 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   }
 
   Positioned _profilFoto(double width) {
-    final String defaultProfileImage =
-        'https://www.halifuryasi.com/Upload/null.png';
     return Positioned(
       top: coverHeight - profileSize / 1.5,
       left: 20, // Ortalamak için
@@ -1190,10 +1195,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               borderRadius: AppRadius.r12,
               border: Border.all(color: Colors.white, width: 2),
               image: DecorationImage(
+                fit: BoxFit.cover,
                 image: NetworkImage(
                   widget.sellerProfil.profilFotograf?.isNotEmpty == true
                       ? widget.sellerProfil.profilFotograf!
-                      : defaultProfileImage,
+                      : NotFound.defaultProfileImageUrl,
                 ),
               ),
             ),
@@ -1224,9 +1230,14 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: NetworkImage(
-            widget.sellerProfil.saticiProfili?.profilBanner == ''
-                ? notFoundImageUrl
+            widget.sellerProfil.saticiProfili?.profilBanner == null
+                ? NotFound.defaultBannerImageUrl
                 : widget.sellerProfil.saticiProfili?.profilBanner ?? '',
+          ),
+          onError: (exception, stackTrace) => Image.network(
+            NotFound.defaultBannerImageUrl,
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
           ),
           fit: BoxFit.cover,
           alignment: Alignment.center,

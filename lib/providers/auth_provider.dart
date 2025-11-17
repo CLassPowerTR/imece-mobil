@@ -54,6 +54,7 @@ class UserNotifier extends Notifier<User?> {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accesToken') ?? '';
+    debugPrint('token: $token');
     if (token.isEmpty) {
       clearUser();
       return;

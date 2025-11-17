@@ -18,6 +18,7 @@ import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/userCoupons.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
+import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';

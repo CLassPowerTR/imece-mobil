@@ -16,6 +16,7 @@ import 'package:imecehub/screens/profil/messaging/private/messaging_private_scre
 import 'package:imecehub/screens/profil/buyerProfil/menu/orders/order_detail_screen.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen.dart';
+import 'package:imecehub/screens/profil/sellerProfil/widgets/my_products_widgets.dart';
 
 import 'package:imecehub/screens/profil/wallet/wallet_screen.dart';
 import 'package:imecehub/screens/profil/wallet/widget/past_payments_more_view.dart';
@@ -60,6 +61,10 @@ final Map<String, WidgetBuilder> appRoutes = {
       sellerProfil: args['user'] as User,
       isStory: args['isStory'] as bool,
     );
+  },
+  '/profil/myProducts': (context) {
+    final seller = ModalRoute.of(context)!.settings.arguments as User;
+    return MyProductsGrid(seller: seller);
   },
   '/profil/wallet': (context) => WalletScreen(),
   '/profil/wallet/pastPayments': (context) {

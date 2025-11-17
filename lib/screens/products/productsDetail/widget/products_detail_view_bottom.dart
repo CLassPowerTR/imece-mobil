@@ -2,16 +2,15 @@ part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBottom extends ConsumerStatefulWidget {
   final Product product;
-  final bool isLoggedIn;
   final List<int> sepetUrunIdList;
   final Future<void> Function()? sepeteEkle;
 
-  const ProductsDetailViewBottom(
-      {super.key,
-      required this.product,
-      required this.isLoggedIn,
-      required this.sepetUrunIdList,
-      required this.sepeteEkle});
+  const ProductsDetailViewBottom({
+    super.key,
+    required this.product,
+    required this.sepetUrunIdList,
+    required this.sepeteEkle,
+  });
 
   @override
   ConsumerState<ProductsDetailViewBottom> createState() =>
@@ -29,6 +28,8 @@ class _ProductsDetailViewBottomState
   @override
   Widget build(BuildContext context) {
     final themeData = HomeStyle(context: context);
+    final currentUser = ref.watch(userProvider);
+    final isSeller = currentUser?.rol == 'satici';
     return container(
       context,
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -39,8 +40,10 @@ class _ProductsDetailViewBottomState
         spacing: 10,
         children: [
           _fiyatStokText(themeData),
-          _sepeteEkleButton(context),
-          _grupAlimButton(context)
+          if (!isSeller) ...[
+            _sepeteEkleButton(context),
+            _grupAlimButton(context),
+          ],
         ],
       ),
     );
@@ -48,60 +51,79 @@ class _ProductsDetailViewBottomState
 
   Expanded _grupAlimButton(BuildContext context) {
     return Expanded(
-        child: textButton(context, 'Grup alım',
-            buttonColor: Colors.orange, elevation: 4));
+      child: textButton(
+        context,
+        'Grup alım',
+        buttonColor: Colors.orange,
+        elevation: 4,
+      ),
+    );
   }
 
   Builder _sepeteEkleButton(BuildContext context) {
     final isInSepet = widget.sepetUrunIdList.contains(widget.product.urunId);
 
-    return Builder(builder: (context) {
-      if (widget.product.stokDurumu! <= 0) {
-        return Expanded(
-          child: container(context,
+    return Builder(
+      builder: (context) {
+        if (widget.product.stokDurumu! <= 0) {
+          return Expanded(
+            child: container(
+              context,
               color: Colors.red,
               borderRadius: AppRadius.r8,
               boxShadowColor: Colors.red,
               alignment: Alignment.center,
-              child: customText('Stokta Yok', context,
-                  color: AppColors.onPrimary(context),
-                  size: HomeStyle(context: context).bodyMedium.fontSize)),
-        );
-      } else {
-        return Expanded(
-          child: textButton(
-            context,
-            isInSepet ? 'Sepete Git' : 'Sepete ekle',
-            elevation: 4,
-            buttonColor: isInSepet ? Colors.orangeAccent : null,
-            onPressed: widget.sepeteEkle,
-          ),
-        );
-      }
-    });
+              child: customText(
+                'Stokta Yok',
+                context,
+                color: AppColors.onPrimary(context),
+                size: HomeStyle(context: context).bodyMedium.fontSize,
+              ),
+            ),
+          );
+        } else {
+          return Expanded(
+            child: textButton(
+              context,
+              isInSepet ? 'Sepete Git' : 'Sepete ekle',
+              elevation: 4,
+              buttonColor: isInSepet ? Colors.orangeAccent : null,
+              onPressed: widget.sepeteEkle,
+            ),
+          );
+        }
+      },
+    );
   }
 
   Expanded _fiyatStokText(HomeStyle themeData) {
     return Expanded(
-        child: RichText(
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            text: TextSpan(
-                style: TextStyle(
-                    fontSize: themeData.bodyLarge.fontSize,
-                    color: themeData.primary,
-                    fontWeight: FontWeight.bold),
-                children: [
-                  TextSpan(text: 'KG:'),
-                  TextSpan(
-                      text: ' ${widget.product.urunParakendeFiyat} TL',
-                      style: TextStyle(color: themeData.secondary)),
-                  TextSpan(text: '\nKalan:'),
-                  TextSpan(
-                      text: ' ${widget.product.stokDurumu} KG',
-                      style: TextStyle(
-                          color: getStokRengi(widget.product.stokDurumu ?? 0))),
-                ])));
+      child: RichText(
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: themeData.bodyLarge.fontSize,
+            color: themeData.primary,
+            fontWeight: FontWeight.bold,
+          ),
+          children: [
+            TextSpan(text: 'KG:'),
+            TextSpan(
+              text: ' ${widget.product.urunParakendeFiyat} TL',
+              style: TextStyle(color: themeData.secondary),
+            ),
+            TextSpan(text: '\nKalan:'),
+            TextSpan(
+              text: ' ${widget.product.stokDurumu} KG',
+              style: TextStyle(
+                color: getStokRengi(widget.product.stokDurumu ?? 0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

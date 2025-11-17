@@ -1,7 +1,7 @@
 part of '../cart_screen.dart';
 
 class _CartViewBody extends ConsumerStatefulWidget {
-  const _CartViewBody({super.key});
+  const _CartViewBody();
 
   @override
   ConsumerState<_CartViewBody> createState() => _CartViewBodyState();
@@ -45,8 +45,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   FocusNode _focusNode = FocusNode();
   String? selectedCard = "Visa Card";
   String? selectedIban = "İban";
-  TextEditingController couponController =
-      TextEditingController(text: '000000');
+  TextEditingController couponController = TextEditingController(
+    text: '000000',
+  );
   late Future<Map<String, dynamic>> _sepetInfoFuture;
 
   @override
@@ -65,15 +66,19 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Future<void> _handleSatinAl(BuildContext context) async {
     if (!_confirm) {
       showTemporarySnackBar(
-          context, 'Lütfen satın alım koşullarını onaylayın.');
+        context,
+        'Lütfen satın alım koşullarını onaylayın.',
+      );
       return;
     }
 
     final double amount =
         double.tryParse('${sepetInfo['toplam_tutar'] ?? '0'}') ?? 0.0;
 
-    final String cardNo =
-        (cardNumber ?? _cardNumberController.text).replaceAll(' ', '');
+    final String cardNo = (cardNumber ?? _cardNumberController.text).replaceAll(
+      ' ',
+      '',
+    );
     final String cvvNo = (cvv ?? _cvvController.text);
     final String holder = (cartUserName ?? _cartUserNameController.text);
     final String expire = (lateDate ?? _lateUseDateController.text);
@@ -129,7 +134,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
           'Address': '',
           'CardName': 'Maximum kartım',
         },
-      }
+      },
     };
 
     showTemporarySnackBar(context, 'Sipariş onaylanıyor...');
@@ -139,15 +144,18 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       final resultCode = response['ResultCode']?.toString();
       if (resultCode == 'Success') {
         final dynamic data = response['Data'];
-        final String? redirectUrl =
-            data is Map<String, dynamic> ? (data['Url']?.toString()) : null;
+        final String? redirectUrl = data is Map<String, dynamic>
+            ? (data['Url']?.toString())
+            : null;
         if (redirectUrl != null && redirectUrl.isNotEmpty) {
           bool shouldLaunch3DS = false;
 
           // 3D Secure akışı doğruysa önce siparişi onayla
           if (_teslimatAdresId == null || _faturaAdresId == null) {
             showTemporarySnackBar(
-                context, 'Adres bilgisi bulunamadı. Lütfen adres ekleyin.');
+              context,
+              'Adres bilgisi bulunamadı. Lütfen adres ekleyin.',
+            );
           } else {
             try {
               final orderResponse = await ApiService.fetchPaymentSiparisOnayla(
@@ -159,30 +167,39 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               if (durum == 'ONAYLANDI') {
                 final siparisId = orderResponse['siparis_id'];
                 final toplamFiyat = orderResponse['toplam_fiyat'];
-                showTemporarySnackBar(context,
-                    'Siparişiniz onaylandı! ID: $siparisId, Toplam: $toplamFiyat TL');
+                showTemporarySnackBar(
+                  context,
+                  'Siparişiniz onaylandı! ID: $siparisId, Toplam: $toplamFiyat TL',
+                );
                 shouldLaunch3DS = true;
                 setState(() {});
               } else if (durum == 'STOK_YETERSIZ') {
                 final List<dynamic> yetersiz =
                     orderResponse['yetersiz_urunler'] ?? [];
                 final String msg = yetersiz
-                    .map((e) => (e is Map && e['urun_adi'] != null)
-                        ? e['urun_adi']
-                        : '')
+                    .map(
+                      (e) => (e is Map && e['urun_adi'] != null)
+                          ? e['urun_adi']
+                          : '',
+                    )
                     .where((e) => e.toString().isNotEmpty)
                     .join(', ');
                 showTemporarySnackBar(context, 'Stok yetersizliği: $msg');
               } else {
-                final String mesaj = (orderResponse['hata']?.toString() ??
+                final String mesaj =
+                    (orderResponse['hata']?.toString() ??
                     orderResponse['mesaj']?.toString() ??
                     'Bilinmeyen hata.');
                 showTemporarySnackBar(
-                    context, 'Sipariş onaylama başarısız: $mesaj');
+                  context,
+                  'Sipariş onaylama başarısız: $mesaj',
+                );
               }
             } catch (e) {
               showTemporarySnackBar(
-                  context, 'Sipariş onaylanırken bir hata oluştu: $e');
+                context,
+                'Sipariş onaylanırken bir hata oluştu: $e',
+              );
             }
           }
 
@@ -192,7 +209,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             final Uri? uri = Uri.tryParse(redirect);
             if (uri == null || !(uri.hasScheme && uri.hasAuthority)) {
               showTemporarySnackBar(
-                  context, 'Geçersiz yönlendirme adresi: $redirect');
+                context,
+                'Geçersiz yönlendirme adresi: $redirect',
+              );
               return;
             }
             bool launched = false;
@@ -219,7 +238,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             }
             if (!launched) {
               showTemporarySnackBar(
-                  context, '3D Secure sayfası açılamadı: $redirect');
+                context,
+                '3D Secure sayfası açılamadı: $redirect',
+              );
             }
           }
         } else {
@@ -232,12 +253,14 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
         final List<dynamic> yetersiz = response['yetersiz_urunler'] ?? [];
         final String msg = yetersiz
             .map(
-                (e) => (e is Map && e['urun_adi'] != null) ? e['urun_adi'] : '')
+              (e) => (e is Map && e['urun_adi'] != null) ? e['urun_adi'] : '',
+            )
             .where((e) => e.toString().isNotEmpty)
             .join(', ');
         showTemporarySnackBar(context, 'Stok yetersizliği: $msg');
       } else {
-        final String mesaj = (response['mesaj']?.toString() ??
+        final String mesaj =
+            (response['mesaj']?.toString() ??
             response['ResultCode']?.toString() ??
             'Bilinmeyen hata.');
         showTemporarySnackBar(context, 'Sipariş onaylama başarısız: $mesaj');
@@ -283,13 +306,14 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return SafeArea(
-      child: _getSepetItems(themeData, width, height),
-    );
+    return SafeArea(child: _getSepetItems(themeData, width, height));
   }
 
   FutureBuilder<Map<String, dynamic>> _getSepetItems(
-      HomeStyle themeData, double width, double height) {
+    HomeStyle themeData,
+    double width,
+    double height,
+  ) {
     return FutureBuilder<Map<String, dynamic>>(
       future: _sepetFuture,
       builder: (context, snapshot) {
@@ -353,111 +377,117 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                           color: themeData.surfaceContainer,
                           borderRadius: BorderRadius.circular(8),
                           margin: AppPaddings.all8,
-                          padding:
-                              EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                          padding: EdgeInsets.only(
+                            left: 12,
+                            right: 12,
+                            bottom: 12,
+                          ),
                           child: Column(
                             spacing: 10,
                             children: [
-                              Text('Sepetinizdeki Ürünler:',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                'Sepetinizdeki Ürünler:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               ...(() {
                                 final sortedList =
                                     List<Map<String, dynamic>>.from(sepetList);
-                                sortedList.sort((a, b) => (a['urun'] as int)
-                                    .compareTo(b['urun'] as int));
+                                sortedList.sort(
+                                  (a, b) => (a['urun'] as int).compareTo(
+                                    b['urun'] as int,
+                                  ),
+                                );
                                 return sortedList.map<Widget>((item) {
-                                  return FutureBuilder<Product>(
-                                    future:
-                                        ApiService.fetchProduct(item['urun']),
-                                    builder: (context, productSnapshot) {
-                                      if (productSnapshot.hasError) {
-                                        return Text(
-                                            'Ürün verisi alınamadı: ${productSnapshot.error}');
-                                      } else if (productSnapshot.hasData) {
-                                        final product = productSnapshot.data!;
-                                        return FutureBuilder<User>(
-                                          future: ApiService.fetchUserId(
-                                              product.satici),
-                                          builder: (context, sellerSnapshot) {
-                                            if (sellerSnapshot.hasError) {
-                                              return Text(
-                                                  'Satıcı verisi alınamadı: ${sellerSnapshot.error}');
-                                            } else if (sellerSnapshot.hasData) {
-                                              final seller =
-                                                  sellerSnapshot.data!;
-                                              return SepetProductsCard(
-                                                sellerProfile: seller,
-                                                product: product,
-                                                item: item,
-                                                context: context,
-                                                removeCart: () {
-                                                  setState(() async {
-                                                    try {
-                                                      await ApiService
-                                                          .fetchSepetEkle(
-                                                              item['miktar'] -
-                                                                  1,
-                                                              product.urunId!);
-                                                    } catch (e) {
-                                                      showTemporarySnackBar(
-                                                          context,
-                                                          e.toString());
-                                                    } finally {
-                                                      setState(() {
-                                                        _fetchSepet();
-                                                      });
-                                                    }
-                                                  });
-                                                },
-                                                updateCart: () {
-                                                  setState(() async {
-                                                    try {
-                                                      await ApiService
-                                                          .fetchSepetEkle(
-                                                              item['miktar'] +
-                                                                  1,
-                                                              product.urunId!);
-                                                    } catch (e) {
-                                                      showTemporarySnackBar(
-                                                          context,
-                                                          e.toString());
-                                                    } finally {
-                                                      setState(() {
-                                                        _fetchSepet();
-                                                      });
-                                                    }
-                                                  });
-                                                },
-                                                deleteFromCart: () {
-                                                  setState(() async {
-                                                    try {
-                                                      await ApiService
-                                                          .fetchSepetEkle(0,
-                                                              product.urunId!);
-                                                    } catch (e) {
-                                                      showTemporarySnackBar(
-                                                          context,
-                                                          e.toString());
-                                                    } finally {
-                                                      setState(() {
-                                                        _fetchSepet();
-                                                      });
-                                                    }
-                                                  });
-                                                },
-                                              );
-                                            } else {
-                                              return Center(
-                                                  child:
-                                                      buildLoadingBar(context));
-                                            }
-                                          },
-                                        );
-                                      } else {
-                                        return Center(
-                                            child: buildLoadingBar(context));
-                                      }
+                                  final productAsync = ref.watch(
+                                    productProvider(item['urun'] as int),
+                                  );
+                                  return productAsync.when(
+                                    loading: () =>
+                                        Center(child: buildLoadingBar(context)),
+                                    error: (error, _) =>
+                                        Text('Ürün verisi alınamadı: $error'),
+                                    data: (product) {
+                                      return FutureBuilder<User>(
+                                        future: ApiService.fetchUserId(
+                                          product.satici,
+                                        ),
+                                        builder: (context, sellerSnapshot) {
+                                          if (sellerSnapshot.hasError) {
+                                            return Text(
+                                              'Satıcı verisi alınamadı: ${sellerSnapshot.error}',
+                                            );
+                                          } else if (sellerSnapshot.hasData) {
+                                            final seller = sellerSnapshot.data!;
+                                            return SepetProductsCard(
+                                              sellerProfile: seller,
+                                              product: product,
+                                              item: item,
+                                              context: context,
+                                              removeCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService.fetchSepetEkle(
+                                                      item['miktar'] - 1,
+                                                      product.urunId!,
+                                                    );
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                      context,
+                                                      e.toString(),
+                                                    );
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                              updateCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService.fetchSepetEkle(
+                                                      item['miktar'] + 1,
+                                                      product.urunId!,
+                                                    );
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                      context,
+                                                      e.toString(),
+                                                    );
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                              deleteFromCart: () {
+                                                setState(() async {
+                                                  try {
+                                                    await ApiService.fetchSepetEkle(
+                                                      0,
+                                                      product.urunId!,
+                                                    );
+                                                  } catch (e) {
+                                                    showTemporarySnackBar(
+                                                      context,
+                                                      e.toString(),
+                                                    );
+                                                  } finally {
+                                                    setState(() {
+                                                      _fetchSepet();
+                                                    });
+                                                  }
+                                                });
+                                              },
+                                            );
+                                          } else {
+                                            return Center(
+                                              child: buildLoadingBar(context),
+                                            );
+                                          }
+                                        },
+                                      );
                                     },
                                   );
                                 }).toList();
@@ -473,7 +503,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                   setState(() {
                                     ref
                                         .read(bottomNavIndexProvider.notifier)
-                                        .state = 1;
+                                        .setIndex(1);
                                     Navigator.pushNamedAndRemoveUntil(
                                       context,
                                       '/home',
@@ -497,9 +527,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                   Positioned.fill(
                     child: Container(
                       color: Colors.black.withOpacity(0.3),
-                      child: Center(
-                        child: buildLoadingBar(context),
-                      ),
+                      child: Center(child: buildLoadingBar(context)),
                     ),
                   ),
               ],
@@ -511,87 +539,104 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   }
 
   Container _satinAlim(BuildContext context, HomeStyle themeData) {
-    return container(context,
-        color: themeData.surfaceContainer,
-        padding: AppPaddings.all12,
-        margin: AppPaddings.all8,
-        borderRadius: AppRadius.r8,
-        child: Column(
-          spacing: 10,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  "Satın alım koşullarını onaylıyorum",
-                  style: TextStyle(fontSize: 15),
-                ),
-                Transform.scale(
-                  scale: 1.2,
-                  child: Checkbox(
-                    side: BorderSide(
-                      color: Color.fromARGB(
-                          255, 34, 255, 34), // Dış çizginin rengi
-                      width: 2, // Dış çizginin kalınlığı
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          4), // Köşeleri yuvarlak yapmak için
-                    ),
-
-                    value: _confirm,
-                    onChanged: (bool? newValue) {
-                      final double? currentOffset = _scrollController.hasClients
-                          ? _scrollController.offset
-                          : null;
-                      setState(() {
-                        _confirm = newValue ?? false;
-                      });
-                      if (currentOffset != null &&
-                          _scrollController.hasClients) {
-                        _scrollController.jumpTo(currentOffset);
-                      }
-                    },
-                    activeColor:
-                        Color.fromARGB(255, 34, 255, 34), // Seçildiğinde rengi
+    return container(
+      context,
+      color: themeData.surfaceContainer,
+      padding: AppPaddings.all12,
+      margin: AppPaddings.all8,
+      borderRadius: AppRadius.r8,
+      child: Column(
+        spacing: 10,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Satın alım koşullarını onaylıyorum",
+                style: TextStyle(fontSize: 15),
+              ),
+              Transform.scale(
+                scale: 1.2,
+                child: Checkbox(
+                  side: BorderSide(
+                    color: Color.fromARGB(
+                      255,
+                      34,
+                      255,
+                      34,
+                    ), // Dış çizginin rengi
+                    width: 2, // Dış çizginin kalınlığı
                   ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      4,
+                    ), // Köşeleri yuvarlak yapmak için
+                  ),
+
+                  value: _confirm,
+                  onChanged: (bool? newValue) {
+                    final double? currentOffset = _scrollController.hasClients
+                        ? _scrollController.offset
+                        : null;
+                    setState(() {
+                      _confirm = newValue ?? false;
+                    });
+                    if (currentOffset != null && _scrollController.hasClients) {
+                      _scrollController.jumpTo(currentOffset);
+                    }
+                  },
+                  activeColor: Color.fromARGB(
+                    255,
+                    34,
+                    255,
+                    34,
+                  ), // Seçildiğinde rengi
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: richText(context,
-                      fontSize: themeData.bodyLarge.fontSize,
-                      textAlign: TextAlign.left,
-                      children: [
-                        TextSpan(
-                            text: 'Total Ücret: ',
-                            style: TextStyle(fontWeight: FontWeight.w900)),
-                        TextSpan(text: '${sepetInfo['toplam_tutar']} TL')
-                      ]),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: richText(
+                  context,
+                  fontSize: themeData.bodyLarge.fontSize,
+                  textAlign: TextAlign.left,
+                  children: [
+                    TextSpan(
+                      text: 'Total Ücret: ',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    TextSpan(text: '${sepetInfo['toplam_tutar']} TL'),
+                  ],
                 ),
-                Expanded(
-                    child: textButton(context, 'Satın Al',
-                        fontSize: themeData.bodyLarge.fontSize,
-                        weight: FontWeight.bold,
-                        buttonColor: _confirm ? null : Colors.grey,
-                        elevation: 6,
-                        shadowColor: _confirm
-                            ? AppColors.secondary(context)
-                            : Colors.grey,
-                        onPressed: _confirm
-                            ? () async {
-                                if (_confirm) {
-                                  await _handleSatinAl(context);
-                                }
-                              }
-                            : null))
-              ],
-            )
-          ],
-        ));
+              ),
+              Expanded(
+                child: textButton(
+                  context,
+                  'Satın Al',
+                  fontSize: themeData.bodyLarge.fontSize,
+                  weight: FontWeight.bold,
+                  buttonColor: _confirm ? null : Colors.grey,
+                  elevation: 6,
+                  shadowColor: _confirm
+                      ? AppColors.secondary(context)
+                      : Colors.grey,
+                  onPressed: _confirm
+                      ? () async {
+                          if (_confirm) {
+                            await _handleSatinAl(context);
+                          }
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Container _odemeSecenegi(BuildContext context, themeData, width) {
@@ -667,9 +712,10 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                   child: Row(
                     children: [
                       Image.network(
-                          'https://image.troyodeme.com//File/troy-acilim.png',
-                          width: 24,
-                          height: 24),
+                        'https://image.troyodeme.com//File/troy-acilim.png',
+                        width: 24,
+                        height: 24,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'Troy Card',
@@ -713,62 +759,63 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                     textAlign: TextAlign.left,
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
-                      hintStyle: TextStyle(
-                        fontSize: 16,
-                      ),
+                      hintStyle: TextStyle(fontSize: 16),
                       border: OutlineInputBorder(),
                       hintText: _focusNode.hasFocus ? '' : '0000000',
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
           SizedBox(height: 8),
-          Builder(builder: (context) {
-            if (cardNumber != null) {
-              return Container(
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      Navigator.pushNamed(
-                        context,
-                        '/cart/addCreditCart',
-                        arguments: {
-                          'cardNumber': cardNumber,
-                          'lateUseDate': lateDate,
-                          'cvv': cvv,
-                          'cartUserName': cartUserName,
-                          'cartName': cartName,
-                        },
-                      );
-                    });
-                  },
-                  child: CreditCardUi(
-                    cardHolderFullName: cartUserName ?? '',
-                    cardNumber: cardNumber ?? '',
-                    validFrom: '00/00',
-                    validThru: lateDate ?? '00/00',
-                    topLeftColor: Colors.blue,
-                    doesSupportNfc: true,
-                    placeNfcIconAtTheEnd: true,
-                    bottomRightColor: Colors.purple,
+          Builder(
+            builder: (context) {
+              if (cardNumber != null) {
+                return Container(
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        Navigator.pushNamed(
+                          context,
+                          '/cart/addCreditCart',
+                          arguments: {
+                            'cardNumber': cardNumber,
+                            'lateUseDate': lateDate,
+                            'cvv': cvv,
+                            'cartUserName': cartUserName,
+                            'cartName': cartName,
+                          },
+                        );
+                      });
+                    },
+                    child: CreditCardUi(
+                      cardHolderFullName: cartUserName ?? '',
+                      cardNumber: cardNumber ?? '',
+                      validFrom: '00/00',
+                      validThru: lateDate ?? '00/00',
+                      topLeftColor: Colors.blue,
+                      doesSupportNfc: true,
+                      placeNfcIconAtTheEnd: true,
+                      bottomRightColor: Colors.purple,
 
-                    cardType: CardType.debit,
-                    //cardProviderLogo: FlutterLogo(),
-                    cardProviderLogoPosition: CardProviderLogoPosition.right,
-                    autoHideBalance: true,
-                    enableFlipping: true, // 👈 Enables the flipping
-                    cvvNumber: cvv ??
-                        '000', // 👈 CVV number to be shown on the back of the card
+                      cardType: CardType.debit,
+                      //cardProviderLogo: FlutterLogo(),
+                      cardProviderLogoPosition: CardProviderLogoPosition.right,
+                      autoHideBalance: true,
+                      enableFlipping: true, // 👈 Enables the flipping
+                      cvvNumber:
+                          cvv ??
+                          '000', // 👈 CVV number to be shown on the back of the card
+                    ),
                   ),
-                ),
-              );
-            } else {
-              return SizedBox();
-            }
-          }),
+                );
+              } else {
+                return SizedBox();
+              }
+            },
+          ),
           textButton(
             context,
             'Kart Ekle',
@@ -792,7 +839,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                 );
               });
             },
-          )
+          ),
         ],
       ),
     );
@@ -807,66 +854,73 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       margin: AppPaddings.all8,
       borderRadius: AppRadius.r8,
       child: FutureBuilder<Map<String, dynamic>>(
-          future: _sepetInfoFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Hata: ${snapshot.error}'));
-            }
-            if (snapshot.hasData) {
-              final data = snapshot.data!;
-              sepetInfo = data;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  richText(context,
-                      fontWeight: FontWeight.w800,
-                      fontSize: themeData.bodyMedium.fontSize,
-                      textAlign: TextAlign.left,
-                      children: [
-                        TextSpan(
-                            text: 'Ara Toplam',
-                            style: TextStyle(
-                              fontSize: themeData.bodyLarge.fontSize,
-                            )),
-                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
-                        TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
-                        TextSpan(
-                            text: '${data['adet']} Adet',
-                            style: TextStyle(fontWeight: FontWeight.w400)),
-                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                        TextSpan(text: 'Ürünlerin Tutarı: '),
-                        TextSpan(
-                            text: '${data['urun_toplam_tutari']} TL',
-                            style: TextStyle(fontWeight: FontWeight.w400)),
-                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                        TextSpan(text: 'Taşıma Ücreti: '),
-                        TextSpan(
-                            text: '${data['tasima_ucreti']} TL',
-                            style: TextStyle(fontWeight: FontWeight.w400)),
-                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                        TextSpan(text: 'Toplam: '),
-                        TextSpan(
-                            text: '${data['toplam_tutar']} TL ',
-                            style: TextStyle(fontWeight: FontWeight.w400)),
-                        TextSpan(
-                            text: '(ek ücretler ve vergiler dahil)',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                color: themeData.primary.withOpacity(0.5))),
-                        TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                        TextSpan(
-                          text: 'Son Teslim Tarihi: ',
-                        ),
-                        TextSpan(
-                            text: '${data['son_teslimat_tarihi']}',
-                            style: TextStyle(fontWeight: FontWeight.w400)),
-                      ]),
-                ],
-              );
-            }
-            return SizedBox();
-          }),
+        future: _sepetInfoFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Hata: ${snapshot.error}'));
+          }
+          if (snapshot.hasData) {
+            final data = snapshot.data!;
+            sepetInfo = data;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                richText(
+                  context,
+                  fontWeight: FontWeight.w800,
+                  fontSize: themeData.bodyMedium.fontSize,
+                  textAlign: TextAlign.left,
+                  children: [
+                    TextSpan(
+                      text: 'Ara Toplam',
+                      style: TextStyle(fontSize: themeData.bodyLarge.fontSize),
+                    ),
+                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
+                    TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
+                    TextSpan(
+                      text: '${data['adet']} Adet',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                    TextSpan(text: 'Ürünlerin Tutarı: '),
+                    TextSpan(
+                      text: '${data['urun_toplam_tutari']} TL',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                    TextSpan(text: 'Taşıma Ücreti: '),
+                    TextSpan(
+                      text: '${data['tasima_ucreti']} TL',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                    TextSpan(text: 'Toplam: '),
+                    TextSpan(
+                      text: '${data['toplam_tutar']} TL ',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                    TextSpan(
+                      text: '(ek ücretler ve vergiler dahil)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: themeData.primary.withOpacity(0.5),
+                      ),
+                    ),
+                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+                    TextSpan(text: 'Son Teslim Tarihi: '),
+                    TextSpan(
+                      text: '${data['son_teslimat_tarihi']}',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }
+          return SizedBox();
+        },
+      ),
     );
   }
 
@@ -880,9 +934,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       weight: FontWeight.bold,
       onPressed: () {
         setState(() {
-          ref.read(bottomNavIndexProvider.notifier).state = 1;
-          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false,
-              arguments: {'refresh': true});
+          ref.read(bottomNavIndexProvider.notifier).setIndex(1);
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+            (route) => false,
+            arguments: {'refresh': true},
+          );
         });
       },
     );
@@ -891,8 +949,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Container _teslimatBilgi(BuildContext context, themeData) {
     String? teslimatTarihiStr =
         sepetInfo['son_teslimat_tarihi'] != null && sepetInfo.isNotEmpty
-            ? sepetInfo['son_teslimat_tarihi']
-            : null;
+        ? sepetInfo['son_teslimat_tarihi']
+        : null;
     String gunFarkiText = '';
     if (teslimatTarihiStr != null && teslimatTarihiStr.isNotEmpty) {
       try {
@@ -928,30 +986,35 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                richText(context,
-                    textAlign: TextAlign.left,
-                    fontSize: themeData.bodyMedium.fontSize,
-                    children: [
-                      TextSpan(
-                          text: 'Tahmini Teslimat Tarihi',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900, fontSize: 16)),
-                      TextSpan(
-                        text:
-                            '\n${sepetInfo['son_teslimat_tarihi'] ?? 'Henüz Belirli Değil'}',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 34, 255, 34),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 17,
-                          decoration: TextDecoration.underline,
-                          decorationStyle: TextDecorationStyle.solid,
-                          decorationColor: Color.fromARGB(255, 34, 255, 34),
-                        ),
+                richText(
+                  context,
+                  textAlign: TextAlign.left,
+                  fontSize: themeData.bodyMedium.fontSize,
+                  children: [
+                    TextSpan(
+                      text: 'Tahmini Teslimat Tarihi',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
                       ),
-                      TextSpan(text: ' $gunFarkiText '),
-                      TextSpan(text: '\nTeslimat zamanı değişebilir!'),
-                      TextSpan(text: '\n${sepetInfo['adet']} Adet')
-                    ]),
+                    ),
+                    TextSpan(
+                      text:
+                          '\n${sepetInfo['son_teslimat_tarihi'] ?? 'Henüz Belirli Değil'}',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 34, 255, 34),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 17,
+                        decoration: TextDecoration.underline,
+                        decorationStyle: TextDecorationStyle.solid,
+                        decorationColor: Color.fromARGB(255, 34, 255, 34),
+                      ),
+                    ),
+                    TextSpan(text: ' $gunFarkiText '),
+                    TextSpan(text: '\nTeslimat zamanı değişebilir!'),
+                    TextSpan(text: '\n${sepetInfo['adet']} Adet'),
+                  ],
+                ),
               ],
             ),
           ),
@@ -995,18 +1058,23 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               elevation: 0,
               "Adres Ekle",
               onPressed: () {
-                Navigator.pushNamed(context, '/profil/adress',
-                    arguments: {'buyerProfil': currentUser});
+                Navigator.pushNamed(
+                  context,
+                  '/profil/adress',
+                  arguments: {'buyerProfil': currentUser},
+                );
               },
             ),
           );
         } else {
           final adresler = snapshot.data!;
-          final hasVarsayilan =
-              adresler.any((adres) => adres.varsayilanAdres == true);
+          final hasVarsayilan = adresler.any(
+            (adres) => adres.varsayilanAdres == true,
+          );
           if (hasVarsayilan) {
-            final varsayilanAdres =
-                adresler.firstWhere((adres) => adres.varsayilanAdres == true);
+            final varsayilanAdres = adresler.firstWhere(
+              (adres) => adres.varsayilanAdres == true,
+            );
             _teslimatAdresId ??= varsayilanAdres.id;
             _faturaAdresId ??= varsayilanAdres.id;
             return AdressCardOrder(
