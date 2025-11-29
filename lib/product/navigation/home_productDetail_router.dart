@@ -45,7 +45,7 @@ class HomeProductDetailRouter extends ConsumerWidget {
           ),
         ),
       ),
-      data: (product) => ProductsDetailScreen(product: product),
+      data: (product) => ProductsDetailScreen(productId: product.urunId ?? 0),
     );
   }
 }

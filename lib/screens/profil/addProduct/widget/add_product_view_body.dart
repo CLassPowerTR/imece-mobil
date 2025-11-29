@@ -1,15 +1,20 @@
 part of '../add_product_screen.dart';
 
-class AddProductViewBody extends StatefulWidget {
+class AddProductViewBody extends ConsumerStatefulWidget {
   final User profileName;
+  final Product? product;
 
-  const AddProductViewBody({super.key, required this.profileName});
+  const AddProductViewBody({
+    super.key,
+    required this.profileName,
+    this.product,
+  });
 
   @override
-  State<AddProductViewBody> createState() => _AddProductViewBodyState();
+  ConsumerState<AddProductViewBody> createState() => _AddProductViewBodyState();
 }
 
-class _AddProductViewBodyState extends State<AddProductViewBody> {
+class _AddProductViewBodyState extends ConsumerState<AddProductViewBody> {
   final TextEditingController _controllerUrunAdi = TextEditingController();
   final TextEditingController _controllerUrunAciklama = TextEditingController();
   final TextEditingController _controllerUrunMiktari = TextEditingController();
@@ -36,6 +41,10 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
   String? urunLabSonucPdfName;
   PlatformFile? _kapakGorselFile;
   Uint8List? _kapakGorselPreviewBytes;
+  // Mevcut ürün görselleri (URL'ler)
+  String? _existingKapakGorselUrl;
+  String? _existingSertifikaPdfUrl;
+  String? _existingLabSonucPdfUrl;
 
   // Kategori veri kümesi
   static const List<Map<String, Object>> kategoriler = [
@@ -88,12 +97,52 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
   @override
   void initState() {
     super.initState();
+    // Eğer product varsa, form alanlarını doldur
+    if (widget.product != null) {
+      _initializeFromProduct(widget.product!);
+    }
     // Her controller'a aynı doğrulama fonksiyonunu ekliyoruz.
     _controllerUrunAdi.addListener(_validateFormFirst);
     _controllerUrunAciklama.addListener(_validateFormFirst);
     _controllerUrunMiktari.addListener(_validateFormSecond);
     _controllerUrunFiyati.addListener(_validateFormSecond);
     _controllerMinFiyati.addListener(_validateFormSecond);
+  }
+
+  void _initializeFromProduct(Product product) {
+    _controllerUrunAdi.text = product.urunAdi ?? '';
+    _controllerUrunAciklama.text = product.aciklama ?? '';
+    _controllerUrunMiktari.text = product.stokDurumu?.toString() ?? '';
+    _controllerUrunFiyati.text = product.urunParakendeFiyat ?? '';
+    _controllerMinFiyati.text = product.urunMinFiyat ?? '';
+
+    // Satış türü
+    if (product.satis_turu != null) {
+      selectedUrunTipiIndex = product.satis_turu == 1 ? 0 : 1;
+    }
+
+    // Kategori - Product'ta kategori ID var, isim bulmamız gerekiyor
+    if (product.kategori != null) {
+      final categoryMap = kategoriler.firstWhere(
+        (cat) => cat['kategori'] == product.kategori,
+        orElse: () => const {'ad': '', 'kategori': 0},
+      );
+      if (categoryMap['ad'] != '') {
+        selectedCategoryName = categoryMap['ad'] as String;
+        // Alt kategori için de bir şey yapabiliriz ama Product'ta yok
+      }
+    }
+
+    // PDF dosya isimleri ve URL'leri
+    urunSertifikaPdfName = product.urunSertifikaPdf;
+    urunLabSonucPdfName = product.labSonucPdf;
+    _existingSertifikaPdfUrl = product.urunSertifikaPdf;
+    _existingLabSonucPdfUrl = product.labSonucPdf;
+
+    // Kapak görseli - URL'den yüklenebilir
+    if (product.kapakGorseli != null && product.kapakGorseli!.isNotEmpty) {
+      _existingKapakGorselUrl = product.kapakGorseli;
+    }
   }
 
   void _validateFormFirst() {
@@ -309,6 +358,8 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                         },
                         urunSertifikaPdfName: urunSertifikaPdfName,
                         urunLabSonucPdfName: urunLabSonucPdfName,
+                        existingSertifikaPdfUrl: _existingSertifikaPdfUrl,
+                        existingLabSonucPdfUrl: _existingLabSonucPdfUrl,
                         onPickSertifika: () async {
                           try {
                             final result = await FilePicker.platform.pickFiles(
@@ -347,7 +398,10 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                       return AddProductPhotosSection(
                         width: width,
                         previewBytes: _kapakGorselPreviewBytes,
+                        existingImageUrl: _existingKapakGorselUrl,
                         onPickImage: _pickKapakGorsel,
+                        isUpdate: widget.product != null,
+                        productId: widget.product?.urunId,
                         onConfirm: () async {
                           try {
                             final int satisTuru = selectedSatisTuru ?? 1;
@@ -371,8 +425,10 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                               );
                               return;
                             }
-                            if (_kapakGorselFile == null ||
-                                _kapakGorselFile!.bytes == null) {
+                            // Görsel seçimi sadece yeni ürün eklerken zorunlu
+                            if (widget.product == null &&
+                                (_kapakGorselFile == null ||
+                                    _kapakGorselFile!.bytes == null)) {
                               showTemporarySnackBar(
                                 context,
                                 'Lütfen kapak görseli ekleyin.',
@@ -392,10 +448,17 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                             }
 
                             final Map<String, dynamic> productPayload = {
-                              'satici_id': saticiId,
+                              // Ürün düzenleme ise 'satici', yeni ürün ekleme ise 'satici_id'
+                              if (widget.product != null)
+                                'satici': saticiId
+                              else
+                                'satici_id': saticiId,
                               'urun_adi': _controllerUrunAdi.text.trim(),
                               'urun_aciklama': _controllerUrunAciklama.text
                                   .trim(),
+                              // Güncelleme için aciklama da ekle (mapping sorununu önlemek için)
+                              if (widget.product != null)
+                                'aciklama': _controllerUrunAciklama.text.trim(),
                               'ana_kategori': selectedCategoryName ?? '',
                               'alt_kategori': selectedSubcategoryName ?? '',
                               'stok_miktari':
@@ -416,6 +479,7 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                                   urunSertifikaPdfName ?? null,
                               'lab_sonuc_pdf': urunLabSonucPdfName ?? null,
                               'kategori_id': kategoriId,
+                              'degerlendirme_puani': "0,0",
                               //'urun_uretim_tarihi': DateFormat(
                               //  'yyyy-MM-dd',
                               //).format(DateTime.now()),
@@ -429,14 +493,91 @@ class _AddProductViewBodyState extends State<AddProductViewBody> {
                                   kapakGorselMultipart;
                             }
 
-                            await ApiService.postSellerAddProduct(
-                              productPayload,
-                            );
-                            showTemporarySnackBar(
-                              context,
-                              'Ürün başarıyla eklendi!',
-                              type: SnackBarType.success,
-                            );
+                            if (widget.product != null &&
+                                widget.product!.urunId != null) {
+                              // Güncelleme işlemi için urun_gorunurluluk ekle
+                              productPayload['urun_gorunurluluk'] = true;
+
+                              // Güncelleme işlemi - Provider kullanarak
+                              final repository = ref.read(
+                                productsRepositoryProvider,
+                              );
+                              await repository.updateProduct(
+                                widget.product!.urunId!,
+                                productPayload,
+                              );
+
+                              // Product provider'ı invalidate et
+                              ref.invalidate(
+                                productProvider(widget.product!.urunId!),
+                              );
+
+                              // Seller products provider'ını invalidate et
+                              if (productPayload.containsKey('satici') &&
+                                  productPayload['satici'] != null) {
+                                final sellerId = productPayload['satici'] is int
+                                    ? productPayload['satici'] as int
+                                    : int.tryParse(
+                                        productPayload['satici'].toString(),
+                                      );
+                                if (sellerId != null) {
+                                  ref.invalidate(
+                                    sellerProductsProvider(sellerId),
+                                  );
+                                }
+                              }
+
+                              // Popüler ürünler provider'ını invalidate et (eğer güncellenen ürün popüler ürünler listesindeyse)
+                              ref.invalidate(populerProductsProvider);
+
+                              // Tüm kategori listelerini invalidate et (güncellenen ürün herhangi bir kategoride olabilir)
+                              // Not: Tüm kategori listelerini invalidate etmek performans açısından maliyetli olabilir,
+                              // ancak veri tutarlılığı için gerekli
+                              repository.invalidateProducts();
+
+                              // Provider'ların yenilenmesini bekle
+                              try {
+                                await Future.wait([
+                                  ref.read(
+                                    productProvider(widget.product!.urunId!)
+                                        .future,
+                                  ),
+                                  if (productPayload.containsKey('satici') &&
+                                      productPayload['satici'] != null)
+                                    ref.read(
+                                      sellerProductsProvider(
+                                        productPayload['satici'] is int
+                                            ? productPayload['satici'] as int
+                                            : int.tryParse(
+                                                productPayload['satici']
+                                                    .toString(),
+                                              ) ??
+                                                0,
+                                      ).future,
+                                    ),
+                                ]);
+                              } catch (e) {
+                                debugPrint(
+                                  'Provider yenilenirken hata: $e',
+                                );
+                              }
+
+                              showTemporarySnackBar(
+                                context,
+                                'Ürün başarıyla güncellendi!',
+                                type: SnackBarType.success,
+                              );
+                            } else {
+                              // Yeni ürün ekleme işlemi
+                              await ApiService.postSellerAddProduct(
+                                productPayload,
+                              );
+                              showTemporarySnackBar(
+                                context,
+                                'Ürün başarıyla eklendi!',
+                                type: SnackBarType.success,
+                              );
+                            }
                             if (mounted) Navigator.pop(context);
                           } catch (e) {
                             showTemporarySnackBar(
@@ -632,6 +773,8 @@ class AddProductFeaturesSection extends StatelessWidget {
   final VoidCallback onNext;
   final String? urunSertifikaPdfName;
   final String? urunLabSonucPdfName;
+  final String? existingSertifikaPdfUrl;
+  final String? existingLabSonucPdfUrl;
   final Future<String?> Function() onPickSertifika;
   final Future<String?> Function() onPickLab;
   final bool isWholesale;
@@ -648,6 +791,8 @@ class AddProductFeaturesSection extends StatelessWidget {
     required this.onNext,
     this.urunSertifikaPdfName,
     this.urunLabSonucPdfName,
+    this.existingSertifikaPdfUrl,
+    this.existingLabSonucPdfUrl,
     required this.onPickSertifika,
     required this.onPickLab,
     required this.isWholesale,
@@ -671,10 +816,26 @@ class AddProductFeaturesSection extends StatelessWidget {
               child: SizedBox(
                 width: width * 0.3,
                 height: width * 0.3,
-                child: Image.network(
-                  fit: BoxFit.cover,
-                  'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
-                ),
+                child:
+                    existingSertifikaPdfUrl != null &&
+                        existingSertifikaPdfUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          existingSertifikaPdfUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.network(
+                              'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      )
+                    : Image.network(
+                        fit: BoxFit.cover,
+                        'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
+                      ),
               ),
             ),
             SizedBox(
@@ -713,10 +874,26 @@ class AddProductFeaturesSection extends StatelessWidget {
               child: SizedBox(
                 width: width * 0.3,
                 height: width * 0.3,
-                child: Image.network(
-                  fit: BoxFit.cover,
-                  'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
-                ),
+                child:
+                    existingLabSonucPdfUrl != null &&
+                        existingLabSonucPdfUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          existingLabSonucPdfUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.network(
+                              'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      )
+                    : Image.network(
+                        fit: BoxFit.cover,
+                        'https://github.com/MuhammedIkbalAKGUNDOGDU/imece-test-website/blob/main/imece/src/assets/images/yuklemeYap.png?raw=true',
+                      ),
               ),
             ),
             SizedBox(
@@ -780,14 +957,20 @@ class AddProductFeaturesSection extends StatelessWidget {
 class AddProductPhotosSection extends StatelessWidget {
   final double width;
   final Uint8List? previewBytes;
+  final String? existingImageUrl;
   final VoidCallback onPickImage;
   final VoidCallback onConfirm;
+  final bool isUpdate;
+  final int? productId;
   const AddProductPhotosSection({
     super.key,
     required this.width,
     required this.previewBytes,
+    this.existingImageUrl,
     required this.onPickImage,
     required this.onConfirm,
+    this.isUpdate = false,
+    this.productId,
   });
 
   @override
@@ -803,13 +986,14 @@ class AddProductPhotosSection extends StatelessWidget {
         _PhotoUploadArea(
           width: width,
           previewBytes: previewBytes,
+          existingImageUrl: existingImageUrl,
           onPickImage: onPickImage,
         ),
         Align(
           alignment: Alignment.bottomCenter,
           child: textButton(
             context,
-            'Onayla',
+            isUpdate ? 'Bilgileri Güncelle' : 'Onayla',
             elevation: 6,
             weight: FontWeight.bold,
             onPressed: onConfirm,
@@ -823,10 +1007,12 @@ class AddProductPhotosSection extends StatelessWidget {
 class _PhotoUploadArea extends StatelessWidget {
   final double width;
   final Uint8List? previewBytes;
+  final String? existingImageUrl;
   final VoidCallback onPickImage;
   const _PhotoUploadArea({
     required this.width,
     required this.previewBytes,
+    this.existingImageUrl,
     required this.onPickImage,
   });
 
@@ -859,8 +1045,44 @@ class _PhotoUploadArea extends StatelessWidget {
                 color: Colors.grey.shade50,
               ),
               alignment: Alignment.center,
-              child: previewBytes == null
-                  ? Column(
+              child: previewBytes != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(
+                        previewBytes!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : existingImageUrl != null && existingImageUrl!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        existingImageUrl!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add,
+                                size: 48,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Görsel Seç / Sürükle',
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.add, size: 48, color: Colors.grey.shade400),
@@ -870,15 +1092,6 @@ class _PhotoUploadArea extends StatelessWidget {
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                       ],
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.memory(
-                        previewBytes!,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.contain,
-                      ),
                     ),
             ),
           ),

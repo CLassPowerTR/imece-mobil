@@ -81,9 +81,21 @@ class ApiService {
   }
 
   static Future<User> fetchSellerProfile(int? id) async {
+    // URL oluştur - eğer sellerProfileApiUrl boşsa usersApiUrl kullan
+    final String baseUrl = config.sellerProfileApiUrl.isNotEmpty
+        ? config.sellerProfileApiUrl
+        : config.usersApiUrl;
+
+    // URL formatını düzelt
+    final String url = baseUrl.endsWith('/') ? '$baseUrl$id/' : '$baseUrl/$id/';
+
+    debugPrint(
+      'fetchSellerProfile: URL: $url, sellerProfileApiUrl: ${config.sellerProfileApiUrl}, usersApiUrl: ${config.usersApiUrl}',
+    );
+
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await _deps.httpClient.get(
-      Uri.parse('${config.sellerProfileApiUrl}$id/'),
+      Uri.parse(url),
       headers: {
         'X-API-Key': config.apiKey,
         'Accept': 'application/json',
@@ -92,12 +104,73 @@ class ApiService {
       },
     );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      return User.fromJson(jsonData);
-    } else {
+    final bodyText = utf8.decode(response.bodyBytes);
+
+    // Response'un JSON olup olmadığını kontrol et
+    final contentType = response.headers['content-type']?.toLowerCase() ?? '';
+    if (!contentType.contains('application/json') &&
+        bodyText.trim().startsWith('<!')) {
+      debugPrint(
+        'fetchSellerProfile: API HTML döndü. Status: ${response.statusCode}',
+      );
+      debugPrint(
+        'fetchSellerProfile: Response body (ilk 200 karakter): ${bodyText.length > 200 ? bodyText.substring(0, 200) : bodyText}',
+      );
       throw Exception(
-        'User verisi alınamadı. Durum kodu: ${response.statusCode}',
+        'Seller profil verisi alınamadı. API yanıtı beklenen formatta değil (HTML döndü). Durum kodu: ${response.statusCode}',
+      );
+    }
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonData = json.decode(bodyText);
+
+        // Gelen veri User.SellerProfil formatındadır
+        // satici_profili alanının doğru parse edildiğinden emin ol
+        if (jsonData is Map<String, dynamic>) {
+          // satici_profili alanını kontrol et
+          if (jsonData.containsKey('satici_profili') &&
+              jsonData['satici_profili'] != null) {
+            debugPrint(
+              'fetchSellerProfile: satici_profili alanı bulundu - User.fromJson ile parse edilecek',
+            );
+            // satici_profili alanının içeriğini kontrol et
+            final saticiProfiliData = jsonData['satici_profili'];
+            if (saticiProfiliData is Map<String, dynamic>) {
+              debugPrint(
+                'fetchSellerProfile: satici_profili Map formatında - SellerProfil.fromJson ile parse edilecek',
+              );
+            }
+          } else {
+            debugPrint(
+              'fetchSellerProfile: Uyarı - satici_profili alanı bulunamadı veya null',
+            );
+            debugPrint(
+              'fetchSellerProfile: JSON keys: ${jsonData.keys.toList()}',
+            );
+          }
+        }
+
+        // User.fromJson içinde satici_profili zaten SellerProfil.fromJson ile parse ediliyor
+        return User.fromJson(jsonData);
+      } catch (e) {
+        debugPrint('fetchSellerProfile: JSON parse hatası: $e');
+        debugPrint(
+          'fetchSellerProfile: Response body (ilk 500 karakter): ${bodyText.length > 500 ? bodyText.substring(0, 500) : bodyText}',
+        );
+        throw Exception(
+          'Seller profil verisi parse edilemedi. Durum kodu: ${response.statusCode}, Hata: $e',
+        );
+      }
+    } else {
+      debugPrint(
+        'fetchSellerProfile: HTTP hatası. Status: ${response.statusCode}',
+      );
+      debugPrint(
+        'fetchSellerProfile: Response body (ilk 200 karakter): ${bodyText.length > 200 ? bodyText.substring(0, 200) : bodyText}',
+      );
+      throw Exception(
+        'Seller profil verisi alınamadı. Durum kodu: ${response.statusCode}',
       );
     }
   }
@@ -1435,6 +1508,273 @@ class ApiService {
     throw Exception(errorMessage);
   }
 
+  static Future<Map<String, dynamic>> putSellerUpdateProduct(
+    int productId,
+    Map<String, dynamic> productPayload,
+  ) async {
+    debugPrint(
+      'putSellerUpdateProduct: Başlatılıyor - productId: $productId, payload keys: ${productPayload.keys.toList()}',
+    );
+    debugPrint(
+      'putSellerUpdateProduct: productPayload: ${productPayload.toString()}',
+    );
+
+    // Update işlemi için field isimlerini API formatına dönüştür
+    final Map<String, dynamic> mappedPayload = {};
+    productPayload.forEach((key, value) {
+      String mappedKey = key;
+
+      // Field isimlerini dönüştür
+      if (key == 'satici_id') {
+        mappedKey = 'satici';
+      } else if (key == 'stok_miktari') {
+        mappedKey = 'stok_durumu';
+      } else if (key == 'urun_aciklama') {
+        mappedKey = 'aciklama';
+      }
+      // Diğer field'lar aynı kalacak (urun_adi, urun_perakende_fiyati, vb.)
+
+      mappedPayload[mappedKey] = value;
+    });
+
+    // Zorunlu alanları kontrol et ve ekle
+    if (!mappedPayload.containsKey('urun_adi') ||
+        mappedPayload['urun_adi'] == null ||
+        mappedPayload['urun_adi'].toString().isEmpty) {
+      throw Exception('urun_adi alanı zorunludur.');
+    }
+    if (!mappedPayload.containsKey('aciklama') ||
+        mappedPayload['aciklama'] == null ||
+        mappedPayload['aciklama'].toString().isEmpty) {
+      throw Exception('aciklama alanı zorunludur.');
+    }
+    if (!mappedPayload.containsKey('stok_durumu') ||
+        mappedPayload['stok_durumu'] == null) {
+      throw Exception('stok_durumu alanı zorunludur.');
+    }
+    if (!mappedPayload.containsKey('satici') ||
+        mappedPayload['satici'] == null) {
+      throw Exception('satici alanı zorunludur.');
+    }
+    // degerlendirme_puani kontrolü ve dönüşümü
+    if (!mappedPayload.containsKey('degerlendirme_puani') ||
+        mappedPayload['degerlendirme_puani'] == null) {
+      // Eğer degerlendirme_puani yoksa, 0.0 ver
+      mappedPayload['degerlendirme_puani'] = 0.0;
+    } else {
+      // String olarak "0,0" veya "0.0" geliyorsa, double'a çevir
+      if (mappedPayload['degerlendirme_puani'] is String) {
+        final strValue = mappedPayload['degerlendirme_puani']
+            .toString()
+            .replaceAll(',', '.');
+        mappedPayload['degerlendirme_puani'] = double.tryParse(strValue) ?? 0.0;
+      } else if (mappedPayload['degerlendirme_puani'] is! num) {
+        // Sayı değilse 0.0 yap
+        mappedPayload['degerlendirme_puani'] = 0.0;
+      }
+    }
+
+    debugPrint(
+      'putSellerUpdateProduct: Mapped payload keys: ${mappedPayload.keys.toList()}',
+    );
+    debugPrint(
+      'putSellerUpdateProduct: Mapped payload: ${mappedPayload.toString()}',
+    );
+
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      debugPrint('putSellerUpdateProduct: HATA - Access token boş!');
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    // URL oluştur - eğer config'de yoksa fallback kullan
+    final String baseUrl = config.productsApiUrl.isNotEmpty
+        ? config.productsApiUrl
+        : config.productsApiUrl;
+    final String updateUrl = baseUrl.endsWith('/')
+        ? '$baseUrl$productId/'
+        : '$baseUrl/$productId/';
+
+    debugPrint('putSellerUpdateProduct: URL oluşturuldu - $updateUrl');
+
+    // Dosya alanlarını kontrol et (lab_sonuc_pdf, urun_sertifika_pdf, kapak_gorseli)
+    final hasFiles = mappedPayload.entries.any((entry) {
+      final value = entry.value;
+      return value is http.MultipartFile || value is List<http.MultipartFile>;
+    });
+
+    debugPrint('putSellerUpdateProduct: Dosya kontrolü - hasFiles: $hasFiles');
+
+    // Eğer dosya varsa multipart request kullan
+    if (hasFiles) {
+      final uri = Uri.parse(updateUrl);
+      final request = http.MultipartRequest('PUT', uri)
+        ..headers.addAll({
+          'Authorization': 'Bearer $accessToken',
+          'X-API-Key': config.apiKey,
+        });
+
+      mappedPayload.forEach((key, value) {
+        if (value == null) return;
+
+        if (value is http.MultipartFile) {
+          request.files.add(value);
+        } else if (value is List<http.MultipartFile>) {
+          request.files.addAll(value);
+        } else if (value is List) {
+          for (final item in value) {
+            if (item == null) continue;
+            request.fields[key] = item.toString();
+          }
+        } else {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      http.StreamedResponse streamedResponse;
+      try {
+        debugPrint(
+          'putSellerUpdateProduct: Multipart PUT isteği gönderiliyor - URL: $updateUrl, files: ${request.files.length}, fields: ${request.fields.keys.toList()}',
+        );
+        streamedResponse = await _deps.httpClient.send(request);
+        debugPrint(
+          'putSellerUpdateProduct: Multipart istek gönderildi - Status: ${streamedResponse.statusCode}',
+        );
+      } catch (e, stackTrace) {
+        debugPrint(
+          'putSellerUpdateProduct: Multipart istek gönderilirken hata oluştu - Hata: $e',
+        );
+        debugPrint('putSellerUpdateProduct: Stack trace: $stackTrace');
+        rethrow;
+      }
+
+      final response = await http.Response.fromStream(streamedResponse);
+      final bodyText = utf8.decode(response.bodyBytes);
+
+      debugPrint(
+        'putSellerUpdateProduct: Response alındı - Status: ${response.statusCode}, Body length: ${bodyText.length}',
+      );
+
+      Map<String, dynamic>? jsonData;
+      if (bodyText.isNotEmpty) {
+        try {
+          final decoded = json.decode(bodyText);
+          if (decoded is Map<String, dynamic>) {
+            jsonData = decoded;
+            debugPrint('putSellerUpdateProduct: JSON parse başarılı');
+          } else {
+            debugPrint(
+              'putSellerUpdateProduct: JSON parse uyarısı - Beklenen Map<String, dynamic>, alınan: ${decoded.runtimeType}',
+            );
+          }
+        } catch (e, stackTrace) {
+          debugPrint(
+            'putSellerUpdateProduct: JSON parse hatası - Hata: $e, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+          );
+          debugPrint('putSellerUpdateProduct: Stack trace: $stackTrace');
+        }
+      } else {
+        debugPrint('putSellerUpdateProduct: Response body boş');
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint(
+          'putSellerUpdateProduct: Başarılı - Status: ${response.statusCode}',
+        );
+        return jsonData ?? {'raw': bodyText};
+      }
+
+      debugPrint(
+        'putSellerUpdateProduct: HATA - Status: ${response.statusCode}, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+      );
+
+      final errorMessage =
+          jsonData?['message'] ??
+          jsonData?['detail'] ??
+          jsonData?.toString() ??
+          (bodyText.isNotEmpty ? bodyText : 'Ürün güncelleme başarısız.');
+
+      debugPrint('putSellerUpdateProduct: Hata mesajı: $errorMessage');
+      throw Exception(errorMessage);
+    } else {
+      // Dosya yoksa normal JSON request
+      try {
+        final jsonBody = json.encode(mappedPayload);
+        debugPrint(
+          'putSellerUpdateProduct: JSON PUT isteği gönderiliyor - URL: $updateUrl, Body length: ${jsonBody.length}',
+        );
+
+        final response = await _deps.httpClient.put(
+          Uri.parse(updateUrl),
+          body: jsonBody,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'X-API-Key': config.apiKey,
+            'Content-Type': 'application/json',
+          },
+        );
+
+        final bodyText = utf8.decode(response.bodyBytes);
+
+        debugPrint(
+          'putSellerUpdateProduct: JSON Response alındı - Status: ${response.statusCode}, Body length: ${bodyText.length}',
+        );
+
+        Map<String, dynamic>? jsonData;
+
+        if (bodyText.isNotEmpty) {
+          try {
+            final decoded = json.decode(bodyText);
+            if (decoded is Map<String, dynamic>) {
+              jsonData = decoded;
+              debugPrint('putSellerUpdateProduct: JSON parse başarılı');
+            } else {
+              debugPrint(
+                'putSellerUpdateProduct: JSON parse uyarısı - Beklenen Map<String, dynamic>, alınan: ${decoded.runtimeType}',
+              );
+            }
+          } catch (e, stackTrace) {
+            debugPrint(
+              'putSellerUpdateProduct: JSON parse hatası - Hata: $e, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+            );
+            debugPrint('putSellerUpdateProduct: Stack trace: $stackTrace');
+          }
+        } else {
+          debugPrint('putSellerUpdateProduct: Response body boş');
+        }
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          debugPrint(
+            'putSellerUpdateProduct: Başarılı - Status: ${response.statusCode}',
+          );
+          return jsonData ?? {'raw': bodyText};
+        }
+
+        debugPrint(
+          'putSellerUpdateProduct: HATA - Status: ${response.statusCode}, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+        );
+
+        final errorMessage =
+            jsonData?['message'] ??
+            jsonData?['detail'] ??
+            jsonData?.toString() ??
+            (bodyText.isNotEmpty ? bodyText : 'Ürün güncelleme başarısız.');
+
+        debugPrint('putSellerUpdateProduct: Hata mesajı: $errorMessage');
+        throw Exception(errorMessage);
+      } catch (e, stackTrace) {
+        if (e is Exception) {
+          rethrow;
+        }
+        debugPrint(
+          'putSellerUpdateProduct: JSON istek gönderilirken beklenmeyen hata - Hata: $e',
+        );
+        debugPrint('putSellerUpdateProduct: Stack trace: $stackTrace');
+        throw Exception('Ürün güncelleme sırasında bir hata oluştu: $e');
+      }
+    }
+  }
+
   static Future<Map<String, dynamic>> postStories(
     Map<String, dynamic> payload, {
     required bool isStories,
@@ -1512,33 +1852,205 @@ class ApiService {
     Map<String, dynamic> userPayload, {
     bool? isSeller,
   }) async {
+    debugPrint(
+      'putUserUpdate: Başlatılıyor - isSeller: $isSeller, payload keys: ${userPayload.keys.toList()}',
+    );
+    debugPrint('putUserUpdate: userPayload: ${userPayload.toString()}');
+
     final accessToken = await getAccessToken();
     if (accessToken.isEmpty) {
+      debugPrint('putUserUpdate: HATA - Access token boş!');
       throw Exception('Kullanıcı oturumu kapalı.');
     }
-    Uri? uri;
+
+    Uri uri;
     if (isSeller == true) {
       uri = Uri.parse(config.sellerProfileUpdateApiUrl);
     } else {
       uri = Uri.parse(config.userUpdateApiUrl);
     }
-    final response = await _deps.httpClient.put(
-      uri,
-      body: json.encode(userPayload),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
-      },
-    );
 
-    if (response.statusCode == 200) {
-      return json.decode(utf8.decode(response.bodyBytes));
-    } else {
-      print('Kullanıcı güncellenirken bir hata oluştu: ${response.body}');
-      throw Exception(
-        'Kullanıcı güncellenirken bir hata oluştu. Durum kodu: ${response.statusCode}',
+    debugPrint('putUserUpdate: URL oluşturuldu - $uri');
+
+    // Dosya alanlarını kontrol et (profil_banner, profil_fotograf)
+    final hasFiles = userPayload.entries.any((entry) {
+      final value = entry.value;
+      return value is http.MultipartFile || value is List<http.MultipartFile>;
+    });
+
+    debugPrint('putUserUpdate: Dosya kontrolü - hasFiles: $hasFiles');
+
+    // Eğer dosya varsa multipart request kullan
+    if (hasFiles) {
+      final request = http.MultipartRequest('PUT', uri)
+        ..headers.addAll({
+          'Authorization': 'Bearer $accessToken',
+          'X-API-Key': config.apiKey,
+        });
+
+      userPayload.forEach((key, value) {
+        if (value == null) return;
+
+        if (value is http.MultipartFile) {
+          request.files.add(value);
+        } else if (value is List<http.MultipartFile>) {
+          request.files.addAll(value);
+        } else if (value is List) {
+          for (final item in value) {
+            if (item == null) continue;
+            request.fields[key] = item.toString();
+          }
+        } else {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      debugPrint(
+        'putUserUpdate: Multipart request hazırlandı - URL: $uri, files: ${request.files.length}, fields: ${request.fields.keys.toList()}',
       );
+      debugPrint('putUserUpdate: Request headers: ${request.headers}');
+
+      http.StreamedResponse streamedResponse;
+      try {
+        debugPrint(
+          'putUserUpdate: Multipart PUT isteği gönderiliyor - URL: $uri, files: ${request.files.length}, fields: ${request.fields.keys.toList()}',
+        );
+        streamedResponse = await _deps.httpClient.send(request);
+        debugPrint(
+          'putUserUpdate: Multipart istek gönderildi - Status: ${streamedResponse.statusCode}',
+        );
+      } catch (e, stackTrace) {
+        debugPrint(
+          'putUserUpdate: Multipart istek gönderilirken hata oluştu - Hata: $e',
+        );
+        debugPrint('putUserUpdate: Stack trace: $stackTrace');
+        rethrow;
+      }
+
+      final response = await http.Response.fromStream(streamedResponse);
+      final bodyText = utf8.decode(response.bodyBytes);
+
+      debugPrint(
+        'putUserUpdate: Response alındı - Status: ${response.statusCode}, Body length: ${bodyText.length}',
+      );
+
+      Map<String, dynamic>? jsonData;
+      if (bodyText.isNotEmpty) {
+        try {
+          final decoded = json.decode(bodyText);
+          if (decoded is Map<String, dynamic>) {
+            jsonData = decoded;
+            debugPrint('putUserUpdate: JSON parse başarılı');
+          } else {
+            debugPrint(
+              'putUserUpdate: JSON parse uyarısı - Beklenen Map<String, dynamic>, alınan: ${decoded.runtimeType}',
+            );
+          }
+        } catch (e, stackTrace) {
+          debugPrint(
+            'putUserUpdate: JSON parse hatası - Hata: $e, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+          );
+          debugPrint('putUserUpdate: Stack trace: $stackTrace');
+        }
+      } else {
+        debugPrint('putUserUpdate: Response body boş');
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('putUserUpdate: Başarılı - Status: ${response.statusCode}');
+        return jsonData ?? {'raw': bodyText};
+      }
+
+      debugPrint(
+        'putUserUpdate: HATA - Status: ${response.statusCode}, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+      );
+
+      final errorMessage =
+          jsonData?['message'] ??
+          jsonData?['detail'] ??
+          jsonData?.toString() ??
+          (bodyText.isNotEmpty ? bodyText : 'Kullanıcı güncelleme başarısız.');
+
+      debugPrint('putUserUpdate: Hata mesajı: $errorMessage');
+      throw Exception(errorMessage);
+    } else {
+      // Dosya yoksa normal JSON request
+      try {
+        final jsonBody = json.encode(userPayload);
+        debugPrint(
+          'putUserUpdate: JSON PUT isteği gönderiliyor - URL: $uri, Body length: ${jsonBody.length}',
+        );
+
+        final response = await _deps.httpClient.put(
+          uri,
+          body: jsonBody,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'X-API-Key': config.apiKey,
+            'Content-Type': 'application/json',
+          },
+        );
+
+        final bodyText = utf8.decode(response.bodyBytes);
+
+        debugPrint(
+          'putUserUpdate: JSON Response alındı - Status: ${response.statusCode}, Body length: ${bodyText.length}',
+        );
+
+        Map<String, dynamic>? jsonData;
+
+        if (bodyText.isNotEmpty) {
+          try {
+            final decoded = json.decode(bodyText);
+            if (decoded is Map<String, dynamic>) {
+              jsonData = decoded;
+              debugPrint('putUserUpdate: JSON parse başarılı');
+            } else {
+              debugPrint(
+                'putUserUpdate: JSON parse uyarısı - Beklenen Map<String, dynamic>, alınan: ${decoded.runtimeType}',
+              );
+            }
+          } catch (e, stackTrace) {
+            debugPrint(
+              'putUserUpdate: JSON parse hatası - Hata: $e, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+            );
+            debugPrint('putUserUpdate: Stack trace: $stackTrace');
+          }
+        } else {
+          debugPrint('putUserUpdate: Response body boş');
+        }
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          debugPrint(
+            'putUserUpdate: Başarılı - Status: ${response.statusCode}',
+          );
+          return jsonData ?? {'raw': bodyText};
+        }
+
+        debugPrint(
+          'putUserUpdate: HATA - Status: ${response.statusCode}, Body: ${bodyText.length > 500 ? bodyText.substring(0, 500) + "..." : bodyText}',
+        );
+
+        final errorMessage =
+            jsonData?['message'] ??
+            jsonData?['detail'] ??
+            jsonData?.toString() ??
+            (bodyText.isNotEmpty
+                ? bodyText
+                : 'Kullanıcı güncelleme başarısız.');
+
+        debugPrint('putUserUpdate: Hata mesajı: $errorMessage');
+        throw Exception(errorMessage);
+      } catch (e, stackTrace) {
+        if (e is Exception) {
+          rethrow;
+        }
+        debugPrint(
+          'putUserUpdate: JSON istek gönderilirken beklenmeyen hata - Hata: $e',
+        );
+        debugPrint('putUserUpdate: Stack trace: $stackTrace');
+        throw Exception('Kullanıcı güncelleme sırasında bir hata oluştu: $e');
+      }
     }
   }
 }

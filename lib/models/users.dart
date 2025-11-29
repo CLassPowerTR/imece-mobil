@@ -26,6 +26,24 @@ class SellerProfil {
   });
 
   factory SellerProfil.fromJson(Map<String, dynamic> json) {
+    // imece_onay_last_date'i yıl-ay-gün formatına dönüştür
+    String? formattedDate;
+    final dynamic dateValue = json['imece_onay_last_date'];
+    if (dateValue != null) {
+      try {
+        final dateStr = dateValue.toString();
+        // ISO 8601 formatından sadece tarih kısmını al (YYYY-MM-DD)
+        if (dateStr.contains('T')) {
+          formattedDate = dateStr.split('T')[0];
+        } else {
+          formattedDate = dateStr;
+        }
+      } catch (e) {
+        // Parse hatası durumunda orijinal değeri kullan
+        formattedDate = dateValue.toString();
+      }
+    }
+
     return SellerProfil(
       id: json['id'] ?? 0,
       profilBanner: json['profil_banner'],
@@ -35,7 +53,7 @@ class SellerProfil {
       saticiVergiNumarasi: json['satici_vergi_numarasi'],
       saticiIban: json['satici_iban'],
       imeceOnay: json['imece_onay'] ?? false,
-      imeceOnayLastDate: json['imece_onay_last_date'],
+      imeceOnayLastDate: formattedDate,
       profession: json['profession'],
       kullanici: json['kullanici'] ?? 0,
     );
@@ -145,8 +163,9 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     // Zorunlu alan doğrulamaları ve güvenli parse
     final dynamic idRaw = json['id'];
-    final int parsedId =
-        idRaw is int ? idRaw : int.tryParse(idRaw?.toString() ?? '') ?? 0;
+    final int parsedId = idRaw is int
+        ? idRaw
+        : int.tryParse(idRaw?.toString() ?? '') ?? 0;
 
     final String username = (json['username'] ?? '').toString();
     final String email = (json['email'] ?? '').toString();
@@ -154,8 +173,8 @@ class User {
     final String? lastLoginStr = json['last_login']?.toString();
     final DateTime? lastLogin =
         (lastLoginStr != null && lastLoginStr.isNotEmpty)
-            ? DateTime.tryParse(lastLoginStr)
-            : null;
+        ? DateTime.tryParse(lastLoginStr)
+        : null;
 
     final String dateJoinedStr = (json['date_joined'] ?? '').toString();
     final DateTime dateJoined =
@@ -166,13 +185,14 @@ class User {
     final bool isActive = json['is_active'] == true;
     final bool isOnline = json['is_online'] == true;
 
-    final String hataYapmaOrani =
-        (json['hata_yapma_orani'] ?? '0.00').toString();
+    final String hataYapmaOrani = (json['hata_yapma_orani'] ?? '0.00')
+        .toString();
     final String bakiye = (json['bakiye'] ?? '0.00').toString();
 
     final List<dynamic> groups = json['groups'] is List ? json['groups'] : [];
-    final List<dynamic> userPermissions =
-        json['user_permissions'] is List ? json['user_permissions'] : [];
+    final List<dynamic> userPermissions = json['user_permissions'] is List
+        ? json['user_permissions']
+        : [];
 
     return User(
       id: parsedId,

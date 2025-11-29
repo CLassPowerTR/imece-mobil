@@ -1,9 +1,9 @@
 part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBody extends ConsumerStatefulWidget {
-  final Product product;
+  final int productId;
 
-  const ProductsDetailViewBody({super.key, required this.product});
+  const ProductsDetailViewBody({super.key, required this.productId});
 
   @override
   ConsumerState<ProductsDetailViewBody> createState() =>
@@ -17,7 +17,7 @@ class _ProductsDetailViewBodyState
   double urunAciklamaContainerHeight = 150;
   double sizedBoxHeight = 200;
 
-  late Future<User> _futureUser;
+  Future<User>? _futureUser;
   late Future<UrunYorumlarResponse> _futureUrunYorumlar;
   bool isFavorite = false;
   int? favoriteProductId;
@@ -26,9 +26,9 @@ class _ProductsDetailViewBodyState
   void initState() {
     super.initState();
     _checkFavorite();
-    _futureUser = ApiService.fetchUserId(widget.product.satici);
+    // Product verisi provider'dan gelecek, bu yüzden initState'de sadece productId'ye göre işlem yapıyoruz
     _futureUrunYorumlar = ApiService.takeCommentsForProduct(
-      urunId: widget.product.urunId,
+      urunId: widget.productId,
     );
   }
 
@@ -41,7 +41,7 @@ class _ProductsDetailViewBodyState
         null,
       );
       for (var item in favorites) {
-        if (item['urun'] == widget.product.urunId) {
+        if (item['urun'] == widget.productId) {
           setState(() {
             isFavorite = true;
             favoriteProductId = item['id'];
@@ -63,36 +63,60 @@ class _ProductsDetailViewBodyState
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    final themeData = HomeStyle(context: context);
-    final currentUser = ref.watch(userProvider);
-    final isLoggedIn = currentUser != null;
+    final productAsync = ref.watch(productProvider(widget.productId));
 
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        spacing: 15,
-        children: [
-          _urunFoto(width, themeData, isLoggedIn, currentUser),
-          _urunBilgi(themeData),
-          _urunStokBilgi(width, themeData),
-          _urunSoruVeCevaplar(context, themeData),
-          Divider(),
-          _urunSaticiBilgli(themeData, width),
-          _urunAciklama(
-            context,
-            themeData,
-            width,
-            widget.product.aciklama ?? '',
-          ),
-          _urunYorumlari(context, width, themeData),
-          _urunSoruCevap(context, themeData, width),
-          customText('Benzer Ürünler', context, weight: FontWeight.bold),
-        ],
+    return productAsync.when(
+      loading: () => Center(child: buildLoadingBar(context)),
+      error: (error, stackTrace) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Ürün yüklenemedi: $error'),
+            const SizedBox(height: 16),
+            textButton(
+              context,
+              'Tekrar Dene',
+              onPressed: () {
+                ref.invalidate(productProvider(widget.productId));
+              },
+            ),
+          ],
+        ),
       ),
+      data: (product) {
+
+        double width = MediaQuery.of(context).size.width;
+        final themeData = HomeStyle(context: context);
+        final currentUser = ref.watch(userProvider);
+        final isLoggedIn = currentUser != null;
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 15,
+            children: [
+              _urunFoto(width, themeData, isLoggedIn, currentUser, product),
+              _urunBilgi(themeData, product),
+              _urunStokBilgi(width, themeData, product),
+              _urunSoruVeCevaplar(context, themeData),
+              Divider(),
+              _urunSaticiBilgli(themeData, width, product),
+              _urunAciklama(
+                context,
+                themeData,
+                width,
+                product.aciklama ?? '',
+              ),
+              _urunYorumlari(context, width, themeData),
+              _urunSoruCevap(context, themeData, width),
+              customText('Benzer Ürünler', context, weight: FontWeight.bold),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -271,9 +295,15 @@ class _ProductsDetailViewBodyState
     );
   }
 
-  FutureBuilder<User> _urunSaticiBilgli(HomeStyle themeData, double width) {
+  FutureBuilder<User> _urunSaticiBilgli(
+    HomeStyle themeData,
+    double width,
+    Product product,
+  ) {
+    // User verisini product'a göre yükle
+    _futureUser ??= ApiService.fetchUserId(product.satici);
     return FutureBuilder<User>(
-      future: _futureUser,
+      future: _futureUser!,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
@@ -461,7 +491,11 @@ class _ProductsDetailViewBodyState
     );
   }
 
-  Container _urunStokBilgi(double width, HomeStyle themeData) {
+  Container _urunStokBilgi(
+    double width,
+    HomeStyle themeData,
+    Product product,
+  ) {
     return Container(
       alignment: Alignment.center,
       height: 30,
@@ -482,9 +516,9 @@ class _ProductsDetailViewBodyState
               style: TextStyle(decoration: TextDecoration.underline),
             ),
             TextSpan(
-              text: ' ${widget.product.stokDurumu.toString()}',
+              text: ' ${product.stokDurumu.toString()}',
               style: TextStyle(
-                color: getStokRengi(widget.product.stokDurumu ?? 0),
+                color: getStokRengi(product.stokDurumu ?? 0),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -494,7 +528,7 @@ class _ProductsDetailViewBodyState
     );
   }
 
-  Padding _urunBilgi(HomeStyle themeData) {
+  Padding _urunBilgi(HomeStyle themeData, Product product) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: RichText(
@@ -507,10 +541,10 @@ class _ProductsDetailViewBodyState
             fontWeight: FontWeight.bold,
           ),
           children: [
-            TextSpan(text: '${widget.product.urunAdi}  - '),
+            TextSpan(text: '${product.urunAdi}  - '),
             TextSpan(
               text: mainCategoryToString(
-                mainCategoryFromInt(widget.product.kategori) ??
+                mainCategoryFromInt(product.kategori) ??
                     MainCategory.meyveler,
               ),
             ),
@@ -525,6 +559,7 @@ class _ProductsDetailViewBodyState
     HomeStyle themeData,
     bool isLoggedIn,
     User? currentUser,
+    Product product,
   ) {
     return Stack(
       children: [
@@ -538,9 +573,9 @@ class _ProductsDetailViewBodyState
             image: DecorationImage(
               fit: BoxFit.cover,
               image: NetworkImage(
-                widget.product.kapakGorseli == ''
+                product.kapakGorseli == ''
                     ? NotFound.defaultBannerImageUrl
-                    : widget.product.kapakGorseli ??
+                    : product.kapakGorseli ??
                           NotFound.defaultBannerImageUrl,
               ),
             ),
@@ -615,7 +650,7 @@ class _ProductsDetailViewBodyState
                           await ApiService.fetchUserFavorites(
                             null,
                             currentUser.id,
-                            widget.product.urunId,
+                            product.urunId,
                             null,
                           );
                           showTemporarySnackBar(

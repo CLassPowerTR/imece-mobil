@@ -102,9 +102,19 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
 
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshProducts() async {
+    // Repository cache'ini temizle
     final repository = ref.read(productsRepositoryProvider);
     repository.invalidateProducts(categoryId: widget.categoryId);
-    final _ = await ref.refresh(productsProvider(widget.categoryId).future);
+
+    // Provider'ı invalidate et ve yeniden yükle
+    ref.invalidate(productsProvider(widget.categoryId));
+    try {
+      await ref.read(productsProvider(widget.categoryId).future);
+    } catch (e) {
+      debugPrint('Products provider yenilenirken hata: $e');
+    }
+
+    // Favorileri yenile
     final favoritesFuture = _fetchFavorites();
     setState(() {
       _futureFavorites = favoritesFuture;
@@ -196,6 +206,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
         final bool favoriteProduct =
             urunId != null && favoriteProductIds.contains(urunId);
         return productsCard(
+          productId: product.urunId ?? 0,
           sepeteEkle: () async {
             if (isLoggedIn) {
               if (isInSepet) {
@@ -334,7 +345,6 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
           },
           isSepet: isInSepet,
           isFavorite: favoriteProduct,
-          product: product,
           width: width,
           context: context,
           height: height,

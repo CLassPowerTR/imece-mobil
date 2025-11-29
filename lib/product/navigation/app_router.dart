@@ -51,8 +51,29 @@ final Map<String, WidgetBuilder> appRoutes = {
   },
   '/profil/messaging': (context) => MessageBox(),
   '/profil/addProduct': (context) {
-    final user = ModalRoute.of(context)!.settings.arguments as User;
-    return AddProductScreen(user: user);
+    final args = ModalRoute.of(context)?.settings.arguments;
+    User? user;
+    Product? product;
+    
+    if (args is Map<String, dynamic>) {
+      user = args['user'] as User?;
+      product = args['product'] as Product?;
+    } else if (args is User) {
+      // Geriye dönük uyumluluk için
+      user = args;
+    }
+    
+    // User null ise, Product'tan satici ID'sini al veya null bırak
+    if (user == null && product != null && product.satici != null) {
+      // Product'tan User oluşturulamaz, sadece ID var
+      // Bu durumda user null kalacak ve AddProductScreen'de hata olabilir
+      // En iyisi User'ı optional yapmak
+    }
+    
+    return AddProductScreen(
+      user: user, // User boş gelebilir
+      product: product, // Product boş gelebilir
+    );
   },
   '/profil/addPost': (context) {
     final args =
@@ -105,8 +126,19 @@ final Map<String, WidgetBuilder> appRoutes = {
     );
   },
   '/products/productsDetail': (context) {
-    final product = ModalRoute.of(context)!.settings.arguments as Product;
-    return ProductsDetailScreen(product: product);
+    final args = ModalRoute.of(context)!.settings.arguments;
+    int? productId;
+    if (args is Product) {
+      productId = args.urunId;
+    } else if (args is int) {
+      productId = args;
+    }
+    if (productId == null) {
+      return const Scaffold(
+        body: Center(child: Text('Ürün bilgisi bulunamadı.')),
+      );
+    }
+    return ProductsDetailScreen(productId: productId);
   },
   '/home/productsDetail': (context) {
     return HomeProductDetailRouter();

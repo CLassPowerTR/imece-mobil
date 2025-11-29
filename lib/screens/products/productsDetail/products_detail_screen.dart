@@ -16,6 +16,7 @@ import 'package:imecehub/core/widgets/yorumContainer.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
+import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
@@ -29,9 +30,9 @@ part 'widget/products_detail_view_body.dart';
 part 'widget/products_detail_view_bottom.dart';
 
 class ProductsDetailScreen extends ConsumerStatefulWidget {
-  final Product product;
+  final int productId;
 
-  const ProductsDetailScreen({super.key, required this.product});
+  const ProductsDetailScreen({super.key, required this.productId});
 
   @override
   ConsumerState<ProductsDetailScreen> createState() =>
@@ -80,58 +81,94 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: true,
-      top: true,
-      left: true,
-      right: true,
-      child: Scaffold(
-        appBar: _productsDetailAppBar(context),
-        body: ProductsDetailViewBody(product: widget.product),
-        bottomNavigationBar: ProductsDetailViewBottom(
-          sepeteEkle: () async {
-            if (sepetUrunIdList.contains(widget.product.urunId)) {
-              ref.read(bottomNavIndexProvider.notifier).setIndex(2);
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/home',
-                (route) => false,
-                arguments: {'refresh': true},
-              );
-            } else {
-              if (isLoggedIn) {
-                if (widget.product.stokDurumu! <= 0) {
-                  showTemporarySnackBar(
-                    context,
-                    'Bu ürün stokta bulunmamaktadır',
-                    type: SnackBarType.info,
-                  );
-                } else {
-                  try {
-                    await ApiService.fetchSepetEkle(
-                      1,
-                      widget.product.urunId ?? 0,
-                    );
-                    showTemporarySnackBar(context, 'Sepete eklendi');
-                  } catch (e) {
+    final productAsync = ref.watch(productProvider(widget.productId));
+
+    return productAsync.when(
+      loading: () => SafeArea(
+        bottom: true,
+        top: true,
+        left: true,
+        right: true,
+        child: Scaffold(
+          appBar: _productsDetailAppBar(context),
+          body: Center(child: buildLoadingBar(context)),
+        ),
+      ),
+      error: (error, stackTrace) => SafeArea(
+        bottom: true,
+        top: true,
+        left: true,
+        right: true,
+        child: Scaffold(
+          appBar: _productsDetailAppBar(context),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Ürün yüklenemedi: $error'),
+                const SizedBox(height: 16),
+                textButton(
+                  context,
+                  'Tekrar Dene',
+                  onPressed: () {
+                    ref.invalidate(productProvider(widget.productId));
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      data: (product) => SafeArea(
+        bottom: true,
+        top: true,
+        left: true,
+        right: true,
+        child: Scaffold(
+          appBar: _productsDetailAppBar(context),
+          body: ProductsDetailViewBody(productId: widget.productId),
+          bottomNavigationBar: ProductsDetailViewBottom(
+            sepeteEkle: () async {
+              if (sepetUrunIdList.contains(product.urunId)) {
+                ref.read(bottomNavIndexProvider.notifier).setIndex(2);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/home',
+                  (route) => false,
+                  arguments: {'refresh': true},
+                );
+              } else {
+                if (isLoggedIn) {
+                  if (product.stokDurumu! <= 0) {
                     showTemporarySnackBar(
                       context,
-                      'Sepete eklenirken bir hata oluştu: $e',
+                      'Bu ürün stokta bulunmamaktadır',
+                      type: SnackBarType.info,
                     );
-                  } finally {
-                    setState(() async {
-                      await _checkGetSepet();
-                      await _checkLogin();
-                    });
+                  } else {
+                    try {
+                      await ApiService.fetchSepetEkle(1, product.urunId ?? 0);
+                      showTemporarySnackBar(context, 'Sepete eklendi');
+                    } catch (e) {
+                      showTemporarySnackBar(
+                        context,
+                        'Sepete eklenirken bir hata oluştu: $e',
+                      );
+                    } finally {
+                      setState(() async {
+                        await _checkGetSepet();
+                        await _checkLogin();
+                      });
+                    }
                   }
+                } else {
+                  showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
                 }
-              } else {
-                showTemporarySnackBar(context, 'Lütfen giriş yapınız!');
               }
-            }
-          },
-          product: widget.product,
-          sepetUrunIdList: sepetUrunIdList,
+            },
+            productId: widget.productId,
+            sepetUrunIdList: sepetUrunIdList,
+          ),
         ),
       ),
     );

@@ -59,12 +59,13 @@ class UserNotifier extends Notifier<User?> {
       clearUser();
       return;
     }
-    await fetchUserMe();
+
     if (state != null) {
       try {
         await ApiService.putUserUpdate({'is_online': true});
       } catch (_) {}
     }
+    await fetchUserMe();
   }
 
   Future<void> login({required String email, required String password}) async {
@@ -87,7 +88,10 @@ class UserNotifier extends Notifier<User?> {
     Map<String, dynamic> payload, {
     bool? isSeller,
   }) async {
-    await ApiService.putUserUpdate(payload, isSeller: isSeller);
+    await ApiService.putUserUpdate(
+      payload,
+      isSeller: isSeller,
+    );
     await fetchUserMe();
   }
 

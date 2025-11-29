@@ -4,11 +4,12 @@ import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/providers/auth_provider.dart';
+import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class productsCard extends ConsumerStatefulWidget {
-  final Product product;
+  final int productId;
   final double width;
   final BuildContext context;
   final double height;
@@ -18,7 +19,7 @@ class productsCard extends ConsumerStatefulWidget {
   final VoidCallback? favoriEkle;
   const productsCard({
     super.key,
-    required this.product,
+    required this.productId,
     required this.width,
     required this.context,
     required this.height,
@@ -42,17 +43,10 @@ class _productsCardState extends ConsumerState<productsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          Navigator.pushNamed(
-            context,
-            '/products/productsDetail',
-            arguments: widget.product,
-          );
-        });
-      },
-      child: Card(
+    final productAsync = ref.watch(productProvider(widget.productId));
+
+    return productAsync.when(
+      loading: () => Card(
         color: HomeStyle(context: context).surfaceContainer,
         child: Padding(
           padding: EdgeInsets.all(10),
@@ -61,223 +55,280 @@ class _productsCardState extends ConsumerState<productsCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Builder(
-                builder: (context) {
-                  if (widget.product.kapakGorseli != '') {
-                    return Expanded(
-                      child: cokluGorsel == true
-                          ? PageView.builder(
-                              itemCount: widget.product.kapakGorseli!.length,
-                              itemBuilder: (context, imgIndex) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                            widget
-                                                        .product
-                                                        .kapakGorseli![imgIndex] ==
-                                                    ''
-                                                ? NotFound.defaultBannerImageUrl
-                                                : widget
-                                                      .product
-                                                      .kapakGorseli![imgIndex],
-                                          ),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                                    Positioned(
-                                      bottom: 4,
-                                      right: 4,
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        width: 25,
-                                        height: 25,
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[300],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                height: 16,
+                width: double.infinity,
+                color: Colors.grey[300],
+              ),
+              const SizedBox(height: 4),
+              Container(height: 12, width: 100, color: Colors.grey[300]),
+            ],
+          ),
+        ),
+      ),
+      error: (error, stackTrace) => Card(
+        color: HomeStyle(context: context).surfaceContainer,
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Center(
+            child: customText('Ürün yüklenemedi', context, color: Colors.red),
+          ),
+        ),
+      ),
+      data: (product) => GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/products/productsDetail',
+            arguments: product.urunId ?? 0,
+          );
+        },
+        child: Card(
+          color: HomeStyle(context: context).surfaceContainer,
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              spacing: 3,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Builder(
+                  builder: (context) {
+                    if (product.kapakGorseli != null &&
+                        product.kapakGorseli != '') {
+                      return Expanded(
+                        child: cokluGorsel == true
+                            ? PageView.builder(
+                                itemCount: product.kapakGorseli!.length,
+                                itemBuilder: (context, imgIndex) {
+                                  return Stack(
+                                    children: [
+                                      Container(
                                         decoration: BoxDecoration(
-                                          color: HomeStyle(
-                                            context: context,
-                                          ).outline,
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
-                                        ),
-                                        child: Text(
-                                          "${imgIndex + 1}/${widget.product.kapakGorseli!.length}",
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              product.kapakGorseli![imgIndex] ==
+                                                      ''
+                                                  ? NotFound
+                                                        .defaultBannerImageUrl
+                                                  : product
+                                                        .kapakGorseli![imgIndex],
+                                            ),
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            )
-                          : Stack(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                        widget.product.kapakGorseli ??
-                                            NotFound.defaultBannerImageUrl,
+                                      // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
+                                      Positioned(
+                                        bottom: 4,
+                                        right: 4,
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 25,
+                                          height: 25,
+                                          decoration: BoxDecoration(
+                                            color: HomeStyle(
+                                              context: context,
+                                            ).outline,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "${imgIndex + 1}/${product.kapakGorseli!.length}",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ), // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                                Positioned(
-                                  bottom: 4,
-                                  right: 4,
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: 25,
-                                    height: 25,
+                                    ],
+                                  );
+                                },
+                              )
+                            : Stack(
+                                children: [
+                                  Container(
                                     decoration: BoxDecoration(
-                                      color: HomeStyle(
-                                        context: context,
-                                      ).outline,
                                       borderRadius: BorderRadius.circular(8),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          product.kapakGorseli ??
+                                              NotFound.defaultBannerImageUrl,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child: Text(
-                                      "1/1",
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
+                                  ), // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
+                                  Positioned(
+                                    bottom: 4,
+                                    right: 4,
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      width: 25,
+                                      height: 25,
+                                      decoration: BoxDecoration(
+                                        color: HomeStyle(
+                                          context: context,
+                                        ).outline,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        "1/1",
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                    );
-                  } else {
-                    return Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: NetworkImage(NotFound.defaultBannerImageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 4),
-              // Bilgi bölümünü içerik kadar yer kaplayacak şekilde düzenliyoruz.
-              customText(
-                widget.product.urunAdi ?? '',
-                context,
-                weight: FontWeight.bold,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
-              ),
-              buildRatingStars(widget.product.degerlendirmePuani ?? 0.0),
-              customText(
-                '${widget.product.aciklama}',
-                context,
-                size: 14,
-                maxLines: 1,
-              ),
-              customText(
-                "KG: ${widget.product.urunParakendeFiyat} TL",
-                context,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
-                color: HomeStyle(context: context).secondary,
-              ),
-
-              if (ref.watch(userProvider)?.rol != 'satici')
-                Row(
-                  spacing: 5,
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: SizedBox(
-                        height: 30,
-                        child: Builder(
-                          builder: (context) {
-                            if (widget.product.stokDurumu! <= 0) {
-                              return TextButton(
-                                onPressed: () {},
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                ),
-                                child: customText(
-                                  'Stokta Yok',
-                                  context,
-                                  color: Colors.white,
-                                  weight: FontWeight.bold,
-                                  textAlign: TextAlign.center,
-                                  size: HomeStyle(
-                                    context: context,
-                                  ).bodySmall.fontSize,
-                                ),
-                              );
-                            } else {
-                              return TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor: widget.isSepet
-                                      ? Colors.orangeAccent[200]
-                                      : HomeStyle(context: context).secondary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                ),
-                                onPressed: widget.product.stokDurumu! >= 0
-                                    ? widget.sepeteEkle
-                                    : null,
-                                child: customText(
-                                  widget.isSepet ? 'Sepete Git' : 'Sepete Ekle',
-                                  context,
-                                  color: Colors.white,
-                                  weight: FontWeight.bold,
-                                  size: HomeStyle(
-                                    context: context,
-                                  ).bodySmall.fontSize,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: widget.favoriEkle,
+                                ],
+                              ),
+                      );
+                    } else {
+                      return Expanded(
                         child: Container(
-                          height: 30,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                NotFound.defaultBannerImageUrl,
+                              ),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          child: Icon(
-                            widget.isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: widget.isFavorite ? Colors.red : Colors.grey,
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 4),
+                // Bilgi bölümünü içerik kadar yer kaplayacak şekilde düzenliyoruz.
+                customText(
+                  product.urunAdi ?? '',
+                  context,
+                  weight: FontWeight.bold,
+                  size: HomeStyle(context: context).bodyLarge.fontSize,
+                ),
+                buildRatingStars(product.degerlendirmePuani ?? 0.0),
+                customText(
+                  '${product.aciklama}',
+                  context,
+                  size: 14,
+                  maxLines: 1,
+                ),
+                customText(
+                  "KG: ${product.urunParakendeFiyat} TL",
+                  context,
+                  size: HomeStyle(context: context).bodyLarge.fontSize,
+                  color: HomeStyle(context: context).secondary,
+                ),
+
+                if (ref.watch(userProvider)?.rol != 'satici')
+                  Row(
+                    spacing: 5,
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: SizedBox(
+                          height: 30,
+                          child: Builder(
+                            builder: (context) {
+                              if (product.stokDurumu != null &&
+                                  product.stokDurumu! <= 0) {
+                                return TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  child: customText(
+                                    'Stokta Yok',
+                                    context,
+                                    color: Colors.white,
+                                    weight: FontWeight.bold,
+                                    textAlign: TextAlign.center,
+                                    size: HomeStyle(
+                                      context: context,
+                                    ).bodySmall.fontSize,
+                                  ),
+                                );
+                              } else {
+                                return TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: widget.isSepet
+                                        ? Colors.orangeAccent[200]
+                                        : HomeStyle(context: context).secondary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  onPressed:
+                                      product.stokDurumu != null &&
+                                          product.stokDurumu! >= 0
+                                      ? widget.sepeteEkle
+                                      : null,
+                                  child: customText(
+                                    widget.isSepet
+                                        ? 'Sepete Git'
+                                        : 'Sepete Ekle',
+                                    context,
+                                    color: Colors.white,
+                                    weight: FontWeight.bold,
+                                    size: HomeStyle(
+                                      context: context,
+                                    ).bodySmall.fontSize,
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-            ],
+                      Expanded(
+                        flex: 1,
+                        child: GestureDetector(
+                          onTap: widget.favoriEkle,
+                          child: Container(
+                            height: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.grey[200],
+                            ),
+                            child: Icon(
+                              widget.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: widget.isFavorite
+                                  ? Colors.red
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -313,7 +364,7 @@ GridView productCards({
         favoriEkle: onFavoriEkle(product),
         isSepet: isInSepet(product),
         isFavorite: isFavorite(product),
-        product: product,
+        productId: product.urunId ?? 0,
         width: width,
         context: context,
         height: height,

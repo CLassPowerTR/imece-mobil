@@ -1,19 +1,17 @@
 part of '../home_screen.dart';
 
-class _HomeViewBody extends StatefulWidget {
+class _HomeViewBody extends ConsumerStatefulWidget {
   const _HomeViewBody();
 
   @override
-  State<_HomeViewBody> createState() => _HomeViewBodyState();
+  ConsumerState<_HomeViewBody> createState() => _HomeViewBodyState();
 }
 
-class _HomeViewBodyState extends State<_HomeViewBody> {
+class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
   static List<Category>? cachedCategories;
   static List<Company>? cachedSellers;
-  static List<Product>? cachedPopulerProducts;
   late Future<List<Category>> _futureCategory;
   late Future<List<Company>> _futureSellers;
-  late Future<List<Product>> _futurePopulerProducts;
   bool isLoggedIn = false;
 
   @override
@@ -21,7 +19,6 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
     super.initState();
     _voidCachedCategories();
     _voidCachedSellers();
-    _voidCachedPopulerProducts();
     _checkLogin();
   }
 
@@ -48,12 +45,30 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       _futureSellers = Future.value(freshSellers);
     });
 
-    List<Product> freshPopulerProducts =
-        await ApiService.fetchPopulerProducts();
-    setState(() {
-      cachedPopulerProducts = freshPopulerProducts;
-      _futurePopulerProducts = Future.value(freshPopulerProducts);
-    });
+    // Products repository'deki cache'leri temizle
+    try {
+      final repository = ref.read(productsRepositoryProvider);
+      repository.invalidatePopulerProducts();
+      repository.invalidateCampaigns();
+      debugPrint('Home: Popüler ürünler ve kampanyalar cache temizlendi');
+    } catch (e) {
+      debugPrint('Home: Cache temizlenirken hata: $e');
+    }
+
+    // Popüler ürünler ve kampanyalar provider'larını invalidate et
+    ref.invalidate(populerProductsProvider);
+    ref.invalidate(campaignsProvider);
+
+    // Provider'ların yeniden yüklenmesini bekle (cache temizlendikten sonra)
+    try {
+      await Future.wait([
+        ref.read(populerProductsProvider.future),
+        ref.read(campaignsProvider.future),
+      ]);
+      debugPrint('Home: Provider\'lar başarıyla yenilendi');
+    } catch (e) {
+      debugPrint('Home: Provider yenilenirken hata: $e');
+    }
   }
 
   @override
@@ -76,7 +91,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   _futureCategories(width, height),
-                  _kampanyalarItems(width, height),
+                  CampaignsItemsCard(width: width, height: height),
                   //_saticilarList(height, context, width),
                   //SizedBox(height: 16),
                   StoryCampaingsCard(height: height, width: width),
@@ -96,27 +111,19 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
   }
 
   Column _futurePopulerProductsView(double width, double height) {
+    final populerProductsAsync = ref.watch(populerProductsProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _populerUrunlerText(context),
-        FutureBuilder<List<Product>>(
-          future: _futurePopulerProducts,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return ProductsGridShimmer(itemCount: 2);
-            } else if (snapshot.hasError) {
-              return Text("Hata oluştu: ${snapshot.error}");
-            } else if (snapshot.hasData) {
-              List<Product> populerProducts = snapshot.data!;
-
-              return _populerUrunCards(width, height, populerProducts);
-            } else {
-              return SizedBox();
-            }
-          },
+        populerProductsAsync.when(
+          loading: () => ProductsGridShimmer(itemCount: 2),
+          error: (error, _) => Text("Hata oluştu: $error"),
+          data: (populerProducts) =>
+              _populerUrunCards(width, height, populerProducts),
         ),
       ],
     );
@@ -401,8 +408,9 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
+        final product = populerProducts[index];
         return productsCard2(
-          product: populerProducts[index],
+          product: product,
           width: width,
           context: context,
           height: height,
@@ -529,46 +537,6 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _kampanyalarItems(double width, double height) {
-    return FutureBuilder<Campaigns>(
-      future: ApiService.fetchProductsCampaings(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(height: 200, child: CampaignsShimmer(height: 200));
-        } else if (snapshot.hasError) {
-          return Center(child: Text("Hata oluştu: ${snapshot.error}"));
-        } else if (snapshot.hasData) {
-          final campaigns = snapshot.data!;
-          if (campaigns.data.isEmpty) {
-            return SizedBox.shrink();
-          }
-          return SizedBox(
-            height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: campaigns.data.length,
-              itemBuilder: (context, index) {
-                final item = campaigns.data[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: index == campaigns.data.length - 1 ? 0 : 8,
-                  ),
-                  child: CampaingsCard(
-                    item: item,
-                    width: width,
-                    height: height,
-                  ),
-                );
-              },
-            ),
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
     );
   }
 
@@ -773,20 +741,6 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
       _futureSellers.then((sellers) {
         // Gelen veriyi cache'e atıyoruz.
         cachedSellers = sellers;
-      });
-    }
-  }
-
-  void _voidCachedPopulerProducts() {
-    if (cachedPopulerProducts != null && cachedPopulerProducts!.isNotEmpty) {
-      // Cache dolu ise: direkt veriyi Future.value ile sarıyoruz.
-      _futurePopulerProducts = Future.value(cachedPopulerProducts);
-    } else {
-      // İlk açılışta veya cache boşsa API'den verileri çek
-      _futurePopulerProducts = ApiService.fetchPopulerProducts();
-      _futurePopulerProducts.then((populerProducts) {
-        // Gelen veriyi cache'e atıyoruz.
-        cachedPopulerProducts = populerProducts;
       });
     }
   }

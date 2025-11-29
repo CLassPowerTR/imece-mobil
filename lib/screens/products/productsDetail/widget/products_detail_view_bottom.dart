@@ -1,13 +1,13 @@
 part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBottom extends ConsumerStatefulWidget {
-  final Product product;
+  final int productId;
   final List<int> sepetUrunIdList;
   final Future<void> Function()? sepeteEkle;
 
   const ProductsDetailViewBottom({
     super.key,
-    required this.product,
+    required this.productId,
     required this.sepetUrunIdList,
     required this.sepeteEkle,
   });
@@ -27,25 +27,47 @@ class _ProductsDetailViewBottomState
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
-    final currentUser = ref.watch(userProvider);
-    final isSeller = currentUser?.rol == 'satici';
-    return container(
-      context,
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      color: themeData.surfaceContainer,
-      width: double.infinity,
-      height: 70,
-      child: Row(
-        spacing: 10,
-        children: [
-          _fiyatStokText(themeData),
-          if (!isSeller) ...[
-            _sepeteEkleButton(context),
-            _grupAlimButton(context),
-          ],
-        ],
+    final productAsync = ref.watch(productProvider(widget.productId));
+
+    return productAsync.when(
+      loading: () => container(
+        context,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        color: HomeStyle(context: context).surfaceContainer,
+        width: double.infinity,
+        height: 70,
+        child: Center(child: buildLoadingBar(context)),
       ),
+      error: (error, stackTrace) => container(
+        context,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        color: HomeStyle(context: context).surfaceContainer,
+        width: double.infinity,
+        height: 70,
+        child: Center(child: Text('Ürün yüklenemedi')),
+      ),
+      data: (product) {
+        final themeData = HomeStyle(context: context);
+        final currentUser = ref.watch(userProvider);
+        final isSeller = currentUser?.rol == 'satici';
+        return container(
+          context,
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          color: themeData.surfaceContainer,
+          width: double.infinity,
+          height: 70,
+          child: Row(
+            spacing: 10,
+            children: [
+              _fiyatStokText(themeData, product),
+              if (!isSeller) ...[
+                _sepeteEkleButton(context, product),
+                _grupAlimButton(context),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -60,12 +82,12 @@ class _ProductsDetailViewBottomState
     );
   }
 
-  Builder _sepeteEkleButton(BuildContext context) {
-    final isInSepet = widget.sepetUrunIdList.contains(widget.product.urunId);
+  Builder _sepeteEkleButton(BuildContext context, Product product) {
+    final isInSepet = widget.sepetUrunIdList.contains(product.urunId);
 
     return Builder(
       builder: (context) {
-        if (widget.product.stokDurumu! <= 0) {
+        if (product.stokDurumu! <= 0) {
           return Expanded(
             child: container(
               context,
@@ -96,7 +118,7 @@ class _ProductsDetailViewBottomState
     );
   }
 
-  Expanded _fiyatStokText(HomeStyle themeData) {
+  Expanded _fiyatStokText(HomeStyle themeData, Product product) {
     return Expanded(
       child: RichText(
         maxLines: 2,
@@ -110,14 +132,14 @@ class _ProductsDetailViewBottomState
           children: [
             TextSpan(text: 'KG:'),
             TextSpan(
-              text: ' ${widget.product.urunParakendeFiyat} TL',
+              text: ' ${product.urunParakendeFiyat} TL',
               style: TextStyle(color: themeData.secondary),
             ),
             TextSpan(text: '\nKalan:'),
             TextSpan(
-              text: ' ${widget.product.stokDurumu} KG',
+              text: ' ${product.stokDurumu} KG',
               style: TextStyle(
-                color: getStokRengi(widget.product.stokDurumu ?? 0),
+                color: getStokRengi(product.stokDurumu ?? 0),
               ),
             ),
           ],

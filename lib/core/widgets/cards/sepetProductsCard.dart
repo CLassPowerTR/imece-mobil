@@ -42,7 +42,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
       onTap: () {
         setState(() {
           Navigator.pushNamed(context, '/products/productsDetail',
-              arguments: widget.product);
+              arguments: widget.product.urunId ?? 0);
         });
       },
       child: Stack(

@@ -1,8 +1,8 @@
 part of '../add_product_screen.dart';
 
 extension AddProductExtensions on BuildContext {
-  Widget addProductBody(User user) {
-    return AddProductViewBody(profileName: user);
+  Widget addProductBody(User user, {Product? product}) {
+    return AddProductViewBody(profileName: user, product: product);
   }
 }
 

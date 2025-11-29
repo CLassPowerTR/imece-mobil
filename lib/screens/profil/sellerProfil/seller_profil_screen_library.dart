@@ -27,3 +27,5 @@ export 'package:imecehub/providers/stories_campaings_provider.dart';
 export 'package:imecehub/providers/products_provider.dart';
 export 'package:imecehub/screens/home/style/home_screen_style.dart';
 export 'package:imecehub/services/api_service.dart';
+export 'package:file_picker/file_picker.dart';
+export 'dart:io';

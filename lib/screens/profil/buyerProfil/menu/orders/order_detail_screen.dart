@@ -317,7 +317,7 @@ class OrderDetailScreen extends ConsumerWidget {
                       Navigator.pushNamed(
                         context,
                         '/products/productsDetail',
-                        arguments: product,
+                        arguments: product.urunId ?? 0,
                       );
                     } catch (e) {
                       Navigator.of(context).pop();
