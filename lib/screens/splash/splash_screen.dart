@@ -1,12 +1,17 @@
 // lib/screens/splash/splash_screen.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/stories_campaings_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../models/products.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -23,31 +28,75 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   String _loadingMessage = '';
   double _progress = 0.0;
+  String _version = '';
+  String _buildNumber = '';
 
   @override
   void initState() {
     super.initState();
+    _loadVersion();
     _initializeAnimations();
+
     Future.microtask(() => _initializeApp());
+  }
+
+  Future<void> _loadVersion() async {
+    // package_info_plus bazı durumlarda (özellikle hot-reload / tam restart olmadan)
+    // MissingPluginException fırlatabilir veya kanal hiç cevap vermezse bekletebilir.
+    // Splash'ın takılmaması için timeout + güvenli fallback uyguluyoruz.
+    const fallbackVersion = 'Debug'; // pubspec.yaml: version: 0.0.1
+
+    try {
+      final info = await PackageInfo.fromPlatform().timeout(
+        const Duration(milliseconds: 800),
+      );
+      if (!mounted) return;
+      setState(() {
+        _version = info.version;
+        _buildNumber = info.buildNumber;
+      });
+      debugPrint('Uygulama Versiyonu: ${info.version}+${info.buildNumber}');
+    } on MissingPluginException catch (e) {
+      debugPrint('Versiyon bilgisi alınamadı (plugin yok): $e');
+      if (!mounted) return;
+      setState(() {
+        _version = fallbackVersion;
+        _buildNumber = '';
+      });
+    } on TimeoutException catch (e) {
+      debugPrint('Versiyon bilgisi alınamadı (timeout): $e');
+      if (!mounted) return;
+      setState(() {
+        _version = fallbackVersion;
+        _buildNumber = '';
+      });
+    } catch (e) {
+      debugPrint('Versiyon bilgisi alınamadı: $e');
+      if (!mounted) return;
+      setState(() {
+        _version = fallbackVersion;
+        _buildNumber = '';
+      });
+    }
   }
 
   void _initializeAnimations() {
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.5, curve: Curves.easeInOut),
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
       ),
     );
 
@@ -59,11 +108,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       bool isUserLoggedIn = false;
 
       // 1. Auth Provider'ı kontrol et (İlk öncelik)
-      await _updateProgress(0.20, '');
+      await _updateProgress(0.15, '');
       try {
         final user = ref.read(userProvider);
         isUserLoggedIn = user != null;
-        await Future.delayed(const Duration(milliseconds: 300));
         debugPrint(
           'Auth kontrol edildi. Kullanıcı: ${isUserLoggedIn ? "Giriş yapmış" : "Giriş yapmamış"}',
         );
@@ -72,63 +120,61 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         isUserLoggedIn = false;
       }
 
-      // 2. Ürünleri yükle (Her durumda)
-      await _updateProgress(0.40, '');
-      try {
-        final repository = ref.read(productsRepositoryProvider);
-        await repository.fetchProducts();
-        await Future.delayed(const Duration(milliseconds: 150));
-      } catch (e) {
-        debugPrint('Ürünler yüklenemedi: $e');
-      }
+      // Paralel yükleme için Future listesi
+      final futures = <Future>[];
 
-      // 3. Popüler ürünleri yükle (Her durumda)
-      await _updateProgress(0.55, '');
-      try {
-        final repository = ref.read(productsRepositoryProvider);
-        await repository.fetchPopulerProducts();
-        await Future.delayed(const Duration(milliseconds: 150));
-      } catch (e) {
-        debugPrint('Popüler ürünler yüklenemedi: $e');
-      }
+      // 2-4. Temel verileri paralel yükle (Her durumda)
+      await _updateProgress(0.30, '');
 
-      // 4. Hikayeler ve kampanyaları yükle (Her durumda)
-      await _updateProgress(0.70, '');
-      try {
-        await ref.read(storiesCampaignsProvider.future);
-        await Future.delayed(const Duration(milliseconds: 150));
-      } catch (e) {
-        debugPrint('Hikayeler yüklenemedi: $e');
-      }
+      futures.add(
+        ref.read(productsRepositoryProvider).fetchProducts().catchError((e) {
+          debugPrint('Ürünler yüklenemedi: $e');
+          return <Product>[];
+        }),
+      );
 
-      // 5. Kampanyaları yükle (Her durumda)
-      await _updateProgress(0.80, '');
+      futures.add(
+        ref.read(productsRepositoryProvider).fetchPopulerProducts().catchError((
+          e,
+        ) {
+          debugPrint('Popüler ürünler yüklenemedi: $e');
+          return <Product>[];
+        }),
+      );
+
+      futures.add(
+        ref.read(storiesCampaignsProvider.future).catchError((e) {
+          debugPrint('Hikayeler yüklenemedi: $e');
+          return const StoriesCampaignsState(stories: [], campaigns: []);
+        }),
+      );
+
+      // Paralel işlemleri bekle
+      await Future.wait(futures);
+      await _updateProgress(0.65, '');
+
+      // 5. Kampanyaları yükle
       try {
-        final repository = ref.read(productsRepositoryProvider);
-        await repository.fetchCampaigns();
-        await Future.delayed(const Duration(milliseconds: 150));
+        await ref.read(productsRepositoryProvider).fetchCampaigns();
       } catch (e) {
         debugPrint('Kampanyalar yüklenemedi: $e');
       }
 
+      await _updateProgress(0.85, '');
+
       // 6. Sepeti yükle (Sadece giriş yapmış kullanıcılar için)
       if (isUserLoggedIn) {
-        await _updateProgress(0.90, '');
         try {
           await ref.read(cartProvider.notifier).loadCart();
-          await Future.delayed(const Duration(milliseconds: 150));
           debugPrint('Sepet yüklendi');
         } catch (e) {
           debugPrint('Sepet yüklenemedi: $e');
         }
-      } else {
-        await _updateProgress(0.90, '');
-        await Future.delayed(const Duration(milliseconds: 150));
       }
 
       // 7. Tamamlandı - Hoş geldiniz!
       await _updateProgress(1.0, 'Hoş geldiniz!');
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 400));
 
       // Ana sayfaya yönlendir
       if (mounted) {
@@ -239,19 +285,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 opacity: _fadeAnimation,
                 child: Column(
                   children: [
-                    // Progress Bar
+                    // Progress Bar with Animation
                     _buildNeumorphicContainer(
                       isPressed: true,
                       padding: const EdgeInsets.all(8),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: LinearProgressIndicator(
-                          value: _progress,
-                          minHeight: isSmallScreen ? 8 : 10,
-                          backgroundColor: Colors.transparent,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF4ECDC4),
-                          ),
+                        child: TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          tween: Tween<double>(begin: 0, end: _progress),
+                          builder: (context, value, child) {
+                            return LinearProgressIndicator(
+                              value: value,
+                              minHeight: isSmallScreen ? 8 : 10,
+                              backgroundColor: Colors.transparent,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF4ECDC4),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -290,7 +343,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: Text(
-                  'Versiyon 1.0.0',
+                  _version.isNotEmpty
+                      ? 'Versiyon $_version${_buildNumber.isNotEmpty ? '+$_buildNumber' : ''}'
+                      : '',
                   style: GoogleFonts.poppins(
                     fontSize: isSmallScreen ? 11 : 12,
                     color: const Color(0xFF9CA3AF),

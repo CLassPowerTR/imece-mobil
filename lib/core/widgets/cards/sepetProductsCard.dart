@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/constants/app_colors.dart';
-import 'package:imecehub/core/widgets/richText.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/users.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SepetProductsCard extends StatefulWidget {
   final Product product;
@@ -35,318 +37,477 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
     final product = widget.product;
     final item = widget.item;
     final themeData = HomeStyle(context: context);
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          Navigator.pushNamed(
-            context,
-            '/products/productsDetail',
-            arguments: widget.product.urunId ?? 0,
-          );
-        });
-      },
+    final totalPrice =
+        (double.tryParse(item['miktar'].toString()) ?? 0) *
+        (double.tryParse(product.urunParakendeFiyat.toString()) ?? 0);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
       child: Stack(
         children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: themeData.surfaceContainer,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                // 3D Neumorphic Shadow - Dark
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  offset: const Offset(8, 8),
-                  blurRadius: 15,
-                  spreadRadius: 0,
-                ),
-                // 3D Neumorphic Shadow - Light
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.7),
-                  offset: const Offset(-8, -8),
-                  blurRadius: 15,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Builder(
-                  builder: (context) {
-                    if (item['tahmini_teslimat_tarihi'] != null) {
-                      return Text(
-                        'Tahmini Teslim Tarihi: ${item['tahmini_teslimat_tarihi']}',
-                      );
-                    }
-                    return SizedBox.shrink();
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  spacing: 8,
-                  children: [
-                    // 3D Neumorphic Image Container
-                    Container(
-                      width: 125,
-                      height: 95,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            offset: const Offset(4, 4),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.6),
-                            offset: const Offset(-4, -4),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child:
-                            product.kapakGorseli != null &&
-                                product.kapakGorseli != ''
-                            ? Image.network(
-                                product.kapakGorseli!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: themeData.surfaceContainer,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 40,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                color: themeData.surfaceContainer,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  size: 40,
-                                ),
-                              ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        spacing: 5,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          richText(
-                            context,
-                            maxLines: 6,
-                            color: themeData.primary,
-                            textAlign: TextAlign.start,
-                            children: [
-                              TextSpan(
-                                text: product.urunAdi ?? 'None',
-                                style: TextStyle(
-                                  overflow: TextOverflow.ellipsis,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: themeData.bodyLarge.fontSize,
-                                ),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/profil/sellerProfile',
-                                  arguments: [widget.sellerProfile, false],
-                                );
-                              });
-                            },
-                            child: Text(
-                              '\n${widget.sellerProfile.saticiProfili?.magazaAdi}',
-                              style: TextStyle(
-                                color: Colors.blue[300],
-                                fontWeight: FontWeight.bold,
-                                fontSize: themeData.bodyMedium.fontSize,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 5),
-                  child: Row(
-                    spacing: 10,
+          InkWell(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/products/productsDetail',
+                arguments: widget.product.urunId ?? 0,
+              );
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = constraints.maxWidth < 360;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 10),
-                        padding: const EdgeInsets.only(
-                          left: 12,
-                          top: 4,
-                          bottom: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: themeData.surfaceContainer,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            width: 2,
-                            color: AppColors.surface(context),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Sol: Ürün Görseli
+                          _buildProductImage(
+                            product,
+                            themeData,
+                            isSmallScreen: isSmallScreen,
                           ),
-                          // İç kısım için pressed neumorphic
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              offset: const Offset(2, 2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.5),
-                              offset: const Offset(-2, -2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Sol tarafta "11 KG" yazısı
-                            Text(
-                              '${item['miktar']} Adet',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            // Sağ tarafta - ve + butonları
-                            Row(
+                          SizedBox(width: isSmallScreen ? 8 : 12),
+
+                          // Orta: Ürün Bilgileri
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // "-" butonu
-                                Builder(
-                                  builder: (context) {
-                                    if (item['miktar'] > 1) {
-                                      return IconButton(
-                                        icon: Icon(
-                                          Icons.remove,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            widget.removeCart();
-                                          });
-                                        },
-                                        padding: EdgeInsets.zero,
-                                        constraints: BoxConstraints(),
-                                        iconSize: 20,
-                                      );
-                                    } else {
-                                      return IconButton(
-                                        icon: Icon(
-                                          Icons.delete_forever_outlined,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            widget.deleteFromCart();
-                                          });
-                                        },
-                                        padding: EdgeInsets.zero,
-                                        constraints: BoxConstraints(),
-                                        iconSize: 20,
-                                      );
-                                    }
-                                  },
+                                _buildProductTitle(
+                                  product,
+                                  context,
+                                  isSmallScreen: isSmallScreen,
                                 ),
-                                // "+" butonu
-                                Container(
-                                  color: Colors.black,
-                                  height: 20,
-                                  width: 1,
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.add, color: Colors.green),
-                                  onPressed: () {
-                                    setState(() {
-                                      widget.updateCart();
-                                    });
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: BoxConstraints(),
-                                  iconSize: 20,
+                                const SizedBox(height: 4),
+                                _buildSellerName(
+                                  context,
+                                  isSmallScreen: isSmallScreen,
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                      richText(
-                        textAlign: TextAlign.left,
-                        fontSize: themeData.bodyMedium.fontSize,
-                        context,
-                        children: [
-                          TextSpan(
-                            text: '1 Adet: ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          TextSpan(text: ' ${product.urunParakendeFiyat} TL'),
-                          TextSpan(
-                            text: '\nMaks: ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: '${product.stokDurumu} Adet'),
+
+                          // Sağ üst silme butonu için alan
+                          const SizedBox(width: 32),
                         ],
                       ),
-                      Expanded(
-                        child: richText(
-                          fontSize: themeData.bodyMedium.fontSize,
-                          textAlign: TextAlign.center,
-                          context,
-                          maxLines: 6,
-                          children: [
-                            TextSpan(
-                              text: 'Ürün Tutarı',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                      const SizedBox(height: 12),
+
+                      // Fiyat bilgisi
+                      _buildPriceInfo(
+                        product,
+                        item,
+                        context,
+                        isSmallScreen: isSmallScreen,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Alt satır: Adet seçici ve toplam fiyat
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: _buildQuantitySelector(
+                              item,
+                              themeData,
+                              isSmallScreen: isSmallScreen,
                             ),
-                            TextSpan(
-                              text:
-                                  '\n${((double.tryParse(item['miktar'].toString()) ?? 0) * (double.tryParse(product.urunParakendeFiyat.toString()) ?? 0)).toStringAsFixed(2)} TL',
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          _buildTotalPrice(
+                            totalPrice,
+                            context,
+                            isSmallScreen: isSmallScreen,
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ),
-          Builder(
-            builder: (context) {
-              if (item['miktar'] > 1) {
-                return Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: Icon(Icons.close_rounded, color: Colors.red),
-                    onPressed: () {
-                      widget.deleteFromCart();
-                    },
-                  ),
-                );
-              } else {
-                return SizedBox.shrink();
-              }
-            },
+
+          // Sağ Üst: Silme İkonu
+          Positioned(top: 8, right: 8, child: _buildDeleteButton(themeData)),
+        ],
+      ),
+    );
+  }
+
+  // Ürün Görseli
+  Widget _buildProductImage(
+    Product product,
+    themeData, {
+    bool isSmallScreen = false,
+  }) {
+    final size = isSmallScreen ? 100.0 : 120.0;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[100],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: product.kapakGorseli != null && product.kapakGorseli!.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl:
+                    product.kapakGorseli ?? NotFound.defaultBannerImageUrl,
+                fit: BoxFit.cover,
+                memCacheWidth: 400,
+                maxHeightDiskCache: 400,
+                fadeInDuration: const Duration(milliseconds: 200),
+                placeholder: (context, url) => Center(
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) {
+                  debugPrint('Image load error: $error for URL: $url');
+                  return Container(
+                    color: Colors.grey[100],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.broken_image_outlined,
+                          size: isSmallScreen ? 24 : 32,
+                          color: Colors.grey[400],
+                        ),
+                        if (!isSmallScreen) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Yüklenemedi',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              )
+            : Container(
+                color: Colors.grey[100],
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  size: isSmallScreen ? 24 : 32,
+                  color: Colors.grey[400],
+                ),
+              ),
+      ),
+    );
+  }
+
+  // Ürün Başlığı
+  Widget _buildProductTitle(
+    Product product,
+    BuildContext context, {
+    bool isSmallScreen = false,
+  }) {
+    return Text(
+      product.urunAdi ?? 'Ürün',
+      style: TextStyle(
+        fontSize: isSmallScreen ? 13 : 15,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF1F2937),
+        height: 1.3,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  // Satıcı Adı
+  Widget _buildSellerName(BuildContext context, {bool isSmallScreen = false}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/profil/sellerProfile',
+          arguments: [widget.sellerProfile, false],
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.store_outlined,
+            size: isSmallScreen ? 12 : 14,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              widget.sellerProfile.saticiProfili?.magazaAdi ?? 'Satıcı',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 11 : 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.blue[600],
+                decoration: TextDecoration.underline,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Fiyat Bilgisi (Birim fiyat ve stok)
+  Widget _buildPriceInfo(
+    Product product,
+    Map item,
+    BuildContext context, {
+    bool isSmallScreen = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Birim',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 11,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${product.urunParakendeFiyat} ₺',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 11 : 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1F2937),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Container(width: 1, color: Colors.grey[300]),
+            ),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Stok',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 11,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${product.stokDurumu}',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 11 : 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1F2937),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Modern Adet Seçici (Pill-shaped)
+  Widget _buildQuantitySelector(
+    Map item,
+    themeData, {
+    bool isSmallScreen = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Eksi Butonu
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  if (item['miktar'] > 1) {
+                    widget.removeCart();
+                  } else {
+                    widget.deleteFromCart();
+                  }
+                });
+              },
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                bottomLeft: Radius.circular(24),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  item['miktar'] > 1
+                      ? Icons.remove_rounded
+                      : Icons.delete_outline_rounded,
+                  size: 18,
+                  color: item['miktar'] > 1
+                      ? Colors.grey[700]
+                      : Colors.red[400],
+                ),
+              ),
+            ),
+          ),
+
+          // Miktar
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 8 : 12),
+            child: Text(
+              '${item['miktar']}',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 13 : 15,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+          ),
+
+          // Artı Butonu
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  widget.updateCart();
+                });
+              },
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.add_rounded,
+                  size: 18,
+                  color: Colors.green[600],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Toplam Fiyat
+  Widget _buildTotalPrice(
+    double totalPrice,
+    BuildContext context, {
+    bool isSmallScreen = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Toplam',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 10 : 11,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '${totalPrice.toStringAsFixed(2)} ₺',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 14 : 16,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF4ECDC4),
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  // Silme Butonu (Sağ Üst)
+  Widget _buildDeleteButton(themeData) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          widget.deleteFromCart();
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Icon(Icons.close_rounded, size: 18, color: Colors.red[400]),
+        ),
       ),
     );
   }

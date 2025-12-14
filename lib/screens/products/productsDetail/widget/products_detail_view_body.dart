@@ -68,24 +68,27 @@ class _ProductsDetailViewBodyState
     return productAsync.when(
       loading: () => Center(child: buildLoadingBar(context)),
       error: (error, stackTrace) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Ürün yüklenemedi: $error'),
-            const SizedBox(height: 16),
-            textButton(
-              context,
-              'Tekrar Dene',
-              onPressed: () {
-                ref.invalidate(productProvider(widget.productId));
-              },
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Ürün yüklenemedi: $error', textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              textButton(
+                context,
+                'Tekrar Dene',
+                onPressed: () {
+                  ref.invalidate(productProvider(widget.productId));
+                },
+              ),
+            ],
+          ),
         ),
       ),
       data: (product) {
-
         double width = MediaQuery.of(context).size.width;
+        final isSmallScreen = width < 360;
         final themeData = HomeStyle(context: context);
         final currentUser = ref.watch(userProvider);
         final isLoggedIn = currentUser != null;
@@ -96,23 +99,37 @@ class _ProductsDetailViewBodyState
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            spacing: 15,
             children: [
               _urunFoto(width, themeData, isLoggedIn, currentUser, product),
-              _urunBilgi(themeData, product),
-              _urunStokBilgi(width, themeData, product),
-              _urunSoruVeCevaplar(context, themeData),
+              SizedBox(height: isSmallScreen ? 10 : 15),
+              _urunBilgi(themeData, product, isSmallScreen),
+              SizedBox(height: isSmallScreen ? 10 : 15),
+              _urunStokBilgi(width, themeData, product, isSmallScreen),
+              SizedBox(height: isSmallScreen ? 10 : 15),
+              _urunSoruVeCevaplar(context, themeData, isSmallScreen),
               Divider(),
-              _urunSaticiBilgli(themeData, width, product),
+              _urunSaticiBilgli(themeData, width, product, isSmallScreen),
               _urunAciklama(
                 context,
                 themeData,
                 width,
                 product.aciklama ?? '',
+                isSmallScreen,
               ),
-              _urunYorumlari(context, width, themeData),
-              _urunSoruCevap(context, themeData, width),
-              customText('Benzer Ürünler', context, weight: FontWeight.bold),
+              _urunYorumlari(context, width, themeData, isSmallScreen),
+              _urunSoruCevap(context, themeData, width, isSmallScreen),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 12 : 15,
+                  vertical: 8,
+                ),
+                child: customText(
+                  'Benzer Ürünler',
+                  context,
+                  weight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 10 : 15),
             ],
           ),
         );
@@ -124,10 +141,14 @@ class _ProductsDetailViewBodyState
     BuildContext context,
     HomeStyle themeData,
     double width,
+    bool isSmallScreen,
   ) {
     return container(
       context,
-      padding: EdgeInsets.only(left: 20, top: 10),
+      padding: EdgeInsets.only(
+        left: isSmallScreen ? 12 : 20,
+        top: isSmallScreen ? 8 : 10,
+      ),
       color: themeData.surfaceContainer,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -136,9 +157,11 @@ class _ProductsDetailViewBodyState
         children: [
           customText(
             'Ürün Soru & Cevap',
-            padding: EdgeInsets.symmetric(vertical: 10),
+            padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 10),
             context,
-            size: themeData.bodyLarge.fontSize,
+            size: isSmallScreen
+                ? themeData.bodyMedium.fontSize
+                : themeData.bodyLarge.fontSize,
             weight: FontWeight.w800,
           ),
           Divider(),
@@ -166,6 +189,7 @@ class _ProductsDetailViewBodyState
     BuildContext context,
     double width,
     HomeStyle themeData,
+    bool isSmallScreen,
   ) {
     return FutureBuilder<UrunYorumlarResponse>(
       future: _futureUrunYorumlar,
@@ -173,15 +197,33 @@ class _ProductsDetailViewBodyState
         if (yorumSnapshot.connectionState == ConnectionState.waiting) {
           return Column(
             mainAxisSize: MainAxisSize.min,
-            children: [buildLoadingBar(context), const SizedBox(height: 16)],
+            children: [
+              buildLoadingBar(context),
+              SizedBox(height: isSmallScreen ? 12 : 16),
+            ],
           );
         } else if (yorumSnapshot.hasError) {
-          return Center(
-            child: Text('Yorumlar alınamadı: ${yorumSnapshot.error}'),
+          return Padding(
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+            child: Center(
+              child: Text(
+                'Yorumlar alınamadı: ${yorumSnapshot.error}',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: isSmallScreen ? 12 : 14),
+              ),
+            ),
           );
         } else if (!yorumSnapshot.hasData ||
             yorumSnapshot.data!.yorumlar.isEmpty) {
-          return Center(child: Text('Bu ürüne ait yorum bulunamadı'));
+          return Padding(
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+            child: Center(
+              child: Text(
+                'Bu ürüne ait yorum bulunamadı',
+                style: TextStyle(fontSize: isSmallScreen ? 12 : 14),
+              ),
+            ),
+          );
         }
 
         final filteredYorumlar = yorumSnapshot.data!;
@@ -190,7 +232,10 @@ class _ProductsDetailViewBodyState
           context,
           width: width,
           color: themeData.surfaceContainer,
-          padding: EdgeInsets.only(left: 20, top: 10),
+          padding: EdgeInsets.only(
+            left: isSmallScreen ? 12 : 20,
+            top: isSmallScreen ? 8 : 10,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,13 +244,15 @@ class _ProductsDetailViewBodyState
               customText(
                 'Ürün Yorumları',
                 context,
-                padding: EdgeInsets.symmetric(vertical: 10),
-                size: themeData.bodyLarge.fontSize,
+                padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 10),
+                size: isSmallScreen
+                    ? themeData.bodyMedium.fontSize
+                    : themeData.bodyLarge.fontSize,
                 weight: FontWeight.w800,
               ),
               Divider(),
               SizedBox(
-                height: 175,
+                height: isSmallScreen ? 160 : 175,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: filteredYorumlar.yorumlar.length,
@@ -241,21 +288,25 @@ class _ProductsDetailViewBodyState
     HomeStyle themeData,
     double width,
     String aciklama,
+    bool isSmallScreen,
   ) {
     final shouldShowToggle = aciklama.trim().length > 180;
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 12 : 15,
+        vertical: isSmallScreen ? 8 : 10,
+      ),
       color: themeData.surfaceContainer,
-      //height: biggerContainer == false ? urunAciklamaContainerHeight : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        //mainAxisAlignment: MainAxisAlignment.center,
         children: [
           richText(
             fontWeight: FontWeight.w300,
-            fontSize: themeData.bodyMedium.fontSize,
+            fontSize: isSmallScreen
+                ? themeData.bodySmall.fontSize
+                : themeData.bodyMedium.fontSize,
             textAlign: TextAlign.left,
             context,
             maxLines: biggerContainer == false ? 4 : 999,
@@ -273,7 +324,7 @@ class _ProductsDetailViewBodyState
           if (shouldShowToggle)
             SizedBox(
               width: width,
-              height: 35,
+              height: isSmallScreen ? 30 : 35,
               child: Center(
                 child: GestureDetector(
                   onTap: () {
@@ -286,6 +337,7 @@ class _ProductsDetailViewBodyState
                     context,
                     color: themeData.secondary,
                     weight: FontWeight.bold,
+                    size: isSmallScreen ? 13 : null,
                   ),
                 ),
               ),
@@ -299,6 +351,7 @@ class _ProductsDetailViewBodyState
     HomeStyle themeData,
     double width,
     Product product,
+    bool isSmallScreen,
   ) {
     // User verisini product'a göre yükle
     _futureUser ??= ApiService.fetchUserId(product.satici);
@@ -308,51 +361,66 @@ class _ProductsDetailViewBodyState
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
             mainAxisSize: MainAxisSize.min,
-            children: [buildLoadingBar(context), const SizedBox(height: 16)],
+            children: [
+              buildLoadingBar(context),
+              SizedBox(height: isSmallScreen ? 12 : 16),
+            ],
           );
         } else if (snapshot.hasError) {
-          // Hata durumu
-          return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+          return Padding(
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+            child: Center(
+              child: Text(
+                'Bir hata oluştu: ${snapshot.error}',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: isSmallScreen ? 12 : 14),
+              ),
+            ),
+          );
         } else {
           final user = snapshot.data!;
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 15),
             child: Column(
-              spacing: 15,
               children: [
-                Row(
-                  spacing: 3,
+                // Satıcı Bilgisi - Responsive Wrap
+                Wrap(
+                  spacing: isSmallScreen ? 4 : 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     customText(
                       'Ürünün Satıcısı:',
                       context,
                       color: themeData.primary.withOpacity(0.3),
+                      size: isSmallScreen ? 12 : null,
                     ),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          Navigator.pushNamed(
-                            context,
-                            '/profil/sellerProfile',
-                            arguments: [user, false],
-                          );
-                        });
+                        Navigator.pushNamed(
+                          context,
+                          '/profil/sellerProfile',
+                          arguments: [user, false],
+                        );
                       },
                       child: customText(
                         user.username,
                         context,
                         color: Colors.blue,
                         weight: FontWeight.bold,
+                        size: isSmallScreen ? 12 : null,
                       ),
                     ),
                     container(
                       context,
-                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 4 : 8,
+                      ),
                       alignment: Alignment.center,
                       borderRadius: BorderRadius.circular(4),
                       color: themeData.secondary,
-                      width: 35,
-                      height: 20,
+                      width: isSmallScreen ? 30 : 35,
+                      height: isSmallScreen ? 18 : 20,
                       isBoxShadow: false,
                       child: customText(
                         user.saticiProfili?.degerlendirmePuani.toString() ??
@@ -360,51 +428,75 @@ class _ProductsDetailViewBodyState
                         context,
                         color: themeData.onSecondary,
                         weight: FontWeight.bold,
+                        size: isSmallScreen ? 10 : null,
                       ),
                     ),
-                    customText(
-                      '5(beş) üzerinden',
-                      context,
-                      color: themeData.primary.withOpacity(0.3),
-                      size: themeData.bodySmall.fontSize,
+                    Expanded(
+                      child: customText(
+                        '5(beş) üzerinden',
+                        context,
+                        maxLines: 2,
+                        color: themeData.primary.withOpacity(0.3),
+                        size: isSmallScreen ? 10 : themeData.bodySmall.fontSize,
+                      ),
                     ),
                   ],
                 ),
-                Row(
-                  spacing: 35,
+                SizedBox(height: isSmallScreen ? 12 : 15),
+
+                // Butonlar - Responsive Row/Wrap
+                Wrap(
+                  spacing: isSmallScreen ? 8 : 12,
+                  runSpacing: isSmallScreen ? 8 : 10,
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    textButton(
-                      context,
-                      'Satıcıyı favorilere ekle   ',
-                      textAlignment: Alignment.center,
-                      buttonColor: themeData.onSecondary,
-                      titleColor: themeData.primary,
-                      minSizeWidth: width * 0.4,
-                      elevation: 0,
-                      border: true,
-                      fontSize: themeData.bodyLarge.fontSize,
-                      icon: Image.network(
-                        //color: Color.fromRGBO(255, 229, 0, 1),
-                        //colorBlendMode: BlendMode.s,
-                        fit: BoxFit.cover,
-                        width: 15,
-                        height: 20,
-                        'https://i.pinimg.com/736x/47/ef/b4/47efb45d1159f37da35e5031d7906cd9.jpg',
+                    // Favorilere Ekle Butonu
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: isSmallScreen ? width * 0.5 : width * 0.55,
+                        maxWidth: isSmallScreen ? width * 0.92 : width * 0.6,
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      borderRadius: BorderRadius.circular(6),
+                      child: textButton(
+                        context,
+                        isSmallScreen
+                            ? 'Favorilere ekle'
+                            : 'Satıcıyı favorilere ekle',
+                        textAlignment: Alignment.center,
+                        buttonColor: themeData.onSecondary,
+                        titleColor: themeData.primary,
+                        elevation: 0,
+                        border: true,
+                        fontSize: isSmallScreen
+                            ? 11
+                            : themeData.bodyMedium.fontSize,
+                        icon: Image.network(
+                          fit: BoxFit.cover,
+                          width: isSmallScreen ? 12 : 15,
+                          height: isSmallScreen ? 14 : 20,
+                          'https://i.pinimg.com/736x/47/ef/b4/47efb45d1159f37da35e5031d7906cd9.jpg',
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 8 : 12,
+                          vertical: isSmallScreen ? 8 : 10,
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
+
+                    // İmece Onaylı Badge
                     Builder(
                       builder: (context) {
                         if (user.saticiProfili?.imeceOnay ?? false) {
                           return richText(
                             context,
+                            fontSize: isSmallScreen ? 11 : 13,
                             children: [
-                              TextSpan(text: 'İmece onaylı'),
+                              TextSpan(text: 'İmece onaylı '),
                               WidgetSpan(
                                 child: SizedBox(
-                                  width: 20,
-                                  height: 20,
+                                  width: isSmallScreen ? 14 : 18,
+                                  height: isSmallScreen ? 14 : 18,
                                   child: Image.network(
                                     color: Color.fromRGBO(255, 229, 0, 1),
                                     fit: BoxFit.cover,
@@ -432,19 +524,20 @@ class _ProductsDetailViewBodyState
                                 ),
                             child: richText(
                               context,
+                              fontSize: isSmallScreen ? 11 : 13,
                               children: [
                                 TextSpan(
-                                  text: 'İmece onaylı',
+                                  text: 'İmece onaylı ',
                                   style: TextStyle(
                                     color: Colors.white,
                                     decoration: TextDecoration.underline,
-                                    fontSize: themeData.bodyLarge.fontSize,
+                                    fontSize: isSmallScreen ? 11 : 13,
                                   ),
                                 ),
                                 WidgetSpan(
                                   child: SizedBox(
-                                    width: 20,
-                                    height: 20,
+                                    width: isSmallScreen ? 14 : 18,
+                                    height: isSmallScreen ? 14 : 18,
                                     child: Image.network(
                                       'https://icons.veryicon.com/png/o/miscellaneous/linear/certificate-11.png',
                                     ),
@@ -469,6 +562,7 @@ class _ProductsDetailViewBodyState
   GestureDetector _urunSoruVeCevaplar(
     BuildContext context,
     HomeStyle themeData,
+    bool isSmallScreen,
   ) {
     return GestureDetector(
       onTap: () {
@@ -479,73 +573,97 @@ class _ProductsDetailViewBodyState
         );
       },
       child: Container(
-        margin: EdgeInsets.only(left: 15),
+        margin: EdgeInsets.only(left: isSmallScreen ? 12 : 15),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.message, color: themeData.secondary),
-            customText('  Ürün Soru & Cevapları (2)', context),
-            Icon(Icons.navigate_next, size: 16),
+            Icon(
+              Icons.message,
+              color: themeData.secondary,
+              size: isSmallScreen ? 18 : 24,
+            ),
+            SizedBox(width: isSmallScreen ? 4 : 8),
+            Flexible(
+              child: customText(
+                'Ürün Soru & Cevapları (2)',
+                context,
+                size: isSmallScreen ? 12 : null,
+              ),
+            ),
+            Icon(Icons.navigate_next, size: isSmallScreen ? 14 : 16),
           ],
         ),
       ),
     );
   }
 
-  Container _urunStokBilgi(
+  Widget _urunStokBilgi(
     double width,
     HomeStyle themeData,
     Product product,
+    bool isSmallScreen,
   ) {
-    return Container(
-      alignment: Alignment.center,
-      height: 30,
-      width: width * 0.3,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: Color.fromRGBO(255, 34, 34, 0.1),
-      ),
-      child: RichText(
-        text: TextSpan(
-          style: TextStyle(
-            color: themeData.primary,
-            fontSize: themeData.bodyMedium.fontSize,
-          ),
-          children: [
-            TextSpan(
-              text: 'Kalan KG:',
-              style: TextStyle(decoration: TextDecoration.underline),
+    // Column içindeki maxWidth constraint yüzünden Container varsayılan olarak genişliyor.
+    // Burada IntrinsicWidth ile içerik kadar genişlemesini sağlıyoruz.
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 15),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: IntrinsicWidth(
+          child: Container(
+            alignment: Alignment.center,
+            constraints: BoxConstraints(minHeight: isSmallScreen ? 26 : 30),
+            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 8 : 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              color: Color.fromRGBO(255, 34, 34, 0.1),
             ),
-            TextSpan(
-              text: ' ${product.stokDurumu.toString()}',
-              style: TextStyle(
-                color: getStokRengi(product.stokDurumu ?? 0),
-                fontWeight: FontWeight.bold,
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: themeData.primary,
+                  fontSize: isSmallScreen ? 11 : themeData.bodyMedium.fontSize,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'Kalan KG:',
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
+                  TextSpan(
+                    text: ' ${product.stokDurumu.toString()}',
+                    style: TextStyle(
+                      color: getStokRengi(product.stokDurumu ?? 0),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Padding _urunBilgi(HomeStyle themeData, Product product) {
+  Padding _urunBilgi(HomeStyle themeData, Product product, bool isSmallScreen) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 15),
       child: RichText(
-        maxLines: 3,
+        maxLines: isSmallScreen ? 2 : 3,
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           style: TextStyle(
             color: themeData.primary,
-            fontSize: themeData.bodyLarge.fontSize,
+            fontSize: isSmallScreen
+                ? themeData.bodyMedium.fontSize
+                : themeData.bodyLarge.fontSize,
             fontWeight: FontWeight.bold,
           ),
           children: [
             TextSpan(text: '${product.urunAdi}  - '),
             TextSpan(
               text: mainCategoryToString(
-                mainCategoryFromInt(product.kategori) ??
-                    MainCategory.meyveler,
+                mainCategoryFromInt(product.kategori) ?? MainCategory.meyveler,
               ),
             ),
           ],
@@ -561,30 +679,30 @@ class _ProductsDetailViewBodyState
     User? currentUser,
     Product product,
   ) {
+    final isSmallScreen = width < 360;
+    final imageHeight = isSmallScreen ? 250.0 : 300.0;
+
     return Stack(
       children: [
         Container(
-          height: 300,
+          height: imageHeight,
           width: width,
           decoration: BoxDecoration(
-            border: Border.all(
-              color: themeData.outline.withOpacity(0.5), // Çizgi rengi
-            ),
+            border: Border.all(color: themeData.outline.withOpacity(0.5)),
             image: DecorationImage(
               fit: BoxFit.cover,
               image: NetworkImage(
                 product.kapakGorseli == ''
                     ? NotFound.defaultBannerImageUrl
-                    : product.kapakGorseli ??
-                          NotFound.defaultBannerImageUrl,
+                    : product.kapakGorseli ?? NotFound.defaultBannerImageUrl,
               ),
             ),
           ),
         ),
         Positioned(
-          height: 13,
+          height: isSmallScreen ? 11 : 13,
           bottom: 5,
-          left: width / 2 - 15,
+          left: width / 2 - (isSmallScreen ? 12 : 15),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.grey.withOpacity(0.7),
@@ -594,11 +712,11 @@ class _ProductsDetailViewBodyState
               children: List.generate(4, (index) {
                 final bool isActive = (index + 1) == activeIndex;
                 return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 2,
-                  ), // yan yana arada boşluk
-                  width: 5,
-                  height: 5,
+                  margin: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 1.5 : 2,
+                  ),
+                  width: isSmallScreen ? 4 : 5,
+                  height: isSmallScreen ? 4 : 5,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isActive
@@ -615,10 +733,10 @@ class _ProductsDetailViewBodyState
             final isSeller = currentUser?.rol == 'satici';
             return isLoggedIn && !isSeller
                 ? Positioned(
-                    width: 40,
-                    height: 40,
-                    right: 10,
-                    top: 10,
+                    width: isSmallScreen ? 36 : 40,
+                    height: isSmallScreen ? 36 : 40,
+                    right: isSmallScreen ? 8 : 10,
+                    top: isSmallScreen ? 8 : 10,
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(

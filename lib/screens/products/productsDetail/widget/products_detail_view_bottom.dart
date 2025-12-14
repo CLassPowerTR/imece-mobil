@@ -28,23 +28,36 @@ class _ProductsDetailViewBottomState
   @override
   Widget build(BuildContext context) {
     final productAsync = ref.watch(productProvider(widget.productId));
+    final width = MediaQuery.of(context).size.width;
+    final isSmallScreen = width < 360;
 
     return productAsync.when(
       loading: () => container(
         context,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 8 : 10,
+          vertical: isSmallScreen ? 6 : 8,
+        ),
         color: HomeStyle(context: context).surfaceContainer,
         width: double.infinity,
-        height: 70,
+        height: isSmallScreen ? 60 : 70,
         child: Center(child: buildLoadingBar(context)),
       ),
       error: (error, stackTrace) => container(
         context,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 8 : 10,
+          vertical: isSmallScreen ? 6 : 8,
+        ),
         color: HomeStyle(context: context).surfaceContainer,
         width: double.infinity,
-        height: 70,
-        child: Center(child: Text('Ürün yüklenemedi')),
+        height: isSmallScreen ? 60 : 70,
+        child: Center(
+          child: Text(
+            'Ürün yüklenemedi',
+            style: TextStyle(fontSize: isSmallScreen ? 12 : 14),
+          ),
+        ),
       ),
       data: (product) {
         final themeData = HomeStyle(context: context);
@@ -52,17 +65,21 @@ class _ProductsDetailViewBottomState
         final isSeller = currentUser?.rol == 'satici';
         return container(
           context,
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallScreen ? 8 : 10,
+            vertical: isSmallScreen ? 6 : 8,
+          ),
           color: themeData.surfaceContainer,
           width: double.infinity,
-          height: 70,
+          height: isSmallScreen ? 60 : 70,
           child: Row(
-            spacing: 10,
             children: [
-              _fiyatStokText(themeData, product),
+              _fiyatStokText(themeData, product, isSmallScreen),
+              SizedBox(width: isSmallScreen ? 6 : 10),
               if (!isSeller) ...[
-                _sepeteEkleButton(context, product),
-                _grupAlimButton(context),
+                _sepeteEkleButton(context, product, isSmallScreen),
+                SizedBox(width: isSmallScreen ? 6 : 10),
+                _grupAlimButton(context, isSmallScreen),
               ],
             ],
           ),
@@ -71,18 +88,23 @@ class _ProductsDetailViewBottomState
     );
   }
 
-  Expanded _grupAlimButton(BuildContext context) {
+  Expanded _grupAlimButton(BuildContext context, bool isSmallScreen) {
     return Expanded(
       child: textButton(
         context,
         'Grup alım',
         buttonColor: Colors.orange,
         elevation: 4,
+        fontSize: isSmallScreen ? 11 : null,
       ),
     );
   }
 
-  Builder _sepeteEkleButton(BuildContext context, Product product) {
+  Builder _sepeteEkleButton(
+    BuildContext context,
+    Product product,
+    bool isSmallScreen,
+  ) {
     final isInSepet = widget.sepetUrunIdList.contains(product.urunId);
 
     return Builder(
@@ -99,7 +121,7 @@ class _ProductsDetailViewBottomState
                 'Stokta Yok',
                 context,
                 color: AppColors.onPrimary(context),
-                size: HomeStyle(context: context).bodyMedium.fontSize,
+                size: isSmallScreen ? 11 : HomeStyle(context: context).bodySmall.fontSize,
               ),
             ),
           );
@@ -111,6 +133,7 @@ class _ProductsDetailViewBottomState
               elevation: 4,
               buttonColor: isInSepet ? Colors.orangeAccent : null,
               onPressed: widget.sepeteEkle,
+              fontSize: isSmallScreen ? 11 : null,
             ),
           );
         }
@@ -118,14 +141,18 @@ class _ProductsDetailViewBottomState
     );
   }
 
-  Expanded _fiyatStokText(HomeStyle themeData, Product product) {
+  Expanded _fiyatStokText(
+    HomeStyle themeData,
+    Product product,
+    bool isSmallScreen,
+  ) {
     return Expanded(
       child: RichText(
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           style: TextStyle(
-            fontSize: themeData.bodyLarge.fontSize,
+            fontSize: isSmallScreen ? 11 : themeData.bodyMedium.fontSize,
             color: themeData.primary,
             fontWeight: FontWeight.bold,
           ),

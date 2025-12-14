@@ -1,5 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
@@ -28,6 +31,7 @@ import 'package:imecehub/core/widgets/cards/productsCard.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/core/widgets/cards/orderCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 part 'buyer_profil_view_header.dart';
 part 'buyer_profil_view_body.dart';

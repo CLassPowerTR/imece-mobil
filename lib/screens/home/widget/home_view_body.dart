@@ -76,9 +76,21 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final themeData = HomeStyle(context: context);
+    final isOnline = ref.watch(isOnlineProvider);
+    
     return Scaffold(
       appBar: HomeHeaderAppBar(),
-      body: RefreshIndicator(
+      body: Column(
+        children: [
+          // Offline Banner
+          if (!isOnline)
+            OfflineBanner(
+              onRetry: () {
+                _refreshFutures();
+              },
+            ),
+          Expanded(
+            child: RefreshIndicator(
         color: themeData.secondary,
         backgroundColor: Colors.white,
         onRefresh: _refreshFutures,
@@ -106,6 +118,9 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             ),
           ),
         ),
+      ),
+          ),
+        ],
       ),
     );
   }

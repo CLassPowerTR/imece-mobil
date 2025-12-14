@@ -12,158 +12,153 @@ class _topProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Performans için değerleri bir kez hesapla
     final theme = HomeStyle(context: context);
-    final screenHeight = MediaQuery.of(context).size.height;
-    final containerHeight = height * 0.4;
-    final topSpacing = screenHeight * 0.06;
-    final secondaryColor = theme.secondary;
-    final primaryColor = theme.primary;
-    final headlineSmallSize = theme.headlineSmall.fontSize;
-    final bodyMediumSize = theme.bodyMedium.fontSize;
+    final isSmallScreen = width < 360;
 
-    // Profil fotoğrafı URL'ini önceden hesapla
     final String profileImageUrl =
         (buyerProfil.profilFotograf == null ||
             (buyerProfil.profilFotograf?.isEmpty ?? true))
         ? NotFound.defaultProfileImageUrl
         : buyerProfil.profilFotograf!;
 
-    // İsim bilgisini önceden hesapla
     final displayName =
         (buyerProfil.firstName == '' && buyerProfil.lastName == '')
         ? buyerProfil.username
         : '${buyerProfil.firstName} ${buyerProfil.lastName}';
 
-    // Rol bilgisini önceden hesapla
     final roleText = buyerProfil.rol == 'alici' ? 'Alıcı' : '';
 
-    return SizedBox(
-      height: height * 0.3,
+    return Container(
+      height: isSmallScreen ? height * 0.25 : height * 0.28,
       width: width,
-      child: Container(
-        height: containerHeight,
-        width: width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-
-            colors: [
-              secondaryColor.withOpacity(0.3),
-              secondaryColor.withOpacity(0.5),
-              secondaryColor.withOpacity(0.7),
-              secondaryColor,
-              secondaryColor.withGreen(190),
-            ],
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 3,
-          children: [
-            SizedBox(height: topSpacing),
-            ClipOval(
-              child: Container(
-                width: 80,
-                height: 80,
-                color: Colors.white,
-                child: Image.network(
-                  profileImageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  cacheWidth: 160,
-                  cacheHeight: 160,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.network(
-                      NotFound.defaultProfileImageUrl,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      cacheWidth: 160,
-                      cacheHeight: 160,
-                    );
-                  },
-                ),
-              ),
-            ),
-            customText(
-              displayName,
-              context,
-              weight: FontWeight.bold,
-              maxLines: 2,
-              size: headlineSmallSize,
-            ),
-            customText(
-              buyerProfil.email,
-              context,
-              color: primaryColor.withOpacity(0.5),
-              maxLines: 2,
-              size: bodyMediumSize,
-            ),
-            if (roleText.isNotEmpty)
-              customText(
-                roleText,
-                context,
-                color: primaryColor.withOpacity(0.5),
-              ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.primary.withOpacity(0.8),
+            theme.secondary.withOpacity(0.9),
+            theme.secondary,
           ],
         ),
       ),
-    );
-  }
-}
-
-class _logoutButton extends ConsumerWidget {
-  final VoidCallback? onLogout;
-  const _logoutButton({this.onLogout});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: TextButton(
-        style: ButtonStyle(
-          padding: WidgetStateProperty.all(
-            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallScreen ? 16 : 20,
+            vertical: isSmallScreen ? 12 : 16,
           ),
-          overlayColor: WidgetStateProperty.all(
-            HomeStyle(context: context).outline.withOpacity(0.08),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Profil Fotoğrafı
+              Hero(
+                tag: 'profile_photo_${buyerProfil.id}',
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                      ),
+                    ],
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: ClipOval(
+                    child:
+                        (buyerProfil.profilFotograf == null ||
+                            (buyerProfil.profilFotograf?.isEmpty ?? true))
+                        ? Container(
+                            width: isSmallScreen ? 80 : 100,
+                            height: isSmallScreen ? 80 : 100,
+                            color: Colors.white,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/vectors/profil.svg',
+                                width: isSmallScreen ? 50 : 60,
+                                height: isSmallScreen ? 50 : 60,
+                                colorFilter: ColorFilter.mode(
+                                  theme.primary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: profileImageUrl,
+                            width: isSmallScreen ? 80 : 100,
+                            height: isSmallScreen ? 80 : 100,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 300,
+                            fadeInDuration: const Duration(milliseconds: 200),
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(color: Colors.white),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.white,
+                              child: Center(
+                                child: SvgPicture.asset(
+                                  'assets/vectors/profil.svg',
+                                  width: isSmallScreen ? 50 : 60,
+                                  height: isSmallScreen ? 50 : 60,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.grey[400]!,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 10 : 12),
+
+              // İsim
+              Text(
+                displayName,
+                style: GoogleFonts.poppins(
+                  fontSize: isSmallScreen ? 18 : 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 4),
+
+              // Rol Badge
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 12 : 16,
+                  vertical: isSmallScreen ? 4 : 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  roleText,
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallScreen ? 11 : 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        onPressed: () async {
-          try {
-            final result = await ref.read(userProvider.notifier).logout();
-            showTemporarySnackBar(context, result);
-          } catch (e) {
-            showTemporarySnackBar(context, e.toString());
-          } finally {
-            if (onLogout != null) {
-              onLogout!();
-            }
-          }
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          spacing: 15,
-          children: [
-            Icon(
-              Icons.logout_outlined,
-              color: Colors.red,
-              size: HomeStyle(context: context).headlineSmall.fontSize,
-            ),
-            customText(
-              'Çıkış Yap',
-              context,
-              weight: FontWeight.w500,
-              size: HomeStyle(context: context).bodyLarge.fontSize,
-              color: Colors.red,
-            ),
-          ],
         ),
       ),
     );
@@ -172,144 +167,299 @@ class _logoutButton extends ConsumerWidget {
 
 class _userMenu extends StatelessWidget {
   final User buyerProfil;
-  const _userMenu({required this.buyerProfil});
 
-  static const List<Map<String, dynamic>> menuItemsInfo = [
-    {
-      'title': 'Profilim',
-      'icon': Icons.person_outline_sharp,
-      'color': '#15d7fa',
-      'route': '/profil/myProfile',
-    },
-    {
-      'title': 'Siparişlerim',
-      'icon': Icons.shopping_basket_outlined,
-      'color': '#3baa00',
-      'route': '/profil/orders',
-    },
-    {
-      'title': 'Değerlendirmelerim',
-      'icon': Icons.star_rate_outlined,
-      'color': '#ffaa56',
-      'route': '/profil/comments',
-    },
-    {
-      'title': 'Dahil Olduğum Gruplar',
-      'icon': Icons.group_outlined,
-      'color': '#aa56ff',
-      'route': '/profil/groups',
-    },
-    {
-      'title': 'İndirim Kuponlarım',
-      'icon': Icons.card_giftcard_outlined,
-      'color': '#cc6c00',
-      'route': '/profil/coupons',
-    },
-    {
-      'title': 'Takip ettiklerim',
-      'icon': Icons.person_outline_sharp,
-      'color': '#ffaaaa',
-      'route': '/profil/follow',
-    },
-    {
-      'title': 'Adres Bilgilerim',
-      'icon': Icons.location_on_outlined,
-      'color': '#00bfbf',
-      'route': '/profil/adress',
-    },
-    {
-      'title': 'Kartlarım',
-      'icon': Icons.credit_card_outlined,
-      'color': '#ff007f',
-      'route': '/profil/cards',
-    },
-    {
-      'title': 'Favorilerim',
-      'icon': Icons.favorite_border,
-      'color': '#ff0000',
-      'route': '/profil/favorite',
-    },
-    {
-      'title': 'Destek',
-      'icon': Icons.support_agent_outlined,
-      'color': '#ff0000',
-      'route': '/profil/support',
-    },
-    {
-      'title': 'Ayarlar',
-      'icon': Icons.settings_outlined,
-      'color': '#000000',
-      'route': '/profil/settings',
-    },
-  ];
+  const _userMenu({required this.buyerProfil});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (int i = 0; i < menuItemsInfo.length; i++) ...[
-            TextButton(
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all(
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                alignment: Alignment.centerLeft,
-                splashFactory: NoSplash.splashFactory,
-                overlayColor: WidgetStateProperty.all(
-                  HomeStyle(context: context).secondary,
-                ),
+    final theme = HomeStyle(context: context);
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+
+    final menuItems = [
+      _MenuItem(
+        icon: Icons.person_outline,
+        title: 'Profilim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/myProfile',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.receipt_long_outlined,
+        title: 'Siparişlerim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/orders',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.favorite_border,
+        title: 'Favorilerim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/favorite',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.star_border,
+        title: 'Değerlendirmelerim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/comments',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.group,
+        title: 'Dahil Olduğum Gruplar',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/groups',
+          arguments: buyerProfil,
+        ),
+      ),
+
+      _MenuItem(
+        icon: Icons.people_outline,
+        title: 'Takip Ettiklerim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/follow',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.card_giftcard_rounded,
+        title: 'İndirim Kuponlarım',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/coupons',
+          arguments: buyerProfil,
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.location_on_outlined,
+        title: 'Adreslerim',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/adress',
+          arguments: {'buyerProfil': buyerProfil},
+        ),
+      ),
+      _MenuItem(
+        icon: Icons.credit_card_rounded,
+        title: 'Kartlarım',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/cards',
+          arguments: buyerProfil,
+        ),
+      ),
+
+      _MenuItem(
+        icon: Icons.support_agent_outlined,
+        title: 'Destek',
+        onTap: () => Navigator.pushNamed(context, '/profil/support'),
+      ),
+      _MenuItem(
+        icon: Icons.settings_outlined,
+        title: 'Ayarlar',
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/profil/settings',
+          arguments: buyerProfil,
+        ),
+      ),
+    ];
+
+    return Column(
+      children: menuItems.map((item) {
+        return Container(
+          margin: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                offset: const Offset(0, 2),
+                blurRadius: 6,
               ),
-              onPressed: () {
-                final route = menuItemsInfo[i]['route'] as String?;
-                if (route != null) {
-                  if (route == '/profil/adress') {
-                    Navigator.pushNamed(
-                      context,
-                      route,
-                      arguments: {'buyerProfil': buyerProfil},
-                    );
-                  } else {
-                    Navigator.pushNamed(context, route);
-                  }
-                } else {
-                  // TODO: route null ise ilgili sayfa eklenecek
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        menuItemsInfo[i]['icon'],
-                        size: 22,
-                        color: Color(
-                          int.parse(
-                            menuItemsInfo[i]['color'].replaceAll('#', '0xff'),
-                          ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: item.onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 14 : 16,
+                  vertical: isSmallScreen ? 14 : 16,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        item.icon,
+                        color: theme.primary,
+                        size: isSmallScreen ? 20 : 22,
+                      ),
+                    ),
+                    SizedBox(width: isSmallScreen ? 12 : 16),
+                    Expanded(
+                      child: Text(
+                        item.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: isSmallScreen ? 14 : 15,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF1F2937),
                         ),
                       ),
-                      SizedBox(width: 12),
-                      customText(menuItemsInfo[i]['title'], context),
-                    ],
-                  ),
-                  Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
-                ],
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: isSmallScreen ? 14 : 16,
+                      color: Colors.grey[400],
+                    ),
+                  ],
+                ),
               ),
             ),
-            if (i != menuItemsInfo.length - 1)
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: Colors.grey.shade300,
-                indent: 8,
-                endIndent: 8,
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _MenuItem {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+}
+
+class _logoutButton extends ConsumerWidget {
+  final VoidCallback onLogout;
+
+  const _logoutButton({required this.onLogout});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            // Logout confirmation dialog
+            final shouldLogout = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  'Çıkış Yap',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
+                content: Text(
+                  'Çıkış yapmak istediğinizden emin misiniz?',
+                  style: GoogleFonts.poppins(),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(
+                      'İptal',
+                      style: GoogleFonts.poppins(color: Colors.grey[600]),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red[600],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Çıkış Yap',
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-          ],
-        ],
+            );
+
+            if (shouldLogout == true) {
+              try {
+                await ref.read(userProvider.notifier).logout();
+                if (context.mounted) {
+                  onLogout();
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Çıkış yapılamadı: $e'),
+                      backgroundColor: Colors.red[700],
+                    ),
+                  );
+                }
+              }
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 14 : 16,
+              vertical: isSmallScreen ? 14 : 16,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.red[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red[200]!),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.logout_rounded,
+                  color: Colors.red[700],
+                  size: isSmallScreen ? 20 : 22,
+                ),
+                SizedBox(width: isSmallScreen ? 8 : 12),
+                Text(
+                  'Çıkış Yap',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallScreen ? 14 : 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

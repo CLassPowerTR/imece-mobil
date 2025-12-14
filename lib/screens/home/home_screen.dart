@@ -23,6 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imecehub/core/widgets/shimmer/categories_shimmer.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
+import 'package:imecehub/core/providers/connectivity_provider.dart';
+import 'package:imecehub/core/widgets/offline_banner.dart';
 
 import '../../services/api_service.dart';
 

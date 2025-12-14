@@ -2080,8 +2080,12 @@ class ApiService {
 
     final uri = Uri.parse(config.supportTicketApiUrl);
     final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll({'X-API-Key': config.apiKey});
+      ..headers.addAll({
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+      });
 
+    // Field'ları ekle
     request.fields['name'] = name;
     request.fields['email'] = email;
     if (phone != null && phone.isNotEmpty) {
@@ -2090,18 +2094,34 @@ class ApiService {
     request.fields['subject'] = subject;
     request.fields['message'] = message;
 
+    debugPrint(
+      'postSupportTicket: Fields eklendi - ${request.fields.keys.toList()}',
+    );
+
+    // Dosyayı ekle (varsa)
     if (attachment != null) {
+      debugPrint(
+        'postSupportTicket: Dosya ekleniyor - filename: ${attachment.filename}, '
+        'length: ${attachment.length} bytes, '
+        'contentType: ${attachment.contentType}',
+      );
       request.files.add(attachment);
+      debugPrint(
+        'postSupportTicket: Dosya eklendi - Total files: ${request.files.length}',
+      );
     }
 
     http.StreamedResponse streamedResponse;
     try {
       debugPrint(
-        'postSupportTicket: İstek gönderiliyor - URL: $uri, fields: ${request.fields.keys.toList()}',
+        'postSupportTicket: Multipart request gönderiliyor - '
+        'URL: $uri, '
+        'fields: ${request.fields.keys.toList()}, '
+        'files: ${request.files.length}',
       );
       streamedResponse = await _deps.httpClient.send(request);
       debugPrint(
-        'postSupportTicket: İstek gönderildi - Status: ${streamedResponse.statusCode}',
+        'postSupportTicket: Response alındı - Status: ${streamedResponse.statusCode}',
       );
     } catch (e, stackTrace) {
       debugPrint('postSupportTicket: İstek gönderilirken hata - Hata: $e');
@@ -2112,32 +2132,50 @@ class ApiService {
     final response = await http.Response.fromStream(streamedResponse);
     final bodyText = utf8.decode(response.bodyBytes);
 
+    debugPrint(
+      'postSupportTicket: Response body length: ${bodyText.length}, '
+      'Status: ${response.statusCode}',
+    );
+
     Map<String, dynamic>? jsonData;
     if (bodyText.isNotEmpty) {
       try {
         final decoded = json.decode(bodyText);
         if (decoded is Map<String, dynamic>) {
           jsonData = decoded;
+          debugPrint('postSupportTicket: JSON parse başarılı');
+        } else {
+          debugPrint(
+            'postSupportTicket: JSON parse uyarısı - Beklenen Map, alınan: ${decoded.runtimeType}',
+          );
         }
-      } catch (e) {
-        debugPrint('postSupportTicket: JSON parse hatası - $e');
+      } catch (e, stackTrace) {
+        debugPrint(
+          'postSupportTicket: JSON parse hatası - $e, Body: ${bodyText.length > 200 ? bodyText.substring(0, 200) + "..." : bodyText}',
+        );
+        debugPrint('postSupportTicket: Stack trace: $stackTrace');
       }
+    } else {
+      debugPrint('postSupportTicket: Response body boş');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       debugPrint(
         'postSupportTicket: Başarılı - Status: ${response.statusCode}',
       );
-      return jsonData ?? {'raw': bodyText};
+      return jsonData ?? {'raw': bodyText, 'status': 'success'};
     }
 
     final errorMessage =
         jsonData?['message'] ??
         jsonData?['detail'] ??
+        jsonData?['error'] ??
         jsonData?.toString() ??
         (bodyText.isNotEmpty ? bodyText : 'Destek talebi oluşturulamadı.');
 
-    debugPrint('postSupportTicket: Hata mesajı: $errorMessage');
+    debugPrint(
+      'postSupportTicket: HATA - Status: ${response.statusCode}, Message: $errorMessage',
+    );
     throw Exception(errorMessage);
   }
 
