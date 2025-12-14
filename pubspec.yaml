@@ -45,6 +45,10 @@ dependencies:
   awesome_snackbar_content: ^0.1.8
   url_launcher: ^6.3.2
   shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+
+  #UI
+  google_fonts: ^6.3.3
 
   # Animations
   animations: ^2.1.1

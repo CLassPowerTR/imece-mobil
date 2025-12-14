@@ -43,9 +43,11 @@ class ApiConfig {
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
   final String paymentSiparisApiUrl =
       dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';
+  final String supportTicketApiUrl = dotenv.env['SUPPOR_TICKET_API_URL'] ?? '';
   final String paymentTriggerApiUrl =
       dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';
+
 
   // Singleton pattern (isteğe bağlı)
   static final ApiConfig instance = ApiConfig._internal();

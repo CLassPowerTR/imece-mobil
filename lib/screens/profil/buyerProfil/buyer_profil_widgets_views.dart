@@ -230,6 +230,12 @@ class _userMenu extends StatelessWidget {
       'route': '/profil/favorite',
     },
     {
+      'title': 'Destek',
+      'icon': Icons.support_agent_outlined,
+      'color': '#ff0000',
+      'route': '/profil/support',
+    },
+    {
       'title': 'Ayarlar',
       'icon': Icons.settings_outlined,
       'color': '#000000',

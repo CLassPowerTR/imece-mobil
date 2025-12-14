@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/constants/app_colors.dart';
-import 'package:imecehub/core/constants/app_paddings.dart';
-import 'package:imecehub/core/constants/app_radius.dart';
-import 'package:imecehub/core/constants/app_textSizes.dart';
-import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/userAdress.dart';
@@ -163,89 +158,200 @@ class AdressCardOrder extends StatelessWidget {
     this.onLocationChange,
   }) : super(key: key);
 
+  IconData _getAddressIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'ev':
+        return Icons.home_rounded;
+      case 'is':
+      case 'iş':
+        return Icons.business_rounded;
+      case 'teslimat':
+        return Icons.local_shipping_rounded;
+      case 'fatura':
+        return Icons.receipt_long_rounded;
+      default:
+        return Icons.location_on_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      margin: const EdgeInsets.all(10),
-      child: Row(
+    final theme = HomeStyle(context: context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
+          // Üst kısım: Icon, Adres Tipi ve Değiştir butonu
           Container(
-            padding: const EdgeInsets.all(10),
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Image.network(
-                icMapUrl,
-                errorBuilder: (context, error, stackTrace) {
-                  return const SizedBox();
-                },
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.secondary.withOpacity(0.1),
+                  theme.secondary.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.only(top: 30, left: 5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  customText(
-                    title,
-                    context,
-                    textAlign: TextAlign.left,
-                    weight: FontWeight.bold,
-                    size: AppTextSizes.bodyMedium(context),
+            child: Row(
+              children: [
+                // Sol: Modern Icon
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.secondary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  customText(
-                    ilIlce,
-                    context,
-                    textAlign: TextAlign.left,
-                    weight: FontWeight.bold,
-                    size: 18,
+                  child: Icon(
+                    _getAddressIcon(adresTipi),
+                    color: theme.secondary,
+                    size: 28,
                   ),
-                  customText(
-                    adres,
-                    context,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: true,
-                    textAlign: TextAlign.left,
-                  ),
-                  Card(
-                    color: Colors.grey[200],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: AppRadius.r8,
-                    ),
-                    child: Padding(
-                      padding: AppPaddings.all4,
-                      child: Text(
-                        adresTipi,
-                        textAlign: TextAlign.center,
+                ),
+                const SizedBox(width: 12),
+                // Orta: Adres Tipi ve Başlık
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.secondary.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          adresTipi.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: theme.secondary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        title,
                         style: TextStyle(
-                            fontSize: AppTextSizes.bodyMedium(context),
-                            color: AppColors.primary(context),
-                            fontWeight: FontWeight.bold),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // Sağ: Değiştir Butonu
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: onLocationChange,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.edit_location_alt_outlined,
+                            size: 18,
+                            color: theme.secondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Değiştir',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: theme.secondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.05,
-                    margin: const EdgeInsets.all(0),
-                    alignment: Alignment.bottomRight,
-                    child: TextButton(
-                        onPressed: onLocationChange,
-                        child: const Text(
-                          'Konum bilgileri değiştir',
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 34, 255, 34),
-                              fontWeight: FontWeight.w900),
-                        )),
-                  )
-                ],
-              ),
+                ),
+              ],
+            ),
+          ),
+          // Alt kısım: Adres Detayları
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // İl/İlçe
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_city_rounded,
+                      size: 18,
+                      color: theme.secondary.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        ilIlce,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Adres Detayı
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      size: 18,
+                      color: theme.secondary.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        adres,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.5,
+                          color: Colors.grey[700],
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

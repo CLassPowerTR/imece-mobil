@@ -23,14 +23,26 @@ class UserNotifier extends Notifier<User?> {
           if (state != null) {
             try {
               await ApiService.putUserUpdate({'is_online': true});
-            } catch (_) {}
+              debugPrint('Auth: App resumed - Kullanıcı online yapıldı');
+            } catch (e) {
+              debugPrint(
+                'Auth: App resumed - Online durumu güncellenemedi: $e',
+              );
+            }
           }
         },
         onPausedOrInactive: () async {
           if (state != null) {
             try {
               await ApiService.putUserUpdate({'is_online': false});
-            } catch (_) {}
+              debugPrint(
+                'Auth: App paused/inactive - Kullanıcı offline yapıldı',
+              );
+            } catch (e) {
+              debugPrint(
+                'Auth: App paused - Offline durumu güncellenemedi: $e',
+              );
+            }
           }
         },
       );
@@ -60,18 +72,33 @@ class UserNotifier extends Notifier<User?> {
       return;
     }
 
+    // Kullanıcı verilerini çek
+    await fetchUserMe();
+
+    // Kullanıcı başarıyla yüklendiyse online yap
     if (state != null) {
       try {
         await ApiService.putUserUpdate({'is_online': true});
-      } catch (_) {}
+        debugPrint('Auth: Kullanıcı online durumu güncellendi');
+      } catch (e) {
+        debugPrint('Auth: Online durumu güncellenemedi: $e');
+      }
     }
-    await fetchUserMe();
   }
 
   Future<void> login({required String email, required String password}) async {
     await ApiService.fetchUserLogin(email, password);
-    await ApiService.putUserUpdate({'is_online': true});
     await fetchUserMe();
+
+    // Login sonrası online yap
+    if (state != null) {
+      try {
+        await ApiService.putUserUpdate({'is_online': true});
+        debugPrint('Auth: Login sonrası kullanıcı online yapıldı');
+      } catch (e) {
+        debugPrint('Auth: Login sonrası online durumu güncellenemedi: $e');
+      }
+    }
   }
 
   Future<void> register({
@@ -80,18 +107,25 @@ class UserNotifier extends Notifier<User?> {
     required String password,
   }) async {
     await ApiService.fetchUserRegister(email, username, password);
-    await ApiService.putUserUpdate({'is_online': true});
     await fetchUserMe();
+
+    // Register sonrası online yap
+    if (state != null) {
+      try {
+        await ApiService.putUserUpdate({'is_online': true});
+        debugPrint('Auth: Register sonrası kullanıcı online yapıldı');
+      } catch (e) {
+        debugPrint('Auth: Register sonrası online durumu güncellenemedi: $e');
+      }
+    }
   }
 
   Future<void> updateUser(
     Map<String, dynamic> payload, {
     bool? isSeller,
   }) async {
-    await ApiService.putUserUpdate(
-      payload,
-      isSeller: isSeller,
-    );
+    await ApiService.putUserUpdate(payload, isSeller: isSeller);
+    // Kullanıcı bilgilerini güncelle (is_online güncellemesi yapmadan)
     await fetchUserMe();
   }
 
@@ -107,12 +141,16 @@ class UserNotifier extends Notifier<User?> {
   Future<String> logout() async {
     String message = 'Başarıyla çıkış yapıldı.';
     try {
+      // Logout öncesi offline yap
       await ApiService.putUserUpdate({'is_online': false});
+      debugPrint('Auth: Logout - Kullanıcı offline yapıldı');
+
       final result = await ApiService.fetchUserLogout();
       if (result.isNotEmpty) {
         message = result;
       }
     } catch (e) {
+      debugPrint('Auth: Logout hatası: $e');
       await _clearStoredTokens();
       state = null;
       rethrow;

@@ -1082,39 +1082,35 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               adres: varsayilanAdres.adresSatiri1,
               icMapUrl: ic_map,
               adresTipi: varsayilanAdres.baslik,
-              title: 'Teslimat Adresi:',
+              title: 'Teslimat & Fatura Adresi',
               onLocationChange: () {
-                // Konum değiştir fonksiyonu
+                final currentUser = ref.read(userProvider);
+                Navigator.pushNamed(
+                  context,
+                  '/profil/adress',
+                  arguments: {'buyerProfil': currentUser},
+                );
               },
             );
           } else {
-            // Varsayılan adres yok, ilk adresi göster ve buton ekle
+            // Varsayılan adres yok, ilk adresi göster (tek kart)
             final ilkAdres = adresler.first;
             _teslimatAdresId ??= ilkAdres.id;
             _faturaAdresId ??= ilkAdres.id;
-            return Column(
-              children: [
-                AdressCardOrder(
-                  ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
-                  adres: ilkAdres.adresSatiri1,
-                  icMapUrl: ic_map,
-                  title: 'Teslimat Adresi:',
-                  adresTipi: ilkAdres.baslik,
-                  onLocationChange: () {
-                    // Konum değiştir fonksiyonu
-                  },
-                ),
-                AdressCardOrder(
-                  ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
-                  adres: ilkAdres.adresSatiri1,
-                  icMapUrl: ic_map,
-                  title: 'Fatura Adresi:',
-                  adresTipi: ilkAdres.baslik,
-                  onLocationChange: () {
-                    // Konum değiştir fonksiyonu
-                  },
-                ),
-              ],
+            return AdressCardOrder(
+              ilIlce: '${ilkAdres.il} / ${ilkAdres.ilce}',
+              adres: ilkAdres.adresSatiri1,
+              icMapUrl: ic_map,
+              title: 'Teslimat & Fatura Adresi',
+              adresTipi: ilkAdres.baslik,
+              onLocationChange: () {
+                final currentUser = ref.read(userProvider);
+                Navigator.pushNamed(
+                  context,
+                  '/profil/adress',
+                  arguments: {'buyerProfil': currentUser},
+                );
+              },
             );
           }
         }

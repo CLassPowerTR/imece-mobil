@@ -25,8 +25,12 @@ import 'package:imecehub/screens/shoppingCart/addCreditCart/add_credit_cart.dart
 import 'package:imecehub/screens/shoppingCart/cart_screen.dart';
 
 import '../../screens/profil/addProduct/add_product_screen.dart';
+import '../../screens/profil/support/support_screen.dart';
+import '../../screens/profil/support/my_tickets_screen.dart';
+import '../../screens/splash/splash_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
+  '/splash': (context) => const SplashScreen(),
   '/home': (context) => HomeScreen(),
   '/cart': (context) => OrderScreen(),
   '/profil': (context) => ProfileScreen(),
@@ -54,7 +58,7 @@ final Map<String, WidgetBuilder> appRoutes = {
     final args = ModalRoute.of(context)?.settings.arguments;
     User? user;
     Product? product;
-    
+
     if (args is Map<String, dynamic>) {
       user = args['user'] as User?;
       product = args['product'] as Product?;
@@ -62,14 +66,14 @@ final Map<String, WidgetBuilder> appRoutes = {
       // Geriye dönük uyumluluk için
       user = args;
     }
-    
+
     // User null ise, Product'tan satici ID'sini al veya null bırak
     if (user == null && product != null && product.satici != null) {
       // Product'tan User oluşturulamaz, sadece ID var
       // Bu durumda user null kalacak ve AddProductScreen'de hata olabilir
       // En iyisi User'ı optional yapmak
     }
-    
+
     return AddProductScreen(
       user: user, // User boş gelebilir
       product: product, // Product boş gelebilir
@@ -111,6 +115,8 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil/myProfile/edit': (context) => const MyProfileEditScreen(),
   '/profil/settings': (context) => const SettingsScreen(),
   '/profil/settings/seller': (context) => const SellerProfileSettingsScreen(),
+  '/profil/support': (context) => const SupportScreen(),
+  '/profil/support/tickets': (context) => const MyTicketsScreen(),
   '/profil/adress': (context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
