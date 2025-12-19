@@ -443,7 +443,7 @@ class ApiService {
     final refreshToken = await getRefreshToken();
     http.Response response;
     try {
-      response = await _deps.httpClient.delete(
+      response = await _deps.httpClient.post(
         Uri.parse(config.userLogoutApiUrl),
         body: json.encode({'refresh_token': refreshToken}),
         headers: {
