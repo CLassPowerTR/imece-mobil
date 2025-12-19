@@ -108,10 +108,10 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                         //SizedBox(height: 16),
                         StoryCampaingsCard(height: height, width: width),
                         _futureSellersView(height, width, themeData),
-                        _alimTipiContainer(height, context),
+                        //_alimTipiContainer(height, context),
                         //_populerUrunCards(width, height),
                         _futurePopulerProductsView(width, height),
-                        _onerilerContainer(height, context, width),
+                        //_onerilerContainer(height, context, width),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.14,
                         ),
@@ -688,10 +688,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             decoration: BoxDecoration(
               color: const Color(0xFFF9FAFB),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFFF3F4F6),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFF3F4F6), width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -700,7 +697,6 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.all(12),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(iconSize / 2),
               child: category.gorsel.isNotEmpty

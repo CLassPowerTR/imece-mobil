@@ -147,10 +147,10 @@ class UserNotifier extends Notifier<User?> {
       await ApiService.putUserUpdate({'is_online': false});
       debugPrint('Auth: Logout - Kullanıcı offline yapıldı');
 
-      final result = await ApiService.fetchUserLogout();
-      if (result.isNotEmpty) {
-        message = result;
-      }
+      //final result = await ApiService.fetchUserLogout();
+      //if (result.isNotEmpty) {
+      //  message = result;
+      //}
     } catch (e) {
       debugPrint('Auth: Logout hatası: $e');
       await _clearStoredTokens();

@@ -135,12 +135,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // Giriş yapılmışsa ek verileri de paralel listeye ekle
       if (isUserLoggedIn) {
         futures.add(
-          ref.read(productsRepositoryProvider).fetchPopulerProducts().catchError((
-            e,
-          ) {
-            debugPrint('Popüler ürünler yüklenemedi: $e');
-            return <Product>[];
-          }),
+          ref
+              .read(productsRepositoryProvider)
+              .fetchPopulerProducts()
+              .catchError((e) {
+                debugPrint('Popüler ürünler yüklenemedi: $e');
+                return <Product>[];
+              }),
         );
 
         futures.add(

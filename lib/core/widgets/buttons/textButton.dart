@@ -35,17 +35,19 @@ SizedBox textButton(
   BorderSide? test = border == true
       ? BorderSide(
           color: borderColor ?? HomeStyle(context: context).outline,
-          width: borderWidth ?? 0)
+          width: borderWidth ?? 0,
+        )
       : null;
   return SizedBox(
     width: effectiveMinSizeWidth,
     height: effectiveMinSizeHeight,
     child: Material(
-      elevation: elevation ?? 16, // Gölgeleme seviyesi
-      shadowColor: shadowColor ??
-          HomeStyle(context: context)
-              .shadow
-              .withOpacity(0.5), // Gölgenin rengi ve opaklığı
+      elevation: elevation ?? 2, // Gölgeleme seviyesi
+      shadowColor:
+          shadowColor ??
+          HomeStyle(
+            context: context,
+          ).shadow.withOpacity(0.5), // Gölgenin rengi ve opaklığı
       borderRadius: borderRadius ?? BorderRadius.circular(8.0),
       child: TextButton(
         onPressed: onPressed,
@@ -59,33 +61,34 @@ SizedBox textButton(
             children: [
               TextSpan(text: title),
               WidgetSpan(
-
-                  //alignment: PlaceholderAlignment.,
-                  child: Builder(
-                builder: (context) {
-                  if (icon != null) {
-                    return icon;
-                  } else {
-                    return SizedBox();
-                  }
-                },
-              ))
+                //alignment: PlaceholderAlignment.,
+                child: Builder(
+                  builder: (context) {
+                    if (icon != null) {
+                      return icon;
+                    } else {
+                      return SizedBox();
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),
         style: ButtonStyle(
-            alignment: textAlignment,
-            side: WidgetStateProperty.all<BorderSide?>(test),
-            padding:
-                WidgetStateProperty.all<EdgeInsets>(padding ?? EdgeInsets.zero),
-            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-              borderRadius: borderRadius ?? AppRadius.r8,
-            )),
-            minimumSize: WidgetStateProperty.all<Size?>(
-                Size(effectiveMinSizeWidth, effectiveMinSizeHeight)),
-            backgroundColor:
-                WidgetStateProperty.all<Color>(effectiveButtonColor)),
+          alignment: textAlignment,
+          side: WidgetStateProperty.all<BorderSide?>(test),
+          padding: WidgetStateProperty.all<EdgeInsets>(
+            padding ?? EdgeInsets.zero,
+          ),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(borderRadius: borderRadius ?? AppRadius.r8),
+          ),
+          minimumSize: WidgetStateProperty.all<Size?>(
+            Size(effectiveMinSizeWidth, effectiveMinSizeHeight),
+          ),
+          backgroundColor: WidgetStateProperty.all<Color>(effectiveButtonColor),
+        ),
       ),
     ),
   );

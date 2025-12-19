@@ -441,6 +441,7 @@ class ApiService {
 
   static Future<String> fetchUserLogout() async {
     final refreshToken = await getRefreshToken();
+    debugPrint('refreshToken: $refreshToken');
     http.Response response;
     try {
       response = await _deps.httpClient.post(
