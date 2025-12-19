@@ -68,13 +68,23 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
   }
 
   Future<void> _checkGetSepet() async {
-    final sepet = await ApiService.fetchSepetGet();
-    // Sepet doluysa ürün id'lerini static listeye ata
-    if (sepet['durum'] == 'SEPET_DOLU' && sepet['sepet'] is List) {
-      sepetUrunIdList = (sepet['sepet'] as List)
-          .map<int>((item) => item['urun'] as int)
-          .toList();
-    } else {
+    try {
+      final loggedIn = await _checkLogin();
+      if (!loggedIn) {
+        sepetUrunIdList = [];
+        return;
+      }
+      final sepet = await ApiService.fetchSepetGet();
+      // Sepet doluysa ürün id'lerini static listeye ata
+      if (sepet['durum'] == 'SEPET_DOLU' && sepet['sepet'] is List) {
+        sepetUrunIdList = (sepet['sepet'] as List)
+            .map<int>((item) => item['urun'] as int)
+            .toList();
+      } else {
+        sepetUrunIdList = [];
+      }
+    } catch (e) {
+      debugPrint('Sepet bilgisi alınırken hata: $e');
       sepetUrunIdList = [];
     }
   }
@@ -99,7 +109,7 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
       await _checkGetSepet();
       if (mounted) setState(() {});
     });
-    
+
     final productAsync = ref.watch(productProvider(widget.productId));
 
     return productAsync.when(

@@ -69,19 +69,34 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   }
 
   Future<void> _checkGetSepet() async {
-    final sepet = await ApiService.fetchSepetGet();
-    // Sepet doluysa ürün id'lerini static listeye ata
-    if (sepet['durum'] == 'SEPET_DOLU' && sepet['sepet'] is List) {
-      sepetUrunIdList = (sepet['sepet'] as List)
-          .map<int>((item) => item['urun'] as int)
-          .toList();
-    } else {
+    try {
+      final loggedIn = await _checkLogin();
+      if (!loggedIn) {
+        sepetUrunIdList = [];
+        return;
+      }
+      final sepet = await ApiService.fetchSepetGet();
+      // Sepet doluysa ürün id'lerini static listeye ata
+      if (sepet['durum'] == 'SEPET_DOLU' && sepet['sepet'] is List) {
+        sepetUrunIdList = (sepet['sepet'] as List)
+            .map<int>((item) => item['urun'] as int)
+            .toList();
+      } else {
+        sepetUrunIdList = [];
+      }
+    } catch (e) {
+      debugPrint('Sepet bilgisi alınırken hata: $e');
       sepetUrunIdList = [];
     }
   }
 
   Future<void> _fetchFavorites() async {
     try {
+      if (!isLoggedIn) {
+        favoriteProductIds = [];
+        productIdToFavoriteId = {};
+        return;
+      }
       final favorites = await ApiService.fetchUserFavorites(
         null,
         null,
@@ -95,6 +110,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
         for (var item in favorites) item['urun'] as int: item['id'] as int,
       };
     } catch (e) {
+      debugPrint('Favoriler alınırken hata: $e');
       favoriteProductIds = [];
       productIdToFavoriteId = {};
     }
@@ -102,6 +118,10 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
 
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshProducts() async {
+    // Giriş durumunu ve sepeti kontrol et
+    await _checkLogin();
+    await _checkGetSepet();
+
     // Repository cache'ini temizle
     final repository = ref.read(productsRepositoryProvider);
     repository.invalidateProducts(categoryId: widget.categoryId);
@@ -128,7 +148,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     // Logout/login olduğunda sepet/favori state'lerini sıfırla veya yeniden yükle.
     // Problem: sepetUrunIdList statik olduğu için logout sonrası "hala sepette" görünebiliyordu.
     ref.listen(userProvider, (previous, next) async {
@@ -155,7 +175,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       });
       await favoritesFuture;
     });
-    
+
     final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
