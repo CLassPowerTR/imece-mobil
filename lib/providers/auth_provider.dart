@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 import 'package:imecehub/models/users.dart';
+import 'package:imecehub/providers/cart_provider.dart';
+import 'package:imecehub/providers/products_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imecehub/services/api_service.dart';
 
@@ -157,6 +159,20 @@ class UserNotifier extends Notifier<User?> {
     }
     await _clearStoredTokens();
     state = null;
+
+    // Logout sonrası: uygulama içi cache/state temizliği
+    // - Products repository cache temizliği (ürün listeleri vs.)
+    // - Sepet state temizliği (lokal cart provider)
+    // Not: UI tarafında ayrıca statik sepet listeleri (sepetUrunIdList) userProvider listener ile temizleniyor.
+    ref.invalidate(productsRepositoryProvider);
+    ref.invalidate(populerProductsProvider);
+    ref.invalidate(campaignsProvider);
+    try {
+      await ref.read(cartProvider.notifier).clearCart();
+    } catch (_) {
+      // Sepet temizliği başarısız olsa bile logout engellenmesin
+    }
+
     return message;
   }
 

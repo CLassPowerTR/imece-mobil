@@ -8,6 +8,7 @@ import 'package:imecehub/main.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';

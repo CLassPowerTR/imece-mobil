@@ -46,6 +46,22 @@ class _ProductsDetailScreenState extends ConsumerState<ProductsDetailScreen> {
   @override
   void initState() {
     super.initState();
+    // Logout sonrası statik sepet listesi temizlenmezse "sepette" görünümü devam edebilir.
+    ref.listen<User?>(userProvider, (previous, next) async {
+      if (!mounted) return;
+
+      if (next == null) {
+        setState(() {
+          isLoggedIn = false;
+          sepetUrunIdList = [];
+        });
+        return;
+      }
+
+      await _checkLogin();
+      await _checkGetSepet();
+      if (mounted) setState(() {});
+    });
     _checkLogin();
     _checkGetSepet();
   }
