@@ -44,7 +44,10 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     });
   }
 
-  Future<void> _showFullScreenStories(List<Story> stories, int initialIndex) async {
+  Future<void> _showFullScreenStories(
+    List<Story> stories,
+    int initialIndex,
+  ) async {
     await showGeneralDialog(
       context: context,
       barrierColor: Colors.black,
@@ -54,7 +57,13 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
           stories: stories,
           initialIndex: initialIndex,
           onStoryViewed: (storyId) {
-            ref.read(viewedStoriesProvider.notifier).update((state) => {...state, storyId});
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ref
+                    .read(viewedStoriesProvider.notifier)
+                    .update((state) => {...state, storyId});
+              }
+            });
           },
         );
       },
@@ -204,14 +213,15 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     final story = stories[index];
     final viewedStories = ref.watch(viewedStoriesProvider);
     final isViewed = viewedStories.contains(story.id);
-    
+
     String imageUrl = story.photo.isEmpty ? story.banner : story.photo;
     final photoUrl = _buildImageUrl('${ApiConfig().baseUrl}$imageUrl');
     return SizedBox(
       width: 85, // Biraz daha genişleterek ferahlık sağladık
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start, // Üstten hizalama sabitlendi
+        mainAxisAlignment:
+            MainAxisAlignment.start, // Üstten hizalama sabitlendi
         children: [
           GestureDetector(
             onTap: () => _showFullScreenStories(stories, index),
@@ -221,8 +231,12 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: !isViewed
-                      ? const Color(0xFF4ECDC4).withOpacity(0.8) // Yeni/Aktif: Turkuaz
-                      : const Color(0xFF9CA3AF).withOpacity(0.4), // İzlenmiş: Gri
+                      ? const Color(0xFF4ECDC4).withOpacity(
+                          0.8,
+                        ) // Yeni/Aktif: Turkuaz
+                      : const Color(
+                          0xFF9CA3AF,
+                        ).withOpacity(0.4), // İzlenmiş: Gri
                   width: 2.5,
                 ),
               ),
@@ -303,7 +317,7 @@ class _StoryViewerState extends State<_StoryViewer> {
     _timer?.cancel();
     _progress = 0.0;
     widget.onStoryViewed(widget.stories[_currentIndex].id);
-    
+
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (!mounted) return;
       setState(() {
@@ -351,7 +365,9 @@ class _StoryViewerState extends State<_StoryViewer> {
       return rawPath;
     }
     final base = ApiConfig().baseUrl;
-    final normalizedBase = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+    final normalizedBase = base.endsWith('/')
+        ? base.substring(0, base.length - 1)
+        : base;
     final normalizedPath = rawPath.startsWith('/') ? rawPath : '/$rawPath';
     return '$normalizedBase$normalizedPath';
   }
@@ -375,7 +391,9 @@ class _StoryViewerState extends State<_StoryViewer> {
                 fit: BoxFit.contain,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
-                  return const Center(child: CircularProgressIndicator(color: Colors.white));
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
                 },
               ),
             ),
@@ -397,7 +415,9 @@ class _StoryViewerState extends State<_StoryViewer> {
                           ? 1.0
                           : (idx == _currentIndex ? _progress : 0.0),
                       backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
                       minHeight: 2,
                     ),
                   ),
@@ -445,11 +465,17 @@ class _StoryViewerState extends State<_StoryViewer> {
                     children: [
                       Text(
                         story.title.isNotEmpty ? story.title : "Kampanya",
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         story.type,
-                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -466,4 +492,3 @@ class _StoryViewerState extends State<_StoryViewer> {
     );
   }
 }
-
