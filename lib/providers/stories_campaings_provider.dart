@@ -38,3 +38,6 @@ final storiesCampaignsBySellerProvider =
       final data = await ref.watch(storiesCampaignsProvider.future);
       return data.filteredByPublisher(sellerId);
     });
+
+/// Uygulama açılışından kapanışına kadar izlenen hikayelerin ID'lerini tutan provider.
+final viewedStoriesProvider = StateProvider<Set<int>>((ref) => {});
