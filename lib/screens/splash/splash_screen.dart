@@ -108,7 +108,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       bool isUserLoggedIn = false;
 
       // 1. Auth Provider'ı kontrol et (İlk öncelik)
-      await _updateProgress(0.15, '');
+      await _updateProgress(0.15, 'Oturum kontrol ediliyor...');
       try {
         final user = ref.read(userProvider);
         isUserLoggedIn = user != null;
@@ -124,7 +124,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       final futures = <Future>[];
 
       // 2-4. Temel verileri paralel yükle (Her durumda)
-      await _updateProgress(0.30, '');
+      await _updateProgress(0.30, 'Veriler senkronize ediliyor...');
 
       futures.add(
         ref.read(productsRepositoryProvider).fetchProducts().catchError((e) {
@@ -151,7 +151,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
       // Paralel işlemleri bekle
       await Future.wait(futures);
-      await _updateProgress(0.65, '');
+      await _updateProgress(0.65, 'Kampanyalar hazırlanıyor...');
 
       // 5. Kampanyaları yükle
       try {
@@ -160,7 +160,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         debugPrint('Kampanyalar yüklenemedi: $e');
       }
 
-      await _updateProgress(0.85, '');
+      await _updateProgress(0.85, 'Mağaza hazırlanıyor...');
 
       // 6. Sepeti yükle (Sadece giriş yapmış kullanıcılar için)
       if (isUserLoggedIn) {
@@ -173,7 +173,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
 
       // 7. Tamamlandı - Hoş geldiniz!
-      await _updateProgress(1.0, 'Hoş geldiniz!');
+      await _updateProgress(1.0, 'Uygulama hazır!');
       await Future.delayed(const Duration(milliseconds: 400));
 
       // Ana sayfaya yönlendir
@@ -255,7 +255,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
                       // App İsmi
                       Text(
-                        'IMECE',
+                        'IMECEHUB',
                         style: GoogleFonts.poppins(
                           fontSize: isSmallScreen ? 36 : 42,
                           fontWeight: FontWeight.w700,
@@ -285,53 +285,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 opacity: _fadeAnimation,
                 child: Column(
                   children: [
-                    // Progress Bar with Animation
-                    _buildNeumorphicContainer(
-                      isPressed: true,
-                      padding: const EdgeInsets.all(8),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          tween: Tween<double>(begin: 0, end: _progress),
-                          builder: (context, value, child) {
-                            return LinearProgressIndicator(
-                              value: value,
-                              minHeight: isSmallScreen ? 8 : 10,
-                              backgroundColor: Colors.transparent,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF4ECDC4),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 16 : 20),
+                    // Modern Progress Bar
+                    _buildModernProgressBar(isSmallScreen),
 
-                    // Yükleme Mesajı (Sadece %100'de göster)
-                    if (_loadingMessage.isNotEmpty)
-                      Text(
-                        _loadingMessage,
-                        style: GoogleFonts.poppins(
-                          fontSize: isSmallScreen ? 13 : 14,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF6B7280),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    if (_loadingMessage.isNotEmpty)
-                      SizedBox(height: isSmallScreen ? 8 : 12),
+                    SizedBox(height: isSmallScreen ? 16 : 24),
 
-                    // Yüzde Göstergesi
-                    Text(
-                      '${(_progress * 100).toInt()}%',
-                      style: GoogleFonts.poppins(
-                        fontSize: isSmallScreen ? 16 : 18,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF4ECDC4),
-                      ),
+                    // Yükleme Mesajı ve Yüzde
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _loadingMessage.isNotEmpty
+                                ? _loadingMessage
+                                : 'Sistem yükleniyor...',
+                            style: GoogleFonts.poppins(
+                              fontSize: isSmallScreen ? 12 : 14,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${(_progress * 100).toInt()}%',
+                          style: GoogleFonts.poppins(
+                            fontSize: isSmallScreen ? 16 : 18,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF4ECDC4),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -401,6 +384,93 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ],
       ),
       child: child,
+    );
+  }
+
+  Widget _buildModernProgressBar(bool isSmallScreen) {
+    return _buildNeumorphicContainer(
+      isPressed: true,
+      padding: const EdgeInsets.all(4),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Track
+              Container(
+                height: isSmallScreen ? 12 : 16,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              // Animated Progress
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutCubic,
+                tween: Tween<double>(begin: 0, end: _progress),
+                builder: (context, value, child) {
+                  return Container(
+                    height: isSmallScreen ? 12 : 16,
+                    width: constraints.maxWidth * value,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4ECDC4), Color(0xFF45B7AF)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: value > 0.1
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Stack(
+                              children: [
+                                // Shimmer effect on the progress
+                                Positioned.fill(
+                                  child: AnimatedBuilder(
+                                    animation: _animationController,
+                                    builder: (context, child) {
+                                      return Transform.translate(
+                                        offset: Offset(
+                                          (constraints.maxWidth * value) *
+                                              (_animationController.value * 2 -
+                                                  1),
+                                          0,
+                                        ),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                Colors.white.withOpacity(0),
+                                                Colors.white.withOpacity(0.2),
+                                                Colors.white.withOpacity(0),
+                                              ],
+                                              stops: const [0.3, 0.5, 0.7],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : null,
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
