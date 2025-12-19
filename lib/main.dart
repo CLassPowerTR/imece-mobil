@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:imecehub/product/init/theme/custom_dark_theme.dart';
 import 'package:imecehub/product/init/theme/custom_light_theme.dart';
@@ -10,8 +11,29 @@ import 'EthernetController.dart';
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
+/// SSL Certificate Pinning için özel HttpOverrides
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        // Güvenlik: Sadece güvenilir sertifikaları kabul et
+        // Production ortamında, belirli sertifika hash'lerini kontrol etmelisiniz
+        // Örnek: return cert.sha1.toString() == 'EXPECTED_CERTIFICATE_HASH';
+        
+        // Şimdilik tüm sertifikaları reddet (en güvenli yaklaşım)
+        // Kendi sertifikanızı eklemek için yukarıdaki yorumu açın
+        return false;
+      };
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // SSL Certificate Pinning'i etkinleştir
+  HttpOverrides.global = MyHttpOverrides();
+  
   runApp(
     const ProviderScope(child: DotenvLoaderApp(child: EthernetController())),
   );

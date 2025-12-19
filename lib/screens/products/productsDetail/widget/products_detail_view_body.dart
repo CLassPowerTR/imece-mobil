@@ -684,17 +684,20 @@ class _ProductsDetailViewBodyState
 
     return Stack(
       children: [
-        Container(
-          height: imageHeight,
-          width: width,
-          decoration: BoxDecoration(
-            border: Border.all(color: themeData.outline.withOpacity(0.5)),
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: NetworkImage(
-                product.kapakGorseli == ''
-                    ? NotFound.defaultBannerImageUrl
-                    : product.kapakGorseli ?? NotFound.defaultBannerImageUrl,
+        Hero(
+          tag: 'product_image_${product.urunId}',
+          child: Container(
+            height: imageHeight,
+            width: width,
+            decoration: BoxDecoration(
+              border: Border.all(color: themeData.outline.withOpacity(0.5)),
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: NetworkImage(
+                  product.kapakGorseli == ''
+                      ? NotFound.defaultBannerImageUrl
+                      : product.kapakGorseli ?? NotFound.defaultBannerImageUrl,
+                ),
               ),
             ),
           ),

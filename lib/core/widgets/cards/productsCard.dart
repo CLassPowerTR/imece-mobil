@@ -101,35 +101,37 @@ class _productsCardState extends ConsumerState<productsCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Builder(
+                  Builder(
                   builder: (context) {
                     if (product.kapakGorseli != null &&
                         product.kapakGorseli != '') {
                       return Expanded(
-                        child: cokluGorsel == true
-                            ? PageView.builder(
-                                itemCount: product.kapakGorseli!.length,
-                                itemBuilder: (context, imgIndex) {
-                                  return Stack(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          image: DecorationImage(
-                                            image: AssetImage(
-                                              product.kapakGorseli![imgIndex] ==
-                                                      ''
-                                                  ? NotFound
-                                                        .defaultBannerImageUrl
-                                                  : product
-                                                        .kapakGorseli![imgIndex],
+                        child: Hero(
+                          tag: 'product_image_${product.urunId}',
+                          child: cokluGorsel == true
+                              ? PageView.builder(
+                                  itemCount: product.kapakGorseli!.length,
+                                  itemBuilder: (context, imgIndex) {
+                                    return Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            fit: BoxFit.cover,
+                                            image: DecorationImage(
+                                              image: AssetImage(
+                                                product.kapakGorseli![imgIndex] ==
+                                                        ''
+                                                    ? NotFound
+                                                          .defaultBannerImageUrl
+                                                    : product
+                                                          .kapakGorseli![imgIndex],
+                                              ),
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
-                                      ),
                                       // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
                                       Positioned(
                                         bottom: 4,
@@ -160,56 +162,60 @@ class _productsCardState extends ConsumerState<productsCard> {
                                   );
                                 },
                               )
-                            : Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                          product.kapakGorseli ??
-                                              NotFound.defaultBannerImageUrl,
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ), // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                                  Positioned(
-                                    bottom: 4,
-                                    right: 4,
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      width: 25,
-                                      height: 25,
+                              : Stack(
+                                  children: [
+                                    Container(
                                       decoration: BoxDecoration(
-                                        color: HomeStyle(
-                                          context: context,
-                                        ).outline,
                                         borderRadius: BorderRadius.circular(8),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            product.kapakGorseli ??
+                                                NotFound.defaultBannerImageUrl,
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      child: Text(
-                                        "1/1",
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
+                                    ), // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
+                                    Positioned(
+                                      bottom: 4,
+                                      right: 4,
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          color: HomeStyle(
+                                            context: context,
+                                          ).outline,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          "1/1",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                        ),
                       );
                     } else {
                       return Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                NotFound.defaultBannerImageUrl,
+                        child: Hero(
+                          tag: 'product_image_${product.urunId}',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  NotFound.defaultBannerImageUrl,
+                                ),
+                                fit: BoxFit.cover,
                               ),
-                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
