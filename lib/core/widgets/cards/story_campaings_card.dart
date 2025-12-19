@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:imecehub/api/api_config.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart'
@@ -115,10 +116,10 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
         }
 
         return Container(
-          padding: const EdgeInsets.all(24), // p-6
+          padding: const EdgeInsets.all(12),
           margin: widget.margin ?? AppPaddings.h10,
           decoration: BoxDecoration(
-            color: Colors.white, // bg-white
+            color: AppColors.surface(context), // bg-white
             borderRadius: BorderRadius.circular(24), // rounded-3xl
             border: Border.all(
               color: const Color(0xFFF3F4F6),
@@ -136,9 +137,9 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildTabs(theme),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               SizedBox(
-                height: widget.height * 0.22,
+                height: widget.height * 0.18,
                 child: TabBarView(
                   controller: _tabController,
                   children: [
@@ -164,15 +165,24 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
       child: TabBar(
         controller: _tabController,
         labelPadding: EdgeInsets.zero,
+        indicatorPadding: const EdgeInsets.all(2), // Adds "border" effect around indicator
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: Colors.white, // Selected tab white
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.secondary(context).withOpacity(0.1), // Lightest
+              AppColors.secondary(context), // Primary color
+            ],
+          ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2), // shadow-md
+              color: AppColors.secondary(context).withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 1, // Glowing effect
+              offset: const Offset(0, 0),
             ),
           ],
         ),
@@ -215,10 +225,10 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
 
   Widget _storiesList(HomeStyle theme, List<Story> items) {
     return ListView.separated(
-      padding: AppPaddings.all12,
+      padding: EdgeInsets.zero,
       scrollDirection: Axis.horizontal,
       itemCount: items.length,
-      separatorBuilder: (context, _) => SizedBox(width: 12),
+      separatorBuilder: (context, _) => const SizedBox(width: 12),
       itemBuilder: (context, index) => _storyItem(theme, items[index]),
     );
   }
@@ -240,10 +250,8 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: story.isActive
-                      ? const Color(0xFF4ECDC4).withOpacity(
-                          0.5,
-                        ) // Soft turquoise ring
-                      : Colors.transparent,
+                      ? const Color(0xFF4ECDC4).withOpacity(0.8) // New/Active: Turquoise
+                      : Colors.grey.withOpacity(0.4), // Viewed: Gray
                   width: 2,
                 ),
               ),
@@ -257,12 +265,12 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
           Text(
             story.description,
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF374151), // text-gray-700
+              color: const Color(0xFF374151),
             ),
           ),
         ],
