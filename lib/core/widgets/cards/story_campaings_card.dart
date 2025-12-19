@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
-import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/variables/url.dart';
-import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart'
     as shimmer;
 import 'package:imecehub/core/widgets/text.dart';
@@ -116,17 +115,28 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
         }
 
         return Container(
-          padding: AppPaddings.all4,
+          padding: const EdgeInsets.all(24), // p-6
           margin: widget.margin ?? AppPaddings.h10,
           decoration: BoxDecoration(
-            color: theme.surface,
-            borderRadius: AppRadius.r12,
-            boxShadow: [boxShadow(context)],
+            color: Colors.white, // bg-white
+            borderRadius: BorderRadius.circular(24), // rounded-3xl
+            border: Border.all(
+              color: const Color(0xFFF3F4F6),
+              width: 1,
+            ), // border-gray-100
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(padding: AppPaddings.all12, child: _buildTabs(theme)),
+              _buildTabs(theme),
+              const SizedBox(height: 24),
               SizedBox(
                 height: widget.height * 0.22,
                 child: TabBarView(
@@ -146,29 +156,40 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
 
   Widget _buildTabs(HomeStyle theme) {
     return Container(
-      padding: AppPaddings.all4,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: AppRadius.r8,
-        boxShadow: [boxShadow(context)],
+        color: const Color(0xFFF3F4F6).withOpacity(0.8), // bg-gray-100/80
+        borderRadius: BorderRadius.circular(16), // rounded-2xl
       ),
       child: TabBar(
         controller: _tabController,
         labelPadding: EdgeInsets.zero,
+        indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: theme.surface,
-          borderRadius: AppRadius.r12,
+          color: Colors.white, // Selected tab white
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2), // shadow-md
+            ),
+          ],
         ),
         dividerColor: Colors.transparent,
-        labelColor: theme.secondary,
-        labelStyle: TextStyle(
-          fontSize: theme.bodyMedium.fontSize,
-          fontWeight: FontWeight.bold,
+        labelColor: const Color(0xFF1F2937), // text-gray-900
+        unselectedLabelColor: const Color(0xFF6B7280), // text-gray-500
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
         ),
-        unselectedLabelColor: theme.primary,
-        tabs: [
-          Tab(child: Center(child: Text('Kampanyalar'))),
-          Tab(child: Center(child: Text('Hikayeler'))),
+        unselectedLabelStyle: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        tabs: const [
+          Tab(text: 'Kampanyalar'),
+          Tab(text: 'Hikayeler'),
         ],
       ),
     );
@@ -206,48 +227,42 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     String imageUrl = story.photo.isEmpty ? story.banner : story.photo;
     final photoUrl = _buildImageUrl('${ApiConfig().baseUrl}$imageUrl');
     return SizedBox(
-      width: 100,
-      height: 100,
+      width: 80, // Slightly smaller for better spacing
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
             onTap: () => _showFullScreenImage(photoUrl),
             child: Container(
-              padding: EdgeInsets.all(2),
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: story.isActive ? Colors.blue : Colors.transparent,
+                  color: story.isActive
+                      ? const Color(0xFF4ECDC4).withOpacity(
+                          0.5,
+                        ) // Soft turquoise ring
+                      : Colors.transparent,
                   width: 2,
                 ),
               ),
               child: CircleAvatar(
                 backgroundImage: NetworkImage(photoUrl),
-                radius: 36,
+                radius: 32,
               ),
             ),
           ),
-          SizedBox(height: 8),
-          Expanded(
-            child: customText(
-              story.description,
-              context,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              color: theme.primary,
-              weight: FontWeight.bold,
-              maxLines: 2,
-            ),
-          ),
-          Expanded(
-            child: customText(
-              story.type,
-              context,
-              color: theme.outline,
-              maxLines: 1,
+          const SizedBox(height: 8),
+          Text(
+            story.description,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF374151), // text-gray-700
             ),
           ),
         ],

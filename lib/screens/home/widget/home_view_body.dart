@@ -686,43 +686,57 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: 5,
       children: [
         GestureDetector(
           onTap: () {
-            setState(() {
-              Navigator.pushNamed(
-                context,
-                '/home/category',
-                arguments: category.kategoriId,
-              );
-            });
+            Navigator.pushNamed(
+              context,
+              '/home/category',
+              arguments: category.kategoriId,
+            );
           },
           child: Container(
-            width: width * 0.20,
-            height: height * 0.08,
+            width: 70,
+            height: 70,
             decoration: BoxDecoration(
-              boxShadow: [boxShadow(context)],
-              borderRadius: HomeStyle(
-                context: context,
-              ).bodyCategoryContainerBorderRadius,
-              image: DecorationImage(
-                image: category.gorsel.isNotEmpty
-                    ? NetworkImage(category.gorsel)
-                    : NetworkImage(NotFound.LogoPNGUrl),
-                fit: BoxFit.cover,
-              ),
+              color: const Color(0xFFF9FAFB), // bg-gray-50
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFF3F4F6), width: 1), // border-gray-100
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2), // shadow-sm
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(35),
+              child: category.gorsel.isNotEmpty
+                  ? Image.network(
+                      category.gorsel,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Image.network(NotFound.LogoPNGUrl),
+                    )
+                  : Image.network(NotFound.LogoPNGUrl),
             ),
           ),
         ),
-        Expanded(
-          child: customText(
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 80,
+          child: Text(
             category.altKategoriAdi.toString(),
-            context,
+            textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            color: HomeStyle(context: context).primary,
-            size: HomeStyle(context: context).bodyMedium.fontSize,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF4B5563), // text-gray-600
+            ),
           ),
         ),
       ],
