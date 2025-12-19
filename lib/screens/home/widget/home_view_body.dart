@@ -77,7 +77,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     double width = MediaQuery.of(context).size.width;
     final themeData = HomeStyle(context: context);
     final isOnline = ref.watch(isOnlineProvider);
-    
+
     return Scaffold(
       appBar: HomeHeaderAppBar(),
       body: Column(
@@ -91,34 +91,36 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             ),
           Expanded(
             child: RefreshIndicator(
-        color: themeData.secondary,
-        backgroundColor: Colors.white,
-        onRefresh: _refreshFutures,
-        child: SafeArea(
-          child: Padding(
-            padding: HomeStyle(context: context).bodyPadding,
-            child: SingleChildScrollView(
-              child: Column(
-                spacing: 12,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _futureCategories(width, height),
-                  CampaignsItemsCard(width: width, height: height),
-                  //_saticilarList(height, context, width),
-                  //SizedBox(height: 16),
-                  StoryCampaingsCard(height: height, width: width),
-                  _futureSellersView(height, width, themeData),
-                  _alimTipiContainer(height, context),
-                  //_populerUrunCards(width, height),
-                  _futurePopulerProductsView(width, height),
-                  _onerilerContainer(height, context, width),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.14),
-                ],
+              color: themeData.secondary,
+              backgroundColor: Colors.white,
+              onRefresh: _refreshFutures,
+              child: SafeArea(
+                child: Padding(
+                  padding: HomeStyle(context: context).bodyPadding,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      spacing: 12,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _futureCategories(width, height),
+                        CampaignsItemsCard(width: width, height: height),
+                        //_saticilarList(height, context, width),
+                        //SizedBox(height: 16),
+                        StoryCampaingsCard(height: height, width: width),
+                        _futureSellersView(height, width, themeData),
+                        _alimTipiContainer(height, context),
+                        //_populerUrunCards(width, height),
+                        _futurePopulerProductsView(width, height),
+                        _onerilerContainer(height, context, width),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.14,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
           ),
         ],
       ),
@@ -239,69 +241,53 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     );
   }
 
-  Column _futureCategories(double width, double height) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        //_categoriesText(context),
-        SizedBox(
-          height: 130,
-          child: FutureBuilder<List<Category>>(
-            future: _futureCategory,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CategoriesShimmer(
-                  padding: HomeStyle(context: context).bodyPadding,
-                  crossAxisCount: 4,
-                  childAspectRatio: 1,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  itemCount: 4,
-                );
-              } else if (snapshot.hasError) {
-                return Text("Hata oluştu: ${snapshot.error}");
-              } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-                return SizedBox.shrink();
-              } else if (snapshot.hasData) {
-                List<Category> categories = snapshot.data!;
+  Widget _futureCategories(double width, double height) {
+    return FutureBuilder<List<Category>>(
+      future: _futureCategory,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CategoriesShimmer(
+            padding: HomeStyle(context: context).bodyPadding,
+            crossAxisCount: 4,
+            childAspectRatio: 1,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            itemCount: 4,
+          );
+        } else if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        } else if (snapshot.hasData) {
+          List<Category> categories = snapshot.data!;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _categoriesText(context),
-                    Expanded(
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          //final category = categories[index];
-
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              right: index == categories.length - 1 ? 0 : 8,
-                            ),
-                            child: _categories(
-                              categories[index],
-                              width,
-                              height,
-                            ),
-                          );
-                        },
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _categoriesText(context),
+              SizedBox(
+                height: 120, // Responsive height for icon + text
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: index == categories.length - 1 ? 0 : 16,
                       ),
-                    ),
-                  ],
-                );
-              } else {
-                return Text("Veri bulunamadı");
-              }
-            },
-          ),
-        ),
-      ],
+                      child: _categories(categories[index], width),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
     );
   }
 
@@ -557,14 +543,14 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
 
   Padding _categoriesText(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: customText(
         'Kategoriler',
         context,
         maxLines: 1,
-        size: HomeStyle(context: context).bodyLarge.fontSize,
-        weight: FontWeight.bold,
-        color: HomeStyle(context: context).primary,
+        size: 16,
+        weight: FontWeight.w700,
+        color: const Color(0xFF1F2937),
       ),
     );
   }
@@ -682,10 +668,11 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     );
   }
 
-  Widget _categories(Category category, double width, double height) {
+  Widget _categories(Category category, double screenWidth) {
+    final double iconSize = (screenWidth * 0.18).clamp(60.0, 75.0);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         GestureDetector(
           onTap: () {
@@ -696,23 +683,26 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             );
           },
           child: Container(
-            width: 70,
-            height: 70,
+            width: iconSize,
+            height: iconSize,
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB), // bg-gray-50
+              color: const Color(0xFFF9FAFB),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFF3F4F6), width: 1), // border-gray-100
+              border: Border.all(
+                color: const Color(0xFFF3F4F6),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
                   blurRadius: 4,
-                  offset: const Offset(0, 2), // shadow-sm
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             padding: const EdgeInsets.all(12),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(35),
+              borderRadius: BorderRadius.circular(iconSize / 2),
               child: category.gorsel.isNotEmpty
                   ? Image.network(
                       category.gorsel,
@@ -726,16 +716,16 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          width: 80,
+          width: iconSize + 10,
           child: Text(
             category.altKategoriAdi.toString(),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF4B5563), // text-gray-600
+              color: const Color(0xFF4B5563),
             ),
           ),
         ),
