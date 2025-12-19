@@ -123,9 +123,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // Paralel yükleme için Future listesi
       final futures = <Future>[];
 
-      // 2-4. Temel verileri paralel yükle (Her durumda)
-      await _updateProgress(0.30, 'Veriler senkronize ediliyor...');
-
+      // 2. Sadece temel ürünleri her durumda yükle
+      await _updateProgress(0.30, 'Ürünler yükleniyor...');
       futures.add(
         ref.read(productsRepositoryProvider).fetchProducts().catchError((e) {
           debugPrint('Ürünler yüklenemedi: $e');
@@ -133,46 +132,49 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         }),
       );
 
-      futures.add(
-        ref.read(productsRepositoryProvider).fetchPopulerProducts().catchError((
-          e,
-        ) {
-          debugPrint('Popüler ürünler yüklenemedi: $e');
-          return <Product>[];
-        }),
-      );
+      // Giriş yapılmışsa ek verileri de paralel listeye ekle
+      if (isUserLoggedIn) {
+        futures.add(
+          ref.read(productsRepositoryProvider).fetchPopulerProducts().catchError((
+            e,
+          ) {
+            debugPrint('Popüler ürünler yüklenemedi: $e');
+            return <Product>[];
+          }),
+        );
 
-      futures.add(
-        ref.read(storiesCampaignsProvider.future).catchError((e) {
-          debugPrint('Hikayeler yüklenemedi: $e');
-          return const StoriesCampaignsState(stories: [], campaigns: []);
-        }),
-      );
+        futures.add(
+          ref.read(storiesCampaignsProvider.future).catchError((e) {
+            debugPrint('Hikayeler yüklenemedi: $e');
+            return const StoriesCampaignsState(stories: [], campaigns: []);
+          }),
+        );
+      }
 
       // Paralel işlemleri bekle
       await Future.wait(futures);
-      await _updateProgress(0.65, 'Kampanyalar hazırlanıyor...');
 
-      // 5. Kampanyaları yükle
-      try {
-        await ref.read(productsRepositoryProvider).fetchCampaigns();
-      } catch (e) {
-        debugPrint('Kampanyalar yüklenemedi: $e');
-      }
-
-      await _updateProgress(0.85, 'Mağaza hazırlanıyor...');
-
-      // 6. Sepeti yükle (Sadece giriş yapmış kullanıcılar için)
+      // 3. Giriş yapılmışsa kampanyaları ve sepeti yükle
       if (isUserLoggedIn) {
+        await _updateProgress(0.65, 'Kampanyalar hazırlanıyor...');
+        try {
+          await ref.read(productsRepositoryProvider).fetchCampaigns();
+        } catch (e) {
+          debugPrint('Kampanyalar yüklenemedi: $e');
+        }
+
+        await _updateProgress(0.85, 'Sepet güncelleniyor...');
         try {
           await ref.read(cartProvider.notifier).loadCart();
-          debugPrint('Sepet yüklendi');
         } catch (e) {
           debugPrint('Sepet yüklenemedi: $e');
         }
+      } else {
+        // Giriş yapılmamışsa doğrudan son aşamaya geç
+        await _updateProgress(0.85, 'Mağaza hazırlanıyor...');
       }
 
-      // 7. Tamamlandı - Hoş geldiniz!
+      // 4. Tamamlandı
       await _updateProgress(1.0, 'Uygulama hazır!');
       await Future.delayed(const Duration(milliseconds: 400));
 
