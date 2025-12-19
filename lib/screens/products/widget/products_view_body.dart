@@ -27,32 +27,6 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   @override
   void initState() {
     super.initState();
-    // Logout/login olduğunda sepet/favori state'lerini sıfırla veya yeniden yükle.
-    // Problem: sepetUrunIdList statik olduğu için logout sonrası "hala sepette" görünebiliyordu.
-    ref.listen(userProvider, (previous, next) async {
-      if (!mounted) return;
-
-      if (next == null) {
-        setState(() {
-          isLoggedIn = false;
-          sepetUrunIdList = [];
-          favoriteProductIds = [];
-          productIdToFavoriteId = {};
-          _futureFavorites = Future.value();
-        });
-        return;
-      }
-
-      // Login olduysa sepet & favorileri yenile.
-      await _checkLogin();
-      await _checkGetSepet();
-      final favoritesFuture = _fetchFavorites();
-      setState(() {
-        _futureFavorites = favoritesFuture;
-      });
-      await favoritesFuture;
-    });
-
     _checkLogin().then((loggedIn) async {
       if (loggedIn) {
         await ref.read(userProvider.notifier).fetchUserMe();
@@ -154,6 +128,34 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    
+    // Logout/login olduğunda sepet/favori state'lerini sıfırla veya yeniden yükle.
+    // Problem: sepetUrunIdList statik olduğu için logout sonrası "hala sepette" görünebiliyordu.
+    ref.listen(userProvider, (previous, next) async {
+      if (!mounted) return;
+
+      if (next == null) {
+        // Logout oldu - tüm sepet/favori state'lerini temizle
+        setState(() {
+          isLoggedIn = false;
+          sepetUrunIdList = [];
+          favoriteProductIds = [];
+          productIdToFavoriteId = {};
+          _futureFavorites = Future.value();
+        });
+        return;
+      }
+
+      // Login olduysa sepet & favorileri yenile
+      await _checkLogin();
+      await _checkGetSepet();
+      final favoritesFuture = _fetchFavorites();
+      setState(() {
+        _futureFavorites = favoritesFuture;
+      });
+      await favoritesFuture;
+    });
+    
     final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
