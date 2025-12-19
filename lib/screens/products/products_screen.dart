@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 // import 'package:imecehub/core/function/actions.dart';
-import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/cards/productsCard.dart';
 import 'package:imecehub/main.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/models/products.dart';
-import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
@@ -16,7 +14,6 @@ import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:imecehub/core/widgets/shimmer/products_shimmer.dart';
 // duplicate import removed
 
