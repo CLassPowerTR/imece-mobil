@@ -20,7 +20,7 @@ class MyHttpOverrides extends HttpOverrides {
         // Güvenlik: Sadece güvenilir sertifikaları kabul et
         // Production ortamında, belirli sertifika hash'lerini kontrol etmelisiniz
         // Örnek: return cert.sha1.toString() == 'EXPECTED_CERTIFICATE_HASH';
-        
+
         // Şimdilik tüm sertifikaları reddet (en güvenli yaklaşım)
         // Kendi sertifikanızı eklemek için yukarıdaki yorumu açın
         return false;
@@ -30,10 +30,10 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // SSL Certificate Pinning'i etkinleştir
   HttpOverrides.global = MyHttpOverrides();
-  
+
   runApp(
     const ProviderScope(child: DotenvLoaderApp(child: EthernetController())),
   );
@@ -58,13 +58,13 @@ class _MyAppState extends ConsumerState<MyApp> {
   Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     final hasLaunchedBefore = prefs.getBool('hasLaunchedBefore') ?? false;
-    
+
     if (mounted) {
       setState(() {
         _initialRoute = hasLaunchedBefore ? '/home' : '/splash';
       });
     }
-    
+
     // İlk açılışı kaydet
     if (!hasLaunchedBefore) {
       await prefs.setBool('hasLaunchedBefore', true);

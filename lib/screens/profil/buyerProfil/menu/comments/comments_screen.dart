@@ -49,9 +49,12 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen>
         shadowColor: Colors.grey[300],
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         leading: TurnBackTextIcon(),
-        title: customText('Değerlendirmelerim', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
-            weight: FontWeight.w600),
+        title: customText(
+          'Değerlendirmelerim',
+          context,
+          size: HomeStyle(context: context).bodyLarge.fontSize,
+          weight: FontWeight.w600,
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: TabBar(
@@ -60,9 +63,7 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen>
             unselectedLabelColor: theme.textTheme.bodyLarge?.color,
             indicator: BoxDecoration(
               color: secondary.withOpacity(0.15),
-              border: Border(
-                bottom: BorderSide(color: secondary, width: 2),
-              ),
+              border: Border(bottom: BorderSide(color: secondary, width: 2)),
             ),
             tabs: const [
               Tab(text: 'Ürün Değerlendirmelerim'),

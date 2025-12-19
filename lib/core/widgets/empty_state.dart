@@ -7,22 +7,22 @@ import 'package:imecehub/screens/home/style/home_screen_style.dart';
 class EmptyState extends StatelessWidget {
   /// Gösterilecek ikon
   final IconData icon;
-  
+
   /// Başlık metni
   final String title;
-  
+
   /// Açıklama metni
   final String message;
-  
+
   /// Opsiyonel aksiyon butonu için callback
   final VoidCallback? onAction;
-  
+
   /// Aksiyon butonunun metni
   final String? actionText;
-  
+
   /// İkon rengi (opsiyonel)
   final Color? iconColor;
-  
+
   /// İkon boyutu
   final double iconSize;
 
@@ -41,7 +41,7 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeData = HomeStyle(context: context);
     final effectiveIconColor = iconColor ?? themeData.primary.withOpacity(0.3);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -49,11 +49,7 @@ class EmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: iconSize,
-              color: effectiveIconColor,
-            ),
+            Icon(icon, size: iconSize, color: effectiveIconColor),
             const SizedBox(height: 16),
             customText(
               title,
@@ -122,7 +118,8 @@ class EmptyFavoritesState extends StatelessWidget {
     return EmptyState(
       icon: Icons.favorite_border,
       title: 'Favori Ürününüz Yok',
-      message: 'Beğendiğiniz ürünleri favorilerinize ekleyerek kolayca ulaşabilirsiniz',
+      message:
+          'Beğendiğiniz ürünleri favorilerinize ekleyerek kolayca ulaşabilirsiniz',
       actionText: 'Ürünleri Keşfet',
       onAction: onGoToProducts,
       iconColor: Colors.red.withOpacity(0.3),
@@ -153,11 +150,8 @@ class EmptySearchState extends StatelessWidget {
   final String? searchQuery;
   final VoidCallback? onClearSearch;
 
-  const EmptySearchState({
-    Key? key,
-    this.searchQuery,
-    this.onClearSearch,
-  }) : super(key: key);
+  const EmptySearchState({Key? key, this.searchQuery, this.onClearSearch})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {

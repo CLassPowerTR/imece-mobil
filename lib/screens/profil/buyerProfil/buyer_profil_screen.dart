@@ -29,7 +29,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/core/widgets/cards/productsCard.dart';
 import 'package:imecehub/models/products.dart';
-import 'package:imecehub/core/widgets\cards/orderCard.dart';
+import 'package:imecehub/core/widgets/cards/orderCard.dart';
 import 'package:imecehub/core/widgets/empty_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';

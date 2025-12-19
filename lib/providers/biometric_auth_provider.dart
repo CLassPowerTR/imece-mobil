@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,16 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum BiometricAuthState {
   /// Cihaz biyometrik kimlik doğrulamayı desteklemiyor
   notAvailable,
-  
+
   /// Kullanıcı biyometrik kimlik doğrulamayı etkinleştirmedi
   disabled,
-  
+
   /// Biyometrik kimlik doğrulama etkin
   enabled,
-  
+
   /// Kimlik doğrulama başarılı
   authenticated,
-  
+
   /// Kimlik doğrulama başarısız
   failed,
 }
@@ -52,9 +53,9 @@ class BiometricAuthService {
     try {
       return await _auth.authenticate(
         localizedReason: localizedReason,
-        options: AuthenticationOptions(
-          useErrorDialogs: useErrorDialogs,
-          stickyAuth: stickyAuth,
+        options: const AuthenticationOptions(
+          useErrorDialogs: true,
+          stickyAuth: true,
           biometricOnly: true,
         ),
       );
@@ -88,7 +89,8 @@ class BiometricAuthService {
 class BiometricAuthNotifier extends StateNotifier<BiometricAuthState> {
   final BiometricAuthService _service;
 
-  BiometricAuthNotifier(this._service) : super(BiometricAuthState.notAvailable) {
+  BiometricAuthNotifier(this._service)
+    : super(BiometricAuthState.notAvailable) {
     _init();
   }
 
@@ -101,7 +103,9 @@ class BiometricAuthNotifier extends StateNotifier<BiometricAuthState> {
     }
 
     final isEnabled = await _service.isEnabled();
-    state = isEnabled ? BiometricAuthState.enabled : BiometricAuthState.disabled;
+    state = isEnabled
+        ? BiometricAuthState.enabled
+        : BiometricAuthState.disabled;
   }
 
   /// Biyometrik kimlik doğrulamayı etkinleştirir
@@ -125,7 +129,9 @@ class BiometricAuthNotifier extends StateNotifier<BiometricAuthState> {
   /// Kimlik doğrulama yapar
   Future<bool> authenticate(String reason) async {
     final success = await _service.authenticate(localizedReason: reason);
-    state = success ? BiometricAuthState.authenticated : BiometricAuthState.failed;
+    state = success
+        ? BiometricAuthState.authenticated
+        : BiometricAuthState.failed;
     return success;
   }
 
@@ -141,10 +147,11 @@ final biometricAuthServiceProvider = Provider<BiometricAuthService>((ref) {
 });
 
 /// Biyometrik kimlik doğrulama durumunu sağlayan Provider
-final biometricAuthProvider = StateNotifierProvider<BiometricAuthNotifier, BiometricAuthState>((ref) {
-  final service = ref.watch(biometricAuthServiceProvider);
-  return BiometricAuthNotifier(service);
-});
+final biometricAuthProvider =
+    StateNotifierProvider<BiometricAuthNotifier, BiometricAuthState>((ref) {
+      final service = ref.watch(biometricAuthServiceProvider);
+      return BiometricAuthNotifier(service);
+    });
 
 /// Biyometrik kimlik doğrulamanın kullanılabilir olup olmadığını döner
 final canUseBiometricsProvider = FutureProvider<bool>((ref) async {
