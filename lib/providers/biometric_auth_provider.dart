@@ -49,15 +49,17 @@ class BiometricAuthService {
     required String localizedReason,
     bool useErrorDialogs = true,
     bool stickyAuth = true,
+    bool biometricOnly = true,
+    bool sensitiveTransaction = true,
   }) async {
     try {
       return await _auth.authenticate(
         localizedReason: localizedReason,
-        options: const AuthenticationOptions(
-          useErrorDialogs: true,
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        // local_auth v3.x: 'options' parametresi yok.
+        // useErrorDialogs bu sürümde public API'da desteklenmiyor (ignore edilir).
+        biometricOnly: biometricOnly,
+        sensitiveTransaction: sensitiveTransaction,
+        persistAcrossBackgrounding: stickyAuth,
       );
     } catch (e) {
       return false;

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/providers/biometric_auth_provider.dart';
 import 'package:imecehub/services/api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Kimlik doğrulama servisini yöneten sınıf
 /// API ile biyometrik doğrulamayı birleştirerek çalışır
@@ -30,39 +29,17 @@ class AuthService {
       );
 
       if (!authenticated) {
-        return {
-          'success': false,
-          'message': 'Biyometrik doğrulama başarısız',
-        };
+        return {'success': false, 'message': 'Biyometrik doğrulama başarısız'};
       }
     }
 
     // 2. API ile giriş yap
     try {
-      // ApiService.signIn metodunu kullan (mevcut API'niz)
-      final response = await ApiService.signIn(email, password);
-
-      if (response['success'] == true) {
-        // Token'ı kaydet
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accesToken', response['token'] ?? '');
-
-        return {
-          'success': true,
-          'message': 'Giriş başarılı',
-          'data': response,
-        };
-      } else {
-        return {
-          'success': false,
-          'message': response['message'] ?? 'Giriş başarısız',
-        };
-      }
+      // Projede mevcut login metodu: token'ları SharedPreferences'a kaydeder.
+      await ApiService.fetchUserLogin(email, password);
+      return {'success': true, 'message': 'Giriş başarılı'};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Bir hata oluştu: $e',
-      };
+      return {'success': false, 'message': 'Bir hata oluştu: $e'};
     }
   }
 
@@ -93,21 +70,12 @@ class AuthService {
       }
     }
 
-    // 2. Token'ı temizle
+    // 2. API ile çıkış yap (token temizliği ApiService içinde yapılıyor)
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('accesToken');
-      await prefs.remove('userId');
-
-      return {
-        'success': true,
-        'message': 'Çıkış başarılı',
-      };
+      await ApiService.fetchUserLogout();
+      return {'success': true, 'message': 'Çıkış başarılı'};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Çıkış sırasında hata: $e',
-      };
+      return {'success': false, 'message': 'Çıkış sırasında hata: $e'};
     }
   }
 
