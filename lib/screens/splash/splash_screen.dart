@@ -1,7 +1,8 @@
 // lib/screens/splash/splash_screen.dart
 
 import 'dart:async';
-
+import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,267 +214,440 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final isSmallScreen = screenWidth < 360;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0E5EC),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
+      body: Stack(
+        children: [
+          // Ethereal nebulous cloudscape background
+          _buildNebulousBackground(context),
 
-              // Logo ve İsim
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    children: [
-                      // Neumorphic Logo Container
-                      _buildNeumorphicContainer(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            'assets/image/website.png',
-                            width: isSmallScreen ? 160 : 180,
-                            height: isSmallScreen ? 160 : 180,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              // Hata durumunda fallback icon göster
-                              return Container(
-                                padding: EdgeInsets.all(
-                                  isSmallScreen ? 40 : 50,
-                                ),
-                                child: Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: isSmallScreen ? 80 : 100,
-                                  color: const Color(0xFF4ECDC4),
-                                ),
-                              );
-                            },
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+
+                  // Logo ve İsim - Floating Artifact Style
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: Column(
+                        children: [
+                          // Ethereal Floating Logo Container
+                          _buildFloatingLogoContainer(
+                            isSmallScreen: isSmallScreen,
                           ),
-                        ),
-                      ),
-                      SizedBox(height: isSmallScreen ? 24 : 32),
+                          SizedBox(height: isSmallScreen ? 24 : 32),
 
-                      // App İsmi
-                      Text(
-                        'IMECEHUB',
-                        style: GoogleFonts.poppins(
-                          fontSize: isSmallScreen ? 36 : 42,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF2D3142),
-                          letterSpacing: 2,
-                        ),
-                      ),
-                      SizedBox(height: isSmallScreen ? 8 : 12),
-                      Text(
-                        'Mobil',
-                        style: GoogleFonts.poppins(
-                          fontSize: isSmallScreen ? 16 : 18,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
-                          letterSpacing: 4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Yükleme Göstergesi
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    // Modern Progress Bar
-                    _buildModernProgressBar(isSmallScreen),
-
-                    SizedBox(height: isSmallScreen ? 16 : 24),
-
-                    // Yükleme Mesajı ve Yüzde
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _loadingMessage.isNotEmpty
-                                ? _loadingMessage
-                                : 'Sistem yükleniyor...',
+                          // Stardust App Name
+                          Text(
+                            'IMECEHUB',
                             style: GoogleFonts.poppins(
-                              fontSize: isSmallScreen ? 12 : 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF6B7280),
+                              fontSize: isSmallScreen ? 36 : 42,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF6B6B7F),
+                              letterSpacing: 2,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x40FFFFFF),
+                                  blurRadius: 10,
+                                ),
+                                Shadow(
+                                  color: Color(0x20E8D7FF),
+                                  blurRadius: 20,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        Text(
-                          '${(_progress * 100).toInt()}%',
-                          style: GoogleFonts.poppins(
-                            fontSize: isSmallScreen ? 16 : 18,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF4ECDC4),
+                          SizedBox(height: isSmallScreen ? 8 : 12),
+                          Text(
+                            'Mobil',
+                            style: GoogleFonts.poppins(
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFFB8B8C8),
+                              letterSpacing: 4,
+                              shadows: [
+                                Shadow(color: Color(0x20FFFFFF), blurRadius: 4),
+                              ],
+                            ),
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // Ethereal Progress Indicator
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Column(
+                      children: [
+                        // Crystallized Progress Bar
+                        _buildEtherealProgressBar(isSmallScreen),
+
+                        SizedBox(height: isSmallScreen ? 16 : 24),
+
+                        // Loading Message with Stardust Style
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _loadingMessage.isNotEmpty
+                                    ? _loadingMessage
+                                    : 'Sistem yükleniyor...',
+                                style: GoogleFonts.poppins(
+                                  fontSize: isSmallScreen ? 12 : 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFFB8B8C8),
+                                  shadows: [
+                                    Shadow(
+                                      color: Color(0x20FFFFFF),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${(_progress * 100).toInt()}%',
+                              style: GoogleFonts.poppins(
+                                fontSize: isSmallScreen ? 16 : 18,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF9B8FD9),
+                                shadows: [
+                                  Shadow(
+                                    color: Color(0x40E8D7FF),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
-              // Alt Bilgi
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Text(
-                  _version.isNotEmpty
-                      ? 'Versiyon $_version${_buildNumber.isNotEmpty ? '+$_buildNumber' : ''}'
-                      : '',
-                  style: GoogleFonts.poppins(
-                    fontSize: isSmallScreen ? 11 : 12,
-                    color: const Color(0xFF9CA3AF),
                   ),
+
+                  const Spacer(),
+
+                  // Version Text with Ethereal Styling
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
+                      _version.isNotEmpty
+                          ? 'Versiyon $_version${_buildNumber.isNotEmpty ? '+$_buildNumber' : ''}'
+                          : '',
+                      style: GoogleFonts.poppins(
+                        fontSize: isSmallScreen ? 11 : 12,
+                        color: Color(0xFFB8B8C8),
+                        shadows: [
+                          Shadow(color: Color(0x15FFFFFF), blurRadius: 3),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 16 : 20),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============= ETHEREAL DESIGN METHODS =============
+
+  /// Creates the nebulous cloudscape background with volumetric depth
+  Widget _buildNebulousBackground(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE8D7FF), // Pastel amethyst
+            Color(0xFFD7E8FF), // Soft sapphire
+            Color(0xFFF5F5FF), // Moonstone white
+            Color(0xFFFFE8F0), // Dawn pink
+            Color(0xFFE0E8FF), // Light ethereal blue
+          ],
+          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Cloud layer 1 - far background
+          Positioned(
+            top: -100,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x30E8D7FF), Color(0x00E8D7FF)],
                 ),
               ),
-              SizedBox(height: isSmallScreen ? 16 : 20),
-            ],
+            ),
+          ),
+          // Cloud layer 2 - mid background
+          Positioned(
+            top: 200,
+            left: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x25D7E8FF), Color(0x00D7E8FF)],
+                ),
+              ),
+            ),
+          ),
+          // Cloud layer 3 - lower background
+          Positioned(
+            bottom: 100,
+            right: 50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x20FFE8F0), Color(0x00FFE8F0)],
+                ),
+              ),
+            ),
+          ),
+          // Stardust particle overlay
+          Positioned.fill(child: CustomPaint(painter: _StardustPainter())),
+        ],
+      ),
+    );
+  }
+
+  /// Creates floating logo container with crystallized cloud material
+  Widget _buildFloatingLogoContainer({required bool isSmallScreen}) {
+    return Transform.rotate(
+      angle: 0.01, // Subtle antigravity tilt
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          // Aurora light halo effect
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x20E8D7FF), // Amethyst glow
+              blurRadius: 25,
+              spreadRadius: 5,
+              offset: Offset(-6, -6),
+            ),
+            BoxShadow(
+              color: Color(0x20D7E8FF), // Sapphire glow
+              blurRadius: 25,
+              spreadRadius: 5,
+              offset: Offset(6, 6),
+            ),
+            BoxShadow(
+              color: Color(0x15FFE8F0), // Dawn pink ambient
+              blurRadius: 35,
+              spreadRadius: 8,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0x50FFFFFF), Color(0x30FFFFFF)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Color(0x50FFFFFF), width: 1.5),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/image/website.png',
+                  width: isSmallScreen ? 160 : 180,
+                  height: isSmallScreen ? 160 : 180,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      padding: EdgeInsets.all(isSmallScreen ? 40 : 50),
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [Color(0x40E8D7FF), Color(0x10E8D7FF)],
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: isSmallScreen ? 80 : 100,
+                        color: Color(0xFF9B8FD9),
+                        shadows: [
+                          Shadow(color: Color(0x40E8D7FF), blurRadius: 10),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNeumorphicContainer({
-    required Widget child,
-    bool isPressed = false,
-    EdgeInsets? padding,
-  }) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE0E5EC),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: isPressed
-            ? [
-                const BoxShadow(
-                  color: Color(0xFFA3B1C6),
-                  offset: Offset(2, 2),
-                  blurRadius: 4,
-                  spreadRadius: 0,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-2, -2),
-                  blurRadius: 4,
-                  spreadRadius: 0,
-                ),
-              ]
-            : [
-                const BoxShadow(
-                  color: Color(0xFFA3B1C6),
-                  offset: Offset(8, 8),
-                  blurRadius: 15,
-                  spreadRadius: 0,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-8, -8),
-                  blurRadius: 15,
-                  spreadRadius: 0,
-                ),
-              ],
-      ),
-      child: child,
-    );
-  }
-
-  Widget _buildModernProgressBar(bool isSmallScreen) {
-    return _buildNeumorphicContainer(
-      isPressed: true,
-      padding: const EdgeInsets.all(4),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              // Track
-              Container(
-                height: isSmallScreen ? 12 : 16,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              // Animated Progress
-              TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutCubic,
-                tween: Tween<double>(begin: 0, end: _progress),
-                builder: (context, value, child) {
-                  return Container(
-                    height: isSmallScreen ? 12 : 16,
-                    width: constraints.maxWidth * value,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4ECDC4), Color(0xFF45B7AF)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF4ECDC4).withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: value > 0.1
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Stack(
-                              children: [
-                                // Shimmer effect on the progress
-                                Positioned.fill(
-                                  child: AnimatedBuilder(
-                                    animation: _animationController,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(
-                                          (constraints.maxWidth * value) *
-                                              (_animationController.value * 2 -
-                                                  1),
-                                          0,
-                                        ),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.white.withOpacity(0),
-                                                Colors.white.withOpacity(0.2),
-                                                Colors.white.withOpacity(0),
-                                              ],
-                                              stops: const [0.3, 0.5, 0.7],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : null,
-                  );
-                },
+  /// Creates ethereal crystallized progress bar
+  Widget _buildEtherealProgressBar(bool isSmallScreen) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0x40FFFFFF), Color(0x20FFFFFF)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Color(0x40FFFFFF), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x10E8D7FF),
+                blurRadius: 15,
+                spreadRadius: 2,
               ),
             ],
-          );
-        },
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  // Track with subtle glow
+                  Container(
+                    height: isSmallScreen ? 12 : 16,
+                    decoration: BoxDecoration(
+                      color: Color(0x15FFFFFF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  // Animated ethereal progress
+                  TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutCubic,
+                    tween: Tween<double>(begin: 0, end: _progress),
+                    builder: (context, value, child) {
+                      return Container(
+                        height: isSmallScreen ? 12 : 16,
+                        width: constraints.maxWidth * value,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF9B8FD9), // Amethyst purple
+                              Color(0xFFB8A8E8), // Light lavender
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x40E8D7FF),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                            ),
+                            BoxShadow(
+                              color: Color(0x30D7E8FF),
+                              blurRadius: 20,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: value > 0.1
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Stack(
+                                  children: [
+                                    // Shimmer/sparkle effect
+                                    Positioned.fill(
+                                      child: AnimatedBuilder(
+                                        animation: _animationController,
+                                        builder: (context, child) {
+                                          return Transform.translate(
+                                            offset: Offset(
+                                              (constraints.maxWidth * value) *
+                                                  (_animationController.value *
+                                                          2 -
+                                                      1),
+                                              0,
+                                            ),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: [
+                                                    Colors.white.withOpacity(0),
+                                                    Colors.white.withOpacity(
+                                                      0.3,
+                                                    ),
+                                                    Colors.white.withOpacity(0),
+                                                  ],
+                                                  stops: const [0.3, 0.5, 0.7],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : null,
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
+}
+
+/// Custom painter for creating subtle stardust particle overlay
+class _StardustPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0x08FFFFFF)
+      ..style = PaintingStyle.fill;
+
+    // Create subtle stardust particles
+    final random = Random(42); // Fixed seed for consistent particles
+    for (int i = 0; i < 50; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 1.5 + 0.5;
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

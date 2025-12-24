@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/variables/url.dart';
+import 'package:imecehub/core/widgets/buttons/groupBuy_button.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
@@ -35,6 +36,7 @@ class productsCard extends ConsumerStatefulWidget {
 
 class _productsCardState extends ConsumerState<productsCard> {
   bool cokluGorsel = false;
+  final isSmallScreen = double.infinity < 360;
 
   @override
   void initState() {
@@ -101,7 +103,7 @@ class _productsCardState extends ConsumerState<productsCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                  Builder(
+                Builder(
                   builder: (context) {
                     if (product.kapakGorseli != null &&
                         product.kapakGorseli != '') {
@@ -132,36 +134,35 @@ class _productsCardState extends ConsumerState<productsCard> {
                                             ),
                                           ),
                                         ),
-                                      // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                                      Positioned(
-                                        bottom: 4,
-                                        right: 4,
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          width: 25,
-                                          height: 25,
-                                          decoration: BoxDecoration(
-                                            color: HomeStyle(
-                                              context: context,
-                                            ).outline,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
+                                        // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
+                                        Positioned(
+                                          bottom: 4,
+                                          right: 4,
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            width: 25,
+                                            height: 25,
+                                            decoration: BoxDecoration(
+                                              color: HomeStyle(
+                                                context: context,
+                                              ).outline,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
-                                          ),
-                                          child: Text(
-                                            "${imgIndex + 1}/${product.kapakGorseli!.length}",
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
+                                            child: Text(
+                                              "${imgIndex + 1}/${product.kapakGorseli!.length}",
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              )
+                                      ],
+                                    );
+                                  },
+                                )
                               : Stack(
                                   children: [
                                     Container(
@@ -187,7 +188,9 @@ class _productsCardState extends ConsumerState<productsCard> {
                                           color: HomeStyle(
                                             context: context,
                                           ).outline,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: Text(
                                           "1/1",
@@ -255,55 +258,65 @@ class _productsCardState extends ConsumerState<productsCard> {
                           height: 30,
                           child: Builder(
                             builder: (context) {
-                              if (product.stokDurumu != null &&
-                                  product.stokDurumu! <= 0) {
-                                return TextButton(
-                                  onPressed: () {},
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+                              if (product.satis_turu == 1) {
+                                if (product.stokDurumu != null &&
+                                    product.stokDurumu! <= 0) {
+                                  return TextButton(
+                                    onPressed: () {},
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      padding: EdgeInsets.zero,
                                     ),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  child: customText(
-                                    'Stokta Yok',
-                                    context,
-                                    color: Colors.white,
-                                    weight: FontWeight.bold,
-                                    textAlign: TextAlign.center,
-                                    size: HomeStyle(
-                                      context: context,
-                                    ).bodySmall.fontSize,
-                                  ),
-                                );
+                                    child: customText(
+                                      'Stokta Yok',
+                                      context,
+                                      color: Colors.white,
+                                      weight: FontWeight.bold,
+                                      textAlign: TextAlign.center,
+                                      size: HomeStyle(
+                                        context: context,
+                                      ).bodySmall.fontSize,
+                                    ),
+                                  );
+                                } else {
+                                  return TextButton(
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: widget.isSepet
+                                          ? Colors.orangeAccent[200]
+                                          : HomeStyle(
+                                              context: context,
+                                            ).secondary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed:
+                                        product.stokDurumu != null &&
+                                            product.stokDurumu! >= 0
+                                        ? widget.sepeteEkle
+                                        : null,
+                                    child: customText(
+                                      widget.isSepet
+                                          ? 'Sepete Git'
+                                          : 'Sepete Ekle',
+                                      context,
+                                      color: Colors.white,
+                                      weight: FontWeight.bold,
+                                      size: HomeStyle(
+                                        context: context,
+                                      ).bodySmall.fontSize,
+                                    ),
+                                  );
+                                }
                               } else {
-                                return TextButton(
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: widget.isSepet
-                                        ? Colors.orangeAccent[200]
-                                        : HomeStyle(context: context).secondary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  onPressed:
-                                      product.stokDurumu != null &&
-                                          product.stokDurumu! >= 0
-                                      ? widget.sepeteEkle
-                                      : null,
-                                  child: customText(
-                                    widget.isSepet
-                                        ? 'Sepete Git'
-                                        : 'Sepete Ekle',
-                                    context,
-                                    color: Colors.white,
-                                    weight: FontWeight.bold,
-                                    size: HomeStyle(
-                                      context: context,
-                                    ).bodySmall.fontSize,
-                                  ),
+                                return groupBuyButton(
+                                  context,
+                                  onPressed: () {},
+                                  elevation: 0,
                                 );
                               }
                             },

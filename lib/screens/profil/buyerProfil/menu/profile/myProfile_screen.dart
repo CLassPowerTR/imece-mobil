@@ -64,126 +64,405 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 4,
-        shadowColor: Colors.grey[300],
-        leadingWidth: MediaQuery.of(context).size.width * 0.3,
-        leading: TurnBackTextIcon(),
-        title: customText(
-          'Profilim',
-          context,
-          size: AppTextSizes.bodyLarge(context),
-          weight: FontWeight.w600,
-        ),
-        actions: [
-          if (_hasChanges)
-            TextButton(
-              onPressed: _isSaving ? null : () => _saveChanges(context),
-              child: _isSaving
-                  ? SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      'Kaydet',
-                      style: TextStyle(
-                        color: HomeStyle(context: context).secondary,
-                        fontWeight: FontWeight.w600,
-                      ),
+      extendBodyBehindAppBar: true,
+      appBar: _buildEtherealAppBar(context),
+      body: Stack(
+        children: [
+          // Ethereal cloudscape background
+          _buildNebulousBackground(context),
+          // Content
+          SafeArea(
+            child: user == null
+                ? Center(
+                    child: _buildStardustText(
+                      'Kullanıcı bilgisi bulunamadı',
+                      fontSize: 16,
                     ),
-            ),
+                  )
+                : ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    children: [
+                      _buildFloatingCard(
+                        context,
+                        index: 0,
+                        title: 'Kullanıcı Adı',
+                        icon: Icons.person,
+                        value: _editedValues['username'] ?? '',
+                        onEdit: () => _editUsername(context),
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 1,
+                        title: 'Ad Soyad',
+                        icon: Icons.person_outline_sharp,
+                        value:
+                            '${(_editedValues['first_name'] ?? '').trim()} ${(_editedValues['last_name'] ?? '').trim()}'
+                                .trim(),
+                        onEdit: () => _editName(context),
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 2,
+                        title: 'E-posta',
+                        icon: Icons.email_outlined,
+                        value: user.email,
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 3,
+                        title: 'Telefon',
+                        icon: Icons.phone_outlined,
+                        value: (_editedValues['telno'] ?? '').isEmpty
+                            ? '-'
+                            : (_editedValues['telno'] ?? ''),
+                        onEdit: () => _editPhone(context),
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 4,
+                        title: 'Rol',
+                        icon: Icons.person_outline,
+                        value: user.rol,
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 5,
+                        title: 'Cinsiyet',
+                        icon: Icons.person_outline,
+                        value: user.aliciProfili?.cinsiyet ?? '-',
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 6,
+                        title: 'Durum',
+                        icon: Icons.check_circle_outline,
+                        value: user.isActive ? 'Aktif' : 'Pasif',
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 7,
+                        title: 'Bakiye',
+                        icon: Icons.money_outlined,
+                        value: user.bakiye,
+                      ),
+
+                      _buildFloatingCard(
+                        context,
+                        index: 9,
+                        title: 'Üyelik Tarihi',
+                        icon: Icons.date_range,
+                        value: _formatDate(user.dateJoined),
+                      ),
+                      _buildFloatingCard(
+                        context,
+                        index: 10,
+                        title: 'Son Giriş',
+                        icon: Icons.date_range_outlined,
+                        value: user.lastLogin != null
+                            ? _formatDate(user.lastLogin!)
+                            : '-',
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                      ),
+                    ],
+                  ),
+          ),
         ],
       ),
-      body: user == null
-          ? Center(child: customText('Kullanıcı bilgisi bulunamadı', context))
-          : ListView(
-              padding: AppPaddings.all12,
-              children: [
-                _infoCard(
-                  context,
-                  title: 'Kullanıcı Adı',
-                  icon: Icons.person,
-                  value: _editedValues['username'] ?? '',
-                  onEdit: () => _editUsername(context),
-                ),
-                _infoCard(
-                  context,
-                  title: 'Ad Soyad',
-                  icon: Icons.person_outline_sharp,
-                  value:
-                      '${(_editedValues['first_name'] ?? '').trim()} ${(_editedValues['last_name'] ?? '').trim()}'
-                          .trim(),
-                  onEdit: () => _editName(context),
-                ),
-                _infoCard(
-                  context,
-                  title: 'E-posta',
-                  icon: Icons.email_outlined,
-                  value: user.email,
-                ),
-                _infoCard(
-                  context,
-                  title: 'Telefon',
-                  icon: Icons.phone_outlined,
-                  value: (_editedValues['telno'] ?? '').isEmpty
-                      ? '-'
-                      : (_editedValues['telno'] ?? ''),
-                  onEdit: () => _editPhone(context),
-                ),
-                _infoCard(
-                  context,
-                  title: 'Rol',
-                  icon: Icons.person_outline,
-                  value: user.rol,
-                ),
-                _infoCard(
-                  context,
-                  title: 'Cinsiyet',
-                  icon: Icons.person_outline,
-                  value: user.aliciProfili?.cinsiyet ?? '-',
-                ),
-                _infoCard(
-                  context,
-                  title: 'Durum',
-                  icon: Icons.check_circle_outline,
-                  value: user.isActive ? 'Aktif' : 'Pasif',
-                ),
-                _infoCard(
-                  context,
-                  title: 'Bakiye',
-                  icon: Icons.money_outlined,
-                  value: user.bakiye,
-                ),
-                _infoCard(
-                  context,
-                  title: 'Hata Yapma Oranı',
-                  icon: Icons.error_outline,
-                  value: user.hataYapmaOrani,
-                ),
-                _infoCard(
-                  context,
-                  title: 'Üyelik Tarihi',
-                  icon: Icons.date_range,
-                  value: _formatDate(user.dateJoined),
-                ),
-                _infoCard(
-                  context,
-                  title: 'Son Giriş',
-                  icon: Icons.date_range_outlined,
-                  value: user.lastLogin != null
-                      ? _formatDate(user.lastLogin!)
-                      : '-',
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              ],
-            ),
     );
   }
 
+  // ============= ETHEREAL DESIGN METHODS =============
+
+  /// Creates the nebulous cloudscape background with volumetric depth
+  Widget _buildNebulousBackground(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE8D7FF), // Pastel amethyst
+            Color(0xFFD7E8FF), // Soft sapphire
+            Color(0xFFF5F5FF), // Moonstone white
+            Color(0xFFFFE8F0), // Dawn pink
+            Color(0xFFE0E8FF), // Light ethereal blue
+          ],
+          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Cloud layer 1 - far background
+          Positioned(
+            top: -100,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x30E8D7FF), Color(0x00E8D7FF)],
+                ),
+              ),
+            ),
+          ),
+          // Cloud layer 2 - mid background
+          Positioned(
+            top: 200,
+            left: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x25D7E8FF), Color(0x00D7E8FF)],
+                ),
+              ),
+            ),
+          ),
+          // Cloud layer 3 - lower background
+          Positioned(
+            bottom: 100,
+            right: 50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x20FFE8F0), Color(0x00FFE8F0)],
+                ),
+              ),
+            ),
+          ),
+          // Stardust particle overlay (very subtle)
+          Positioned.fill(child: CustomPaint(painter: _StardustPainter())),
+        ],
+      ),
+    );
+  }
+
+  /// Creates the ethereal glassmorphic AppBar
+  PreferredSizeWidget _buildEtherealAppBar(BuildContext context) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Color(0x30FFFFFF),
+      centerTitle: true,
+      elevation: 0,
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x40FFFFFF), Color(0x20FFFFFF)],
+              ),
+              border: Border(
+                bottom: BorderSide(color: Color(0x30FFFFFF), width: 1),
+              ),
+            ),
+          ),
+        ),
+      ),
+      leadingWidth: MediaQuery.of(context).size.width * 0.3,
+      leading: TurnBackTextIcon(),
+      title: _buildStardustText(
+        'Profilim',
+        fontSize: AppTextSizes.bodyLarge(context)!.toDouble(),
+        fontWeight: FontWeight.w600,
+      ),
+      actions: [
+        if (_hasChanges)
+          TextButton(
+            onPressed: _isSaving ? null : () => _saveChanges(context),
+            child: _isSaving
+                ? SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF9B8FD9),
+                      ),
+                    ),
+                  )
+                : Text(
+                    'Kaydet',
+                    style: TextStyle(
+                      color: Color(0xFF9B8FD9),
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(color: Color(0x30E8D7FF), blurRadius: 8),
+                      ],
+                    ),
+                  ),
+          ),
+      ],
+    );
+  }
+
+  /// Creates stardust-styled text with ethereal glow
+  Widget _buildStardustText(
+    String text, {
+    double fontSize = 16,
+    FontWeight fontWeight = FontWeight.normal,
+    Color? color,
+  }) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color ?? Color(0xFF6B6B7F),
+        shadows: [Shadow(color: Color(0x20FFFFFF), blurRadius: 4)],
+      ),
+    );
+  }
+
+  /// Creates a floating card with antigravity effects
+  Widget _buildFloatingCard(
+    BuildContext context, {
+    required int index,
+    required String title,
+    required String value,
+    VoidCallback? onEdit,
+    IconData? icon,
+  }) {
+    // Calculate subtle rotation based on index for variety
+    final rotation = (index % 3 - 1) * 0.008; // -0.008 to 0.008 radians
+    final horizontalOffset = (index % 2 == 0) ? 4.0 : -4.0;
+
+    return Transform.rotate(
+      angle: rotation,
+      child: Container(
+        margin: EdgeInsets.only(
+          bottom: 16,
+          left: horizontalOffset > 0 ? horizontalOffset : 0,
+          right: horizontalOffset < 0 ? -horizontalOffset : 0,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(
+              decoration: BoxDecoration(
+                // Crystallized cloud material
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0x50FFFFFF), Color(0x30FFFFFF)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Color(0x50FFFFFF), width: 1.5),
+                // Aurora light halo effect
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x15E8D7FF), // Amethyst glow
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                    offset: Offset(-4, -4),
+                  ),
+                  BoxShadow(
+                    color: Color(0x15D7E8FF), // Sapphire glow
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                    offset: Offset(4, 4),
+                  ),
+                  BoxShadow(
+                    color: Color(0x10FFE8F0), // Dawn pink glow
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [Color(0x30E8D7FF), Color(0x10E8D7FF)],
+                        ),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 22,
+                        color: Color(0xFF9B8FD9),
+                        shadows: [
+                          Shadow(color: Color(0x40E8D7FF), blurRadius: 8),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFFB8B8C8), // Stardust grey
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                            shadows: [
+                              Shadow(color: Color(0x20FFFFFF), blurRadius: 4),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          value.isEmpty ? '-' : value,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF6B6B7F),
+                            fontWeight: FontWeight.w600,
+                            shadows: [
+                              Shadow(color: Color(0x30FFFFFF), blurRadius: 6),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (onEdit != null)
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [Color(0x20E8D7FF), Color(0x00E8D7FF)],
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.edit_outlined),
+                        color: Color(0xFF9B8FD9),
+                        onPressed: onEdit,
+                        tooltip: 'Düzenle',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Kept for backwards compatibility, but now delegates to floating card
   Widget _infoCard(
     BuildContext context, {
     required String title,
@@ -191,55 +470,13 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     VoidCallback? onEdit,
     IconData? icon,
   }) {
-    return Card(
-      color: Colors.grey[100],
-      margin: const EdgeInsets.only(bottom: 12),
-      shadowColor: AppColors.shadow(context),
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
-      child: Padding(
-        padding: AppPaddings.all16,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 12,
-          children: [
-            if (icon != null) Icon(icon, size: 22, color: Colors.grey[600]),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 6,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    value.isEmpty ? '-' : value,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: HomeStyle(context: context).primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (onEdit != null)
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                color: HomeStyle(context: context).secondary,
-                onPressed: onEdit,
-                tooltip: 'Düzenle',
-              ),
-          ],
-        ),
-      ),
+    return _buildFloatingCard(
+      context,
+      index: 0,
+      title: title,
+      value: value,
+      onEdit: onEdit,
+      icon: icon,
     );
   }
 
@@ -390,4 +627,26 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     }
     return true;
   }
+}
+
+/// Custom painter for creating subtle stardust particle overlay
+class _StardustPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0x08FFFFFF)
+      ..style = PaintingStyle.fill;
+
+    // Create subtle stardust particles
+    final random = Random(42); // Fixed seed for consistent particles
+    for (int i = 0; i < 50; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 1.5 + 0.5;
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

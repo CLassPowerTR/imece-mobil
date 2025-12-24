@@ -19,6 +19,7 @@ import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen_library.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/models/urunYorum.dart';
 import 'package:shared_preferences/shared_preferences.dart';

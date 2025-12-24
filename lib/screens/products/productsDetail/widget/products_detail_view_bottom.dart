@@ -76,10 +76,14 @@ class _ProductsDetailViewBottomState
             children: [
               _fiyatStokText(themeData, product, isSmallScreen),
               SizedBox(width: isSmallScreen ? 6 : 10),
-              if (!isSeller) ...[
-                _sepeteEkleButton(context, product, isSmallScreen),
-                SizedBox(width: isSmallScreen ? 6 : 10),
+
+              if (product.satis_turu == 2) ...[
                 _grupAlimButton(context, isSmallScreen),
+              ] else ...[
+                if (!isSeller) ...[
+                  _sepeteEkleButton(context, product, isSmallScreen),
+                  SizedBox(width: isSmallScreen ? 6 : 10),
+                ],
               ],
             ],
           ),
@@ -92,7 +96,7 @@ class _ProductsDetailViewBottomState
     return Expanded(
       child: textButton(
         context,
-        'Grup alım',
+        'Grup Alım',
         buttonColor: Colors.orange,
         elevation: 4,
         fontSize: isSmallScreen ? 11 : null,
@@ -121,7 +125,9 @@ class _ProductsDetailViewBottomState
                 'Stokta Yok',
                 context,
                 color: AppColors.onPrimary(context),
-                size: isSmallScreen ? 11 : HomeStyle(context: context).bodySmall.fontSize,
+                size: isSmallScreen
+                    ? 11
+                    : HomeStyle(context: context).bodySmall.fontSize,
               ),
             ),
           );
@@ -165,9 +171,7 @@ class _ProductsDetailViewBottomState
             TextSpan(text: '\nKalan:'),
             TextSpan(
               text: ' ${product.stokDurumu} KG',
-              style: TextStyle(
-                color: getStokRengi(product.stokDurumu ?? 0),
-              ),
+              style: TextStyle(color: getStokRengi(product.stokDurumu ?? 0)),
             ),
           ],
         ),

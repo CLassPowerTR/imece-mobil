@@ -130,6 +130,11 @@ class _ProductsDetailViewBodyState
                 ),
               ),
               SizedBox(height: isSmallScreen ? 10 : 15),
+
+              // Benzer Ürünler Listesi
+              _benzerUrunler(context, product, isSmallScreen),
+
+              SizedBox(height: isSmallScreen ? 20 : 30),
             ],
           ),
         );
@@ -382,65 +387,136 @@ class _ProductsDetailViewBodyState
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 15),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Satıcı Bilgisi - Responsive Wrap
-                Wrap(
-                  spacing: isSmallScreen ? 4 : 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    customText(
-                      'Ürünün Satıcısı:',
-                      context,
-                      color: themeData.primary.withOpacity(0.3),
-                      size: isSmallScreen ? 12 : null,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/profil/sellerProfile',
-                          arguments: [user, false],
-                        );
-                      },
-                      child: customText(
-                        user.username,
-                        context,
-                        color: Colors.blue,
-                        weight: FontWeight.bold,
-                        size: isSmallScreen ? 12 : null,
+                SizedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Wrap(
+                        spacing: isSmallScreen ? 4 : 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          customText(
+                            'Satıcı:',
+                            context,
+                            color: themeData.primary.withOpacity(0.3),
+                            size: isSmallScreen
+                                ? 12
+                                : AppTextSizes.bodySmall(context)?.toDouble(),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/profil/sellerProfile',
+                                arguments: [user, false],
+                              );
+                            },
+                            child: customText(
+                              user.username,
+                              context,
+                              color: Colors.blue,
+                              weight: FontWeight.bold,
+                              size: isSmallScreen ? 12 : null,
+                            ),
+                          ),
+                          container(
+                            context,
+                            margin: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 4 : 8,
+                            ),
+                            alignment: Alignment.center,
+                            borderRadius: BorderRadius.circular(4),
+                            color: themeData.secondary,
+                            width: isSmallScreen ? 30 : 35,
+                            height: isSmallScreen ? 18 : 20,
+                            isBoxShadow: false,
+                            child: customText(
+                              user.saticiProfili?.degerlendirmePuani
+                                      .toString() ??
+                                  '0.0',
+                              context,
+                              color: themeData.onSecondary,
+                              weight: FontWeight.bold,
+                              size: isSmallScreen ? 10 : null,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    container(
-                      context,
-                      margin: EdgeInsets.symmetric(
-                        horizontal: isSmallScreen ? 4 : 8,
+                      Wrap(
+                        children: [
+                          // İmece Onaylı Badge
+                          Builder(
+                            builder: (context) {
+                              if (user.saticiProfili?.imeceOnay ?? false) {
+                                return richText(
+                                  context,
+                                  fontSize: isSmallScreen ? 11 : 13,
+                                  children: [
+                                    TextSpan(text: 'İmece onaylı '),
+                                    WidgetSpan(
+                                      child: SizedBox(
+                                        width: isSmallScreen ? 14 : 18,
+                                        height: isSmallScreen ? 14 : 18,
+                                        child: Image.network(
+                                          color: Color.fromRGBO(255, 229, 0, 1),
+                                          fit: BoxFit.cover,
+                                          'https://icons.veryicon.com/png/o/miscellaneous/linear/certificate-11.png',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return ShaderMask(
+                                  shaderCallback: (bounds) =>
+                                      LinearGradient(
+                                        colors: [
+                                          Color.fromRGBO(255, 229, 0, 1),
+                                          Color.fromRGBO(153, 138, 0, 1),
+                                        ],
+                                      ).createShader(
+                                        Rect.fromLTWH(
+                                          0,
+                                          0,
+                                          bounds.width,
+                                          bounds.height,
+                                        ),
+                                      ),
+                                  child: richText(
+                                    context,
+                                    fontSize: isSmallScreen ? 11 : 13,
+                                    children: [
+                                      TextSpan(
+                                        text: 'İmece onaylı ',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          decoration: TextDecoration.underline,
+                                          fontSize: isSmallScreen ? 11 : 13,
+                                        ),
+                                      ),
+                                      WidgetSpan(
+                                        child: SizedBox(
+                                          width: isSmallScreen ? 14 : 18,
+                                          height: isSmallScreen ? 14 : 18,
+                                          child: Image.network(
+                                            'https://icons.veryicon.com/png/o/miscellaneous/linear/certificate-11.png',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                      alignment: Alignment.center,
-                      borderRadius: BorderRadius.circular(4),
-                      color: themeData.secondary,
-                      width: isSmallScreen ? 30 : 35,
-                      height: isSmallScreen ? 18 : 20,
-                      isBoxShadow: false,
-                      child: customText(
-                        user.saticiProfili?.degerlendirmePuani.toString() ??
-                            '0.0',
-                        context,
-                        color: themeData.onSecondary,
-                        weight: FontWeight.bold,
-                        size: isSmallScreen ? 10 : null,
-                      ),
-                    ),
-                    Expanded(
-                      child: customText(
-                        '5(beş) üzerinden',
-                        context,
-                        maxLines: 2,
-                        color: themeData.primary.withOpacity(0.3),
-                        size: isSmallScreen ? 10 : themeData.bodySmall.fontSize,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(height: isSmallScreen ? 12 : 15),
 
@@ -482,72 +558,6 @@ class _ProductsDetailViewBodyState
                         ),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                    ),
-
-                    // İmece Onaylı Badge
-                    Builder(
-                      builder: (context) {
-                        if (user.saticiProfili?.imeceOnay ?? false) {
-                          return richText(
-                            context,
-                            fontSize: isSmallScreen ? 11 : 13,
-                            children: [
-                              TextSpan(text: 'İmece onaylı '),
-                              WidgetSpan(
-                                child: SizedBox(
-                                  width: isSmallScreen ? 14 : 18,
-                                  height: isSmallScreen ? 14 : 18,
-                                  child: Image.network(
-                                    color: Color.fromRGBO(255, 229, 0, 1),
-                                    fit: BoxFit.cover,
-                                    'https://icons.veryicon.com/png/o/miscellaneous/linear/certificate-11.png',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return ShaderMask(
-                            shaderCallback: (bounds) =>
-                                LinearGradient(
-                                  colors: [
-                                    Color.fromRGBO(255, 229, 0, 1),
-                                    Color.fromRGBO(153, 138, 0, 1),
-                                  ],
-                                ).createShader(
-                                  Rect.fromLTWH(
-                                    0,
-                                    0,
-                                    bounds.width,
-                                    bounds.height,
-                                  ),
-                                ),
-                            child: richText(
-                              context,
-                              fontSize: isSmallScreen ? 11 : 13,
-                              children: [
-                                TextSpan(
-                                  text: 'İmece onaylı ',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    decoration: TextDecoration.underline,
-                                    fontSize: isSmallScreen ? 11 : 13,
-                                  ),
-                                ),
-                                WidgetSpan(
-                                  child: SizedBox(
-                                    width: isSmallScreen ? 14 : 18,
-                                    height: isSmallScreen ? 14 : 18,
-                                    child: Image.network(
-                                      'https://icons.veryicon.com/png/o/miscellaneous/linear/certificate-11.png',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
                     ),
                   ],
                 ),
@@ -789,6 +799,115 @@ class _ProductsDetailViewBodyState
           },
         ),
       ],
+    );
+  }
+
+  /// Benzer ürünleri gösteren widget
+  Widget _benzerUrunler(
+    BuildContext context,
+    Product currentProduct,
+    bool isSmallScreen,
+  ) {
+    final allProductsAsync = ref.watch(productsProvider(null));
+
+    return allProductsAsync.when(
+      loading: () => SizedBox(
+        height: isSmallScreen ? 200 : 250,
+        child: Center(child: buildLoadingBar(context)),
+      ),
+      error: (error, stack) => SizedBox(
+        height: isSmallScreen ? 100 : 150,
+        child: Center(
+          child: Text(
+            'Benzer ürünler yüklenemedi',
+            style: TextStyle(fontSize: isSmallScreen ? 12 : 14),
+          ),
+        ),
+      ),
+      data: (allProducts) {
+        // Aynı kategorideki, mevcut ürün hariç diğer ürünleri filtrele
+        final similarProducts = allProducts
+            .where(
+              (p) =>
+                  p.kategori == currentProduct.kategori &&
+                  p.urunId != currentProduct.urunId,
+            )
+            .take(10)
+            .toList();
+
+        if (similarProducts.isEmpty) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 15,
+              vertical: isSmallScreen ? 16 : 24,
+            ),
+            child: Center(
+              child: Text(
+                'Benzer ürün bulunamadı',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return SizedBox(
+          height: isSmallScreen ? 220 : 280,
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 8 : 12),
+            scrollDirection: Axis.horizontal,
+            itemCount: similarProducts.length,
+            itemBuilder: (context, index) {
+              final product = similarProducts[index];
+              final cardWidth = isSmallScreen ? 140.0 : 180.0;
+              final cardHeight = isSmallScreen ? 220.0 : 280.0;
+
+              return Container(
+                width: cardWidth,
+                margin: EdgeInsets.only(right: isSmallScreen ? 8 : 12),
+                child: productsCard(
+                  productId: product.urunId ?? 0,
+                  width: cardWidth,
+                  context: context,
+                  height: cardHeight,
+                  isSepet: false,
+                  isFavorite: false,
+                  favoriEkle: () async {
+                    final currentUser = ref.read(userProvider);
+                    if (currentUser == null) {
+                      showTemporarySnackBar(
+                        context,
+                        'Lütfen giriş yapınız',
+                        type: SnackBarType.info,
+                      );
+                      return;
+                    }
+                    // Favori işlemleri burada yapılabilir
+                  },
+                  sepeteEkle: () {
+                    final currentUser = ref.read(userProvider);
+                    if (currentUser == null) {
+                      showTemporarySnackBar(
+                        context,
+                        'Lütfen giriş yapınız',
+                        type: SnackBarType.info,
+                      );
+                      return;
+                    }
+                    showTemporarySnackBar(
+                      context,
+                      'Ürün sepete eklendi',
+                      type: SnackBarType.success,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -350,6 +350,7 @@ class _productsCardState extends State<productsCard2> {
               fontSize: HomeStyle(context: context).bodyLarge.fontSize,
               textAlign: TextAlign.start,
               context,
+              maxLines: 10,
               children: [
                 TextSpan(
                   text: widget.product.urunAdi ?? '',
@@ -361,11 +362,22 @@ class _productsCardState extends State<productsCard2> {
                 ),
                 TextSpan(text: '\n\n', style: TextStyle(fontSize: 10)),
                 TextSpan(
-                  text: 'KG: ',
+                  text: 'Birim: ',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                TextSpan(text: '${widget.product.urunMinFiyat} TL'),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 3)),
+                TextSpan(text: '${widget.product.urunParakendeFiyat} TL\n'),
+                if (widget.product.satis_turu == 2) ...[
+                  TextSpan(
+                    children: [
+                      TextSpan(text: 'Grup Alım ile '),
+                      TextSpan(
+                        text: '(${widget.product.urunMinFiyat} TL)',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: ' kadar indirim\n'),
+                    ],
+                  ),
+                ],
                 TextSpan(
                   text: 'Stok: ',
                   style: TextStyle(fontWeight: FontWeight.bold),
