@@ -12,6 +12,12 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   bool _isSaving = false;
   late Map<String, String> _originalValues;
   late Map<String, String> _editedValues;
+  
+  // Profile photo state
+  PlatformFile? _selectedProfilFoto;
+  String? _originalGender;
+  String? _editedGender;
+  bool _hasPhotoChange = false;
 
   @override
   void initState() {
@@ -26,10 +32,12 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   }
 
   bool get _hasChanges {
-    return _editedValues.entries.any(
+    final basicChanges = _editedValues.entries.any(
       (entry) =>
           _normalize(entry.value) != _normalize(_originalValues[entry.key]),
     );
+    final genderChanged = _normalize(_editedGender) != _normalize(_originalGender);
+    return basicChanges || _hasPhotoChange || genderChanged;
   }
 
   String _formatDate(DateTime dt) {
@@ -52,8 +60,198 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     setState(() {
       _originalValues = nextOriginal;
       _editedValues = Map<String, String>.from(nextOriginal);
+      _originalGender = user.aliciProfili?.cinsiyet;
+      _editedGender = user.aliciProfili?.cinsiyet;
       _initialized = true;
     });
+  }
+
+  /// Telefon numarasını görüntüleme için formatla
+  /// +905551234567 -> +90 555 123 45 67
+  String _formatPhoneDisplay(String phone) {
+    if (phone.isEmpty || phone == '-') return '-';
+    
+    // +90 prefix'ini çıkar
+    String digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // Eğer 90 ile başlıyorsa çıkar
+    if (digits.startsWith('90')) {
+      digits = digits.substring(2);
+    }
+    
+    // Başındaki 0'ı çıkar
+    if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    
+    // En az 10 hane yoksa olduğu gibi göster
+    if (digits.length < 10) return phone;
+    
+    // XXX XXX XX XX formatında göster
+    return '+90 ${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, 8)} ${digits.substring(8, 10)}';
+  }
+
+  Future<void> _pickProfilePhoto() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _selectedProfilFoto = result.files.first;
+          _hasPhotoChange = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Profil fotoğrafı seçilirken hata: $e');
+      if (mounted) {
+        showTemporarySnackBar(context, 'Fotoğraf seçilemedi: $e');
+      }
+    }
+  }
+
+  Future<void> _editGender(BuildContext context, String? currentGender) async {
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        String? selectedGender = currentGender;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Color(0xFFF5F5FF),
+              title: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [Color(0x30E8D7FF), Color(0x10E8D7FF)],
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.person_outline,
+                      color: Color(0xFF9B8FD9),
+                      size: 24,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    'Cinsiyet Seçin',
+                    style: TextStyle(
+                      color: Color(0xFF6B6B7F),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildGenderOption(
+                    'Erkek',
+                    Icons.male,
+                    selectedGender == 'erkek',
+                    () => setDialogState(() => selectedGender = 'erkek'),
+                  ),
+                  SizedBox(height: 12),
+                  _buildGenderOption(
+                    'Kadın',
+                    Icons.female,
+                    selectedGender == 'kadin',
+                    () => setDialogState(() => selectedGender = 'kadin'),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'İptal',
+                    style: TextStyle(color: Color(0xFFB8B8C8)),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: selectedGender == null
+                      ? null
+                      : () => Navigator.pop(ctx, selectedGender),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF9B8FD9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Seç',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _editedGender = result;
+      });
+    }
+  }
+
+  Widget _buildGenderOption(
+    String label,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? Color(0xFFE8D7FF) : Colors.white,
+          border: Border.all(
+            color: isSelected ? Color(0xFF9B8FD9) : Color(0x30E8D7FF),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Color(0xFF9B8FD9) : Color(0xFFB8B8C8),
+              size: 28,
+            ),
+            SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? Color(0xFF6B6B7F) : Color(0xFFB8B8C8),
+              ),
+            ),
+            Spacer(),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Color(0xFF9B8FD9),
+                size: 24,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -63,110 +261,272 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
       _syncUser(user);
     }
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _buildEtherealAppBar(context),
-      body: Stack(
-        children: [
-          // Ethereal cloudscape background
-          _buildNebulousBackground(context),
-          // Content
-          SafeArea(
-            child: user == null
-                ? Center(
-                    child: _buildStardustText(
-                      'Kullanıcı bilgisi bulunamadı',
-                      fontSize: 16,
-                    ),
-                  )
-                : ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                    children: [
-                      _buildFloatingCard(
-                        context,
-                        index: 0,
-                        title: 'Kullanıcı Adı',
-                        icon: Icons.person,
-                        value: _editedValues['username'] ?? '',
-                        onEdit: () => _editUsername(context),
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 1,
-                        title: 'Ad Soyad',
-                        icon: Icons.person_outline_sharp,
-                        value:
-                            '${(_editedValues['first_name'] ?? '').trim()} ${(_editedValues['last_name'] ?? '').trim()}'
-                                .trim(),
-                        onEdit: () => _editName(context),
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 2,
-                        title: 'E-posta',
-                        icon: Icons.email_outlined,
-                        value: user.email,
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 3,
-                        title: 'Telefon',
-                        icon: Icons.phone_outlined,
-                        value: (_editedValues['telno'] ?? '').isEmpty
-                            ? '-'
-                            : (_editedValues['telno'] ?? ''),
-                        onEdit: () => _editPhone(context),
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 4,
-                        title: 'Rol',
-                        icon: Icons.person_outline,
-                        value: user.rol,
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 5,
-                        title: 'Cinsiyet',
-                        icon: Icons.person_outline,
-                        value: user.aliciProfili?.cinsiyet ?? '-',
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 6,
-                        title: 'Durum',
-                        icon: Icons.check_circle_outline,
-                        value: user.isActive ? 'Aktif' : 'Pasif',
-                      ),
-                      _buildFloatingCard(
-                        context,
-                        index: 7,
-                        title: 'Bakiye',
-                        icon: Icons.money_outlined,
-                        value: user.bakiye,
-                      ),
+    final width = MediaQuery.of(context).size.width;
+    final isSmallScreen = width < 360;
 
-                      _buildFloatingCard(
-                        context,
-                        index: 9,
-                        title: 'Üyelik Tarihi',
-                        icon: Icons.date_range,
-                        value: _formatDate(user.dateJoined),
+    return Stack(
+      children: [
+        Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: _buildEtherealAppBar(context),
+          body: Stack(
+            children: [
+              // Ethereal cloudscape background - wrapped in RepaintBoundary for performance
+              RepaintBoundary(
+                child: _buildNebulousBackground(context),
+              ),
+              // Content
+              SafeArea(
+                child: user == null
+                    ? Center(
+                        child: _buildStardustText(
+                          'Kullanıcı bilgisi bulunamadı',
+                          fontSize: 16,
+                        ),
+                      )
+                    : ListView(
+                        physics: const BouncingScrollPhysics(),
+                        cacheExtent: 500, // Cache widgets outside viewport for smoother scrolling
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                        children: [
+                          // Profile Photo Avatar
+                          _buildProfilePhotoSection(user, isSmallScreen),
+                          SizedBox(height: 24),
+                          
+                          const SizedBox(height: 0), // Spacing marker for performance
+                          _buildFloatingCard(
+                            context,
+                            index: 0,
+                            title: 'Kullanıcı Adı',
+                            icon: Icons.person,
+                            value: _editedValues['username'] ?? '',
+                            //onEdit: () => _editUsername(context),
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 1,
+                            title: 'Ad Soyad',
+                            icon: Icons.person_outline_sharp,
+                            value:
+                                '${(_editedValues['first_name'] ?? '').trim()} ${(_editedValues['last_name'] ?? '').trim()}'
+                                    .trim(),
+                            onEdit: () => _editName(context),
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 2,
+                            title: 'E-posta',
+                            icon: Icons.email_outlined,
+                            value: user.email,
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 3,
+                            title: 'Telefon',
+                            icon: Icons.phone_outlined,
+                            value: _formatPhoneDisplay(_editedValues['telno'] ?? ''),
+                            onEdit: () => _editPhone(context),
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 4,
+                            title: 'Rol',
+                            icon: Icons.person_outline,
+                            value: user.rol,
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 5,
+                            title: 'Cinsiyet',
+                            icon: Icons.person_outline,
+                            value: _editedGender == "erkek"? 'Erkek' : 'Kadın',
+                            onEdit: () => _editGender(context, _editedGender),
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 6,
+                            title: 'Durum',
+                            icon: Icons.check_circle_outline,
+                            value: user.isActive ? 'Aktif' : 'Pasif',
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 7,
+                            title: 'Bakiye',
+                            icon: Icons.money_outlined,
+                            value: user.bakiye,
+                          ),
+
+                          _buildFloatingCard(
+                            context,
+                            index: 9,
+                            title: 'Üyelik Tarihi',
+                            icon: Icons.date_range,
+                            value: _formatDate(user.dateJoined),
+                          ),
+                          _buildFloatingCard(
+                            context,
+                            index: 10,
+                            title: 'Son Giriş',
+                            icon: Icons.date_range_outlined,
+                            value: user.lastLogin != null
+                                ? _formatDate(user.lastLogin!)
+                                : '-',
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.05,
+                          ),
+                        ],
                       ),
-                      _buildFloatingCard(
-                        context,
-                        index: 10,
-                        title: 'Son Giriş',
-                        icon: Icons.date_range_outlined,
-                        value: user.lastLogin != null
-                            ? _formatDate(user.lastLogin!)
-                            : '-',
+              ),
+            ],
+          ),
+        ),
+        // Loading overlay
+        if (_isSaving)
+          Container(
+            color: Colors.black54,
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF9B8FD9),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Kaydediliyor...',
+                      style: TextStyle(
+                        color: Color(0xFF6B6B7F),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildProfilePhotoSection(User user, bool isSmallScreen) {
+    final theme = HomeStyle(context: context);
+    final String profileImageUrl =
+        (user.profilFotograf == null || (user.profilFotograf?.isEmpty ?? true))
+            ? NotFound.defaultProfileImageUrl
+            : user.profilFotograf!;
+
+    // If there's a selected photo, show preview
+    final hasNewPhoto = _selectedProfilFoto != null && _selectedProfilFoto!.bytes != null;
+
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x30E8D7FF),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+              border: Border.all(color: Colors.white, width: 4),
+            ),
+            child: ClipOval(
+              child: hasNewPhoto
+                  ? Image.memory(
+                      _selectedProfilFoto!.bytes!,
+                      width: isSmallScreen ? 100 : 120,
+                      height: isSmallScreen ? 100 : 120,
+                      fit: BoxFit.cover,
+                    )
+                  : (user.profilFotograf == null ||
+                          (user.profilFotograf?.isEmpty ?? true))
+                      ? Container(
+                          width: isSmallScreen ? 100 : 120,
+                          height: isSmallScreen ? 100 : 120,
+                          color: Colors.white,
+                          child: Center(
+                            child: SvgPicture.asset(
+                              'assets/vectors/profil.svg',
+                              width: isSmallScreen ? 60 : 70,
+                              height: isSmallScreen ? 60 : 70,
+                              colorFilter: ColorFilter.mode(
+                                theme.primary,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: profileImageUrl,
+                          width: isSmallScreen ? 100 : 120,
+                          height: isSmallScreen ? 100 : 120,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 300,
+                          fadeInDuration: const Duration(milliseconds: 200),
+                          placeholder: (context, url) => Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(color: Colors.white),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.white,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/vectors/profil.svg',
+                                width: isSmallScreen ? 60 : 70,
+                                height: isSmallScreen ? 60 : 70,
+                                colorFilter: ColorFilter.mode(
+                                  Colors.grey[400]!,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+            ),
+          ),
+          // Edit button
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _pickProfilePhoto,
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF9B8FD9), Color(0xFFB8A1E8)],
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x40E8D7FF),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -239,8 +599,12 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
               ),
             ),
           ),
-          // Stardust particle overlay (very subtle)
-          Positioned.fill(child: CustomPaint(painter: _StardustPainter())),
+          // Stardust particle overlay (very subtle) - wrapped in RepaintBoundary
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: CustomPaint(painter: _StardustPainter()),
+            ),
+          ),
         ],
       ),
     );
@@ -255,7 +619,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
       elevation: 0,
       flexibleSpace: ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), // Reduced from 10 for performance
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -349,7 +713,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Reduced from 15 for performance
             child: Container(
               decoration: BoxDecoration(
                 // Crystallized cloud material
@@ -520,28 +884,93 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     final result = await showDialog<Map<String, String?>>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Ad Soyad'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Color(0xFFF5F5FF),
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x30E8D7FF), Color(0x10E8D7FF)],
+                ),
+              ),
+              child: Icon(
+                Icons.person_outline_sharp,
+                color: Color(0xFF9B8FD9),
+                size: 24,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text(
+              'Ad Soyad Düzenle',
+              style: TextStyle(
+                color: Color(0xFF6B6B7F),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: firstController,
-              decoration: const InputDecoration(labelText: 'Ad'),
+              decoration: InputDecoration(
+                labelText: 'Ad',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFFE8D7FF)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFF9B8FD9), width: 2),
+                ),
+              ),
             ),
+            SizedBox(height: 16),
             TextField(
               controller: lastController,
-              decoration: const InputDecoration(labelText: 'Soyad'),
+              decoration: InputDecoration(
+                labelText: 'Soyad',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFFE8D7FF)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFF9B8FD9), width: 2),
+                ),
+              ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal')),
           TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'İptal',
+              style: TextStyle(color: Color(0xFFB8B8C8)),
+            ),
+          ),
+          ElevatedButton(
             onPressed: () => Navigator.pop(ctx, {
               'first_name': firstController.text.trim(),
               'last_name': lastController.text.trim(),
             }),
-            child: Text('Kaydet'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF9B8FD9),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Kaydet',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -556,23 +985,119 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   }
 
   Future<void> _editPhone(BuildContext context) async {
+    // Mevcut telefon numarasını parse et - eğer +90 ile başlıyorsa çıkar
+    String currentPhone = _editedValues['telno'] ?? '';
+    if (currentPhone.startsWith('+90')) {
+      currentPhone = currentPhone.substring(3);
+    }
+    // Sadece rakamları al
+    currentPhone = currentPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    // Başındaki 0'ı çıkar (varsa)
+    if (currentPhone.startsWith('0')) {
+      currentPhone = currentPhone.substring(1);
+    }
+    
+    // İlk değeri formatla - XXX XXX XX XX formatında göster
+    String formattedInitial = '';
+    if (currentPhone.isNotEmpty) {
+      if (currentPhone.length <= 3) {
+        formattedInitial = currentPhone;
+      } else if (currentPhone.length <= 6) {
+        formattedInitial = '${currentPhone.substring(0, 3)} ${currentPhone.substring(3)}';
+      } else if (currentPhone.length <= 8) {
+        formattedInitial = '${currentPhone.substring(0, 3)} ${currentPhone.substring(3, 6)} ${currentPhone.substring(6)}';
+      } else {
+        formattedInitial = '${currentPhone.substring(0, 3)} ${currentPhone.substring(3, 6)} ${currentPhone.substring(6, 8)} ${currentPhone.substring(8, 10)}';
+      }
+    }
+    
     final controller = TextEditingController(
-      text: _editedValues['telno'] ?? '',
+      text: formattedInitial,
     );
+    
     final result = await showDialog<String?>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Telefon'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Color(0xFFF5F5FF),
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0x30E8D7FF), Color(0x10E8D7FF)],
+                ),
+              ),
+              child: Icon(
+                Icons.phone_outlined,
+                color: Color(0xFF9B8FD9),
+                size: 24,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text(
+              'Telefon Numarası',
+              style: TextStyle(
+                color: Color(0xFF6B6B7F),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(labelText: 'Telefon'),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            PhoneInputFormatter(),
+          ],
+          decoration: InputDecoration(
+            labelText: 'Telefon',
+            prefixText: '+90 ',
+            prefixStyle: TextStyle(
+              color: Color(0xFF6B6B7F),
+              fontWeight: FontWeight.w600,
+            ),
+            hintText: '555 123 45 67',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFFE8D7FF)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFF9B8FD9), width: 2),
+            ),
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal')),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text('Kaydet'),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'İptal',
+              style: TextStyle(color: Color(0xFFB8B8C8)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Sadece rakamları al ve başına 0 ekleyerek +90 ile birleştir
+              String rawPhone = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+              String formattedPhone = rawPhone.isNotEmpty ? '+900$rawPhone' : '';
+              Navigator.pop(ctx, formattedPhone);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF9B8FD9),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Kaydet',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -587,21 +1112,51 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
 
   Future<void> _saveChanges(BuildContext context) async {
     final payload = <String, dynamic>{};
+    
+    // Add basic field changes
     _editedValues.forEach((key, value) {
       if (_normalize(_originalValues[key]) != _normalize(value)) {
         payload[key] = _normalize(value);
       }
     });
 
+    // Add gender if changed
+    if (_normalize(_editedGender) != _normalize(_originalGender)) {
+      payload['cinsiyet'] = _editedGender;
+    }
+
+    // Add profile photo if changed
+    if (_hasPhotoChange && _selectedProfilFoto != null && _selectedProfilFoto!.bytes != null) {
+      final fileBytes = _selectedProfilFoto!.bytes!;
+      final fileName = _selectedProfilFoto!.name;
+      final contentType = fileName.toLowerCase().endsWith('.png')
+          ? 'image/png'
+          : 'image/jpeg';
+
+      final multipartFile = http.MultipartFile.fromBytes(
+        'profil_fotograf',
+        fileBytes,
+        filename: fileName,
+        contentType: http.MediaType.parse(contentType),
+      );
+
+      payload['profil_fotograf'] = multipartFile;
+    }
+
     if (payload.isEmpty) return;
 
     setState(() => _isSaving = true);
 
     try {
-      await ref.read(userProvider.notifier).updateUser(payload);
+      await ref.read(userProvider.notifier).updateBuyer(payload);
+      
       setState(() {
         _originalValues = Map.from(_editedValues);
+        _originalGender = _editedGender;
+        _selectedProfilFoto = null;
+        _hasPhotoChange = false;
       });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil bilgileri güncellendi.')),
@@ -649,4 +1204,52 @@ class _StardustPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Telefon formatı için TextInputFormatter
+/// Format: XXX XXX XX XX (+90 prefix'i ayrı olarak eklenecek)
+/// 3 rakam + boşluk + 3 rakam + boşluk + 2 rakam + boşluk + 2 rakam
+/// Toplam: 10 haneli numara
+class PhoneInputFormatter extends TextInputFormatter {
+  static const int maxDigits = 10; // Maksimum 10 rakam
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Sadece rakamları al
+    String digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Maksimum 10 rakam sınırı
+    if (digits.length > maxDigits) {
+      digits = digits.substring(0, maxDigits);
+    }
+
+    if (digits.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Format: XXX XXX XX XX
+    String formatted;
+    if (digits.length <= 3) {
+      formatted = digits;
+    } else if (digits.length <= 6) {
+      formatted = '${digits.substring(0, 3)} ${digits.substring(3)}';
+    } else if (digits.length <= 8) {
+      formatted =
+          '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}';
+    } else {
+      formatted =
+          '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, 8)} ${digits.substring(8)}';
+    }
+
+    // Cursor pozisyonunu hesapla
+    int cursorPosition = formatted.length;
+
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
+  }
 }

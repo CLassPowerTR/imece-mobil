@@ -170,7 +170,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       sellerProductsProvider(_currentSellerProfil.id),
     );
     return Scaffold(
-      backgroundColor: Colors.grey[100]!.withOpacity(0.7),
+      backgroundColor: themeData.surface,
       body: Stack(
         children: [
           RefreshIndicator(
@@ -994,7 +994,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       // userPayload içine profil_fotograf olarak ekle
       await ref.read(userProvider.notifier).updateUser({
         'profil_fotograf': multipartFile,
-      }, isSeller: false);
+      } );
     } catch (e) {
       debugPrint('Profil fotoğrafı güncellenirken hata: $e');
       rethrow;
@@ -1038,7 +1038,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         // userPayload içine profil_banner olarak ekle
         await ref.read(userProvider.notifier).updateUser({
           'profil_banner': multipartFile,
-        }, isSeller: true);
+        });
       }
 
       // Kullanıcı verilerini yeniden yükle
@@ -1169,13 +1169,14 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                               future: ApiService.fetchUserFollow(),
                               builder: (context, snapshot) {
                                 final kullanici = ref.read(userProvider);
+                                final isSeller = kullanici?.rol == 'satici';
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
                                   return Center(
                                     child: buildLoadingBar(context),
                                   );
                                 } else if (snapshot.hasError) {
-                                  return Text('Takip durumu alınamadı');
+                                  return SizedBox.shrink();
                                 } else {
                                   final takipEdilenler = snapshot.data ?? [];
                                   // Takip edilenler arasında bu satıcı var mı?
@@ -1186,7 +1187,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                     orElse: () => null,
                                   );
                                   final isFollowed = takipItem != null;
-                                  return textButton(
+                                  if (isSeller){
+                                    return SizedBox.shrink();
+                                  }
+                                  else {
+                                    return textButton(
                                     context,
                                     isFollowed ? 'Takipten Çık' : 'Takip Et',
                                     minSizeHeight: 32,
@@ -1242,6 +1247,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                       }
                                     },
                                   );
+                                  }
+                                  
                                 }
                               },
                             )

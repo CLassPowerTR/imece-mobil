@@ -26,7 +26,7 @@ class _SellerProfilScreenState extends State<SellerProfilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _sellerProfilAppBar(context),
+      appBar: _sellerProfilAppBar(context, widget.myProfile),
       body: SellerProfilBody(
         sellerProfil: widget.sellerProfil,
         myProfile: widget.myProfile,

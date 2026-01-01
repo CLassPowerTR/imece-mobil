@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,6 +36,8 @@ import 'package:imecehub/core/widgets/cards/orderCard.dart';
 import 'package:imecehub/core/widgets/empty_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
 part 'buyer_profil_view_header.dart';
 part 'buyer_profil_view_body.dart';

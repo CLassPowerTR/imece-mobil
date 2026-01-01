@@ -24,7 +24,12 @@ class UserNotifier extends Notifier<User?> {
         onResumed: () async {
           if (state != null) {
             try {
-              await ApiService.putUserUpdate({'is_online': true});
+              final isSeller = state?.rol == 'satici';
+              if (isSeller) {
+                await ApiService.putSellerUpdate({'is_online': true});
+              } else {
+                await ApiService.putBuyerUpdate({'is_online': true});
+              }
               debugPrint('Auth: App resumed - Kullanıcı online yapıldı');
             } catch (e) {
               debugPrint(
@@ -36,7 +41,12 @@ class UserNotifier extends Notifier<User?> {
         onPausedOrInactive: () async {
           if (state != null) {
             try {
-              await ApiService.putUserUpdate({'is_online': false});
+              final isSeller = state?.rol == 'satici';
+              if (isSeller) {
+                await ApiService.putSellerUpdate({'is_online': false});
+              } else {
+                await ApiService.putBuyerUpdate({'is_online': false});
+              }
               debugPrint(
                 'Auth: App paused/inactive - Kullanıcı offline yapıldı',
               );
@@ -80,7 +90,12 @@ class UserNotifier extends Notifier<User?> {
     // Kullanıcı başarıyla yüklendiyse online yap
     if (state != null) {
       try {
-        await ApiService.putUserUpdate({'is_online': true});
+        final isSeller = state?.rol == 'satici';
+        if (isSeller) {
+          await ApiService.putSellerUpdate({'is_online': true});
+        } else {
+          await ApiService.putBuyerUpdate({'is_online': true});
+        }
         debugPrint('Auth: Kullanıcı online durumu güncellendi');
       } catch (e) {
         debugPrint('Auth: Online durumu güncellenemedi: $e');
@@ -95,7 +110,12 @@ class UserNotifier extends Notifier<User?> {
     // Login sonrası online yap
     if (state != null) {
       try {
-        await ApiService.putUserUpdate({'is_online': true});
+        final isSeller = state?.rol == 'satici';
+        if (isSeller) {
+          await ApiService.putSellerUpdate({'is_online': true});
+        } else {
+          await ApiService.putBuyerUpdate({'is_online': true});
+        }
         debugPrint('Auth: Login sonrası kullanıcı online yapıldı');
       } catch (e) {
         debugPrint('Auth: Login sonrası online durumu güncellenemedi: $e');
@@ -114,7 +134,12 @@ class UserNotifier extends Notifier<User?> {
     // Register sonrası online yap
     if (state != null) {
       try {
-        await ApiService.putUserUpdate({'is_online': true});
+        final isSeller = state?.rol == 'satici';
+        if (isSeller) {
+          await ApiService.putSellerUpdate({'is_online': true});
+        } else {
+          await ApiService.putBuyerUpdate({'is_online': true});
+        }
         debugPrint('Auth: Register sonrası kullanıcı online yapıldı');
       } catch (e) {
         debugPrint('Auth: Register sonrası online durumu güncellenemedi: $e');
@@ -122,13 +147,35 @@ class UserNotifier extends Notifier<User?> {
     }
   }
 
-  Future<void> updateUser(
-    Map<String, dynamic> payload, {
-    bool? isSeller,
-  }) async {
-    await ApiService.putUserUpdate(payload, isSeller: isSeller);
-    // Kullanıcı bilgilerini güncelle (is_online güncellemesi yapmadan)
+  /// Alıcı profilini günceller
+  /// Güncellenebilen alanlar:
+  /// - Kullanıcı: first_name, last_name, telno, profil_fotograf, is_online
+  /// - Alıcı: cinsiyet, adres
+  Future<void> updateBuyer(Map<String, dynamic> payload) async {
+    await ApiService.putBuyerUpdate(payload);
+    // Kullanıcı bilgilerini güncelle
     await fetchUserMe();
+  }
+
+  /// Satıcı profilini günceller
+  /// Güncellenebilen alanlar:
+  /// - Kullanıcı: first_name, last_name, telno, profil_fotograf, is_online
+  /// - Satıcı: profil_banner, profil_tanitim_yazisi, magaza_adi, satici_vergi_numarasi, satici_iban, profession
+  Future<void> updateSeller(Map<String, dynamic> payload) async {
+    await ApiService.putSellerUpdate(payload);
+    // Kullanıcı bilgilerini güncelle
+    await fetchUserMe();
+  }
+
+  /// Legacy updateUser - uses updateBuyer or updateSeller based on isSeller flag
+  /// @deprecated Use updateBuyer or updateSeller instead
+  Future<void> updateUser(Map<String, dynamic> payload) async {
+    final isSeller = state?.rol == 'satici';
+    if (isSeller) {
+      await updateSeller(payload);
+    } else {
+      await updateBuyer(payload);
+    }
   }
 
   Future<void> fetchUserMe() async {
@@ -144,7 +191,12 @@ class UserNotifier extends Notifier<User?> {
     String message = 'Başarıyla çıkış yapıldı.';
     try {
       // Logout öncesi offline yap
-      await ApiService.putUserUpdate({'is_online': false});
+      final isSeller = state?.rol == 'satici';
+      if (isSeller) {
+        await ApiService.putSellerUpdate({'is_online': false});
+      } else {
+        await ApiService.putBuyerUpdate({'is_online': false});
+      }
       debugPrint('Auth: Logout - Kullanıcı offline yapıldı');
 
       //final result = await ApiService.fetchUserLogout();

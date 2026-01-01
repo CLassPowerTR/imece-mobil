@@ -1,6 +1,6 @@
 part of '../seller_profil_screen.dart';
 
-AppBar _sellerProfilAppBar(BuildContext context) {
+AppBar _sellerProfilAppBar(BuildContext context, bool myProfile) {
   return AppBar(
     toolbarHeight: 80,
     title: Padding(
@@ -14,30 +14,32 @@ AppBar _sellerProfilAppBar(BuildContext context) {
       Padding(
         padding: const EdgeInsets.only(top: 10),
         child: Row(
-          children: [shareIconButton(context), _sellerSettingsMenu(context)],
+          children: [shareIconButton(context), _sellerSettingsMenu(context, myProfile)],
         ),
       ),
     ],
   );
 }
 
-PopupMenuButton<String> _sellerSettingsMenu(BuildContext context) {
+PopupMenuButton<String> _sellerSettingsMenu(BuildContext context, bool myProfile) {
   return PopupMenuButton<String>(
     icon: const Icon(Icons.settings_outlined),
     onSelected: (value) async {
       if (value == 'logout') {
-        final bool? confirm = await _confirmLogoutDialog(context);
+        final bool? confirm = await _confirmLogoutDialog(context, myProfile);
         if (confirm != true) return;
         await _handleLogout(context);
       }
     },
-    itemBuilder: (ctx) => const [
+    itemBuilder: (ctx) => [
+      if (myProfile)...[
       PopupMenuItem(value: 'logout', child: Text('Çıkış Yap')),
+    ],
     ],
   );
 }
 
-Future<bool?> _confirmLogoutDialog(BuildContext context) async {
+Future<bool?> _confirmLogoutDialog(BuildContext context, bool myProfile) async {
   return showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(

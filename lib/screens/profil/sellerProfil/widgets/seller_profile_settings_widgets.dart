@@ -571,7 +571,7 @@ class _SellerProfileSettingsScreenState
     setState(() => _isSaving = true);
 
     try {
-      await ref.read(userProvider.notifier).updateUser(payload, isSeller: true);
+      await ref.read(userProvider.notifier).updateUser(payload);
       // Kullanıcı verisi güncellendi, _initialized flag'ini false yap
       // Böylece _syncUser tekrar çalışacak ve controller'lar güncellenecek
       setState(() {

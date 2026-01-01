@@ -4,7 +4,8 @@ class ApiConfig {
   final String baseUrl = dotenv.env['BASE_URL'] ?? '';
   final String usersApiUrl = dotenv.env['USERS_API_URL'] ?? '';
   final String userMeApiUrl = dotenv.env['USER_ME_API_URL'] ?? '';
-  final String userUpdateApiUrl = dotenv.env['USER_UPDATE_ME_API_URL'] ?? '';
+  final String buyerUpdateApiUrl = dotenv.env['BUYER_UPDATE_ME_API_URL'] ?? '';
+  final String sellerUpdateApiUrl = dotenv.env['SELLER_UPDATE_ME_API_URL'] ?? '';
   final String userRqLoginApiUrl = dotenv.env['USER_RQ_LOGIN_API_URL'] ?? '';
   final String userRqRegisterApiUrl =
       dotenv.env['USER_RQ_REGISTER_API_URL'] ?? '';
