@@ -22,23 +22,11 @@ class UserNotifier extends Notifier<User?> {
       _initialized = true;
       _lifecycleObserver = _AuthLifecycleObserver(
         onResumed: () async {
-          if (state != null) {
-            try {
-              final isSeller = state?.rol == 'satici';
-              if (isSeller) {
-                await ApiService.putSellerUpdate({'is_online': true});
-              } else {
-                await ApiService.putBuyerUpdate({'is_online': true});
-              }
-              debugPrint('Auth: App resumed - Kullanıcı online yapıldı');
-            } catch (e) {
-              debugPrint(
-                'Auth: App resumed - Online durumu güncellenemedi: $e',
-              );
-            }
-          }
+          // is_online güncellemesi kaldırıldı - sadece login/logout'ta yapılacak
+          debugPrint('Auth: App resumed');
         },
         onPausedOrInactive: () async {
+          // Uygulama kapatıldığında veya arka plana alındığında offline yap
           if (state != null) {
             try {
               final isSeller = state?.rol == 'satici';
@@ -47,9 +35,7 @@ class UserNotifier extends Notifier<User?> {
               } else {
                 await ApiService.putBuyerUpdate({'is_online': false});
               }
-              debugPrint(
-                'Auth: App paused/inactive - Kullanıcı offline yapıldı',
-              );
+              debugPrint('Auth: App paused/closed - Kullanıcı offline yapıldı');
             } catch (e) {
               debugPrint(
                 'Auth: App paused - Offline durumu güncellenemedi: $e',
@@ -84,22 +70,39 @@ class UserNotifier extends Notifier<User?> {
       return;
     }
 
-    // Kullanıcı verilerini çek
+    // Kullanıcı verilerini çek (is_online güncellemesi splash screen'de yapılacak)
     await fetchUserMe();
+  }
 
-    // Kullanıcı başarıyla yüklendiyse online yap
-    if (state != null) {
-      try {
-        final isSeller = state?.rol == 'satici';
-        if (isSeller) {
-          await ApiService.putSellerUpdate({'is_online': true});
-        } else {
-          await ApiService.putBuyerUpdate({'is_online': true});
-        }
-        debugPrint('Auth: Kullanıcı online durumu güncellendi');
-      } catch (e) {
-        debugPrint('Auth: Online durumu güncellenemedi: $e');
+  /// Kullanıcıyı online yapar (splash screen'de kullanılır)
+  /// Access token var ama henüz kullanıcı fetch edilmemişse bu metodu kullan
+  Future<void> setUserOnline() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accesToken') ?? '';
+
+    if (token.isEmpty) {
+      debugPrint('Auth: Token yok, online yapılamadı');
+      return;
+    }
+
+    try {
+      // Eğer state yoksa önce kullanıcı verilerini çek
+      if (state == null) {
+        await fetchUserMe();
       }
+
+      // Şimdi state'e göre online yap
+      final isSeller = state?.rol == 'satici';
+      if (isSeller) {
+        await ApiService.putSellerUpdate({'is_online': true});
+      } else {
+        await ApiService.putBuyerUpdate({'is_online': true});
+      }
+      debugPrint('Auth: Kullanıcı online yapıldı (rol: ${state?.rol})');
+    } catch (e) {
+      debugPrint('Auth: Online yapılırken hata: $e');
+    } finally {
+      await fetchUserMe();
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/stories_campaings_provider.dart';
@@ -108,9 +109,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     try {
       bool isUserLoggedIn = false;
 
-      // 1. Auth Provider'ı kontrol et (İlk öncelik)
+      // 1. Auth Provider'ı kontrol et ve gerekirse online yap
       await _updateProgress(0.15, 'Oturum kontrol ediliyor...');
       try {
+        // Önce access token var mı kontrol et
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('accesToken') ?? '';
+        
+        if (token.isNotEmpty) {
+          // Token varsa önce kullanıcıyı online yap
+          await ref.read(userProvider.notifier).setUserOnline();
+          debugPrint('Kullanıcı online yapıldı, şimdi veriler yüklenecek');
+        }
+        
+        // Ardından kullanıcı verilerini kontrol et
         final user = ref.read(userProvider);
         isUserLoggedIn = user != null;
         debugPrint(

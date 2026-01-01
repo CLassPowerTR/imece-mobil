@@ -21,6 +21,8 @@ export 'package:imecehub/core/widgets/buttons/textButton.dart';
 export 'package:imecehub/core/widgets/textField.dart';
 export 'package:imecehub/core/widgets/yorumContainer.dart';
 export 'package:imecehub/models/sellerProducts.dart';
+export 'package:imecehub/models/products.dart';
+export 'package:imecehub/core/widgets/cards/productsCard2.dart';
 export 'package:imecehub/models/users.dart';
 export 'package:imecehub/providers/auth_provider.dart';
 export 'package:imecehub/providers/stories_campaings_provider.dart';

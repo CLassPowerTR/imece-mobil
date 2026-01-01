@@ -186,11 +186,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   _profilIstatikler(width, themeData, sellerProductsAsync),
                   _profilStories(context, width),
                   _profilDetailCards(width, themeData),
-                  _profilGonderiler(context, themeData, width),
-                  _profilLastComment(context, width, themeData),
-                  _BenzerUrunlerText(context, themeData),
+                  //_profilGonderiler(context, themeData, width),
+                  _profilSonUrunler(context, width, themeData),
+                  //_BenzerUrunlerText(context, themeData),
                   //_populerUrunlerCards(height, width) //Backend yapımından dolayı deployed
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                 ],
               ),
             ),
@@ -520,6 +520,145 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       textAlign: TextAlign.left,
       size: themeData.bodyLarge.fontSize,
       weight: FontWeight.w800,
+    );
+  }
+
+  /// Son Ürünler bölümü - Horizontal scroll
+  Widget _profilSonUrunler(BuildContext context, double width, HomeStyle themeData) {
+    final asyncProducts = ref.watch(
+      sellerProductsProvider(_currentSellerProfil.saticiProfili?.kullanici ?? 0),
+    );
+    
+    return asyncProducts.when(
+      loading: () => container(
+        context,
+        color: themeData.surfaceContainer,
+        padding: AppPaddings.all16,
+        borderRadius: AppRadius.r16,
+        width: width,
+        margin: AppPaddings.h10v10,
+        child: SizedBox(
+          height: 200,
+          child: Center(child: buildLoadingBar(context)),
+        ),
+      ),
+      error: (error, _) => container(
+        context,
+        color: themeData.surfaceContainer,
+        padding: AppPaddings.all16,
+        borderRadius: AppRadius.r16,
+        width: width,
+        margin: AppPaddings.h10v10,
+        child: SizedBox(
+          height: 200,
+          child: Center(
+            child: customText(
+              'Ürünler yüklenemedi',
+              context,
+              textAlign: TextAlign.center,
+              color: AppColors.error(context),
+            ),
+          ),
+        ),
+      ),
+      data: (items) {
+        // Eğer hiç ürün yoksa boş döndür
+        if (items.isEmpty) {
+          return SizedBox.shrink();
+        }
+
+        // ID'ye göre azalan sırada sırala ve ilk 4'ünü al
+        final sortedItems = items.toList()
+          ..sort((a, b) => (b.urunId ?? 0).compareTo(a.urunId ?? 0));
+        final limitedItems = sortedItems.take(4).toList();
+        
+        final products = limitedItems.map(_mapSellerProductToProduct).toList();
+        
+        return container(
+          context,
+          color: themeData.surfaceContainer,
+          padding: AppPaddings.all16,
+          borderRadius: AppRadius.r16,
+          width: width,
+          margin: AppPaddings.h10v10,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Başlık ve Tümünü Gör butonu
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  customText(
+                    'Son Ürünler',
+                    context,
+                    weight: FontWeight.bold,
+                    size: themeData.titleMedium.fontSize,
+                  ),
+                  if (widget.myProfile)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/profil/myProducts',
+                          arguments: _currentSellerProfil,
+                        );
+                      },
+                      child: customText(
+                        'Tümünü Gör',
+                        context,
+                        color: themeData.secondary,
+                        weight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: 12),
+              // Ürünler listesi
+              SizedBox(
+                height: 280,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return Container(
+                      width: 160,
+                      margin: EdgeInsets.only(right: index < products.length - 1 ? 12 : 0),
+                      child: productsCard2(
+                        myProducts: widget.myProfile,
+                        product: product,
+                        width: 160,
+                        context: context,
+                        height: MediaQuery.of(context).size.height,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// SellerProducts'ı Product'a dönüştür
+  Product _mapSellerProductToProduct(SellerProducts item) {
+    return Product(
+      urunId: item.urunId,
+      urunAdi: item.urunAdi,
+      aciklama: item.aciklama,
+      stokDurumu: item.stokDurumu,
+      urunParakendeFiyat: item.urunPerakendeFiyati,
+      urunMinFiyat: item.urunMinFiyati,
+      degerlendirmePuani: item.degerlendirmePuani,
+      kapakGorseli: item.kapakGorseli,
+      imeceOnayli: item.imeceOnayli,
+      urunGorunurluluk: item.urunGorunurluluk,
+      satis_turu: item.satisTuru,
+      satici: item.satici,
+      kategori: item.kategori,
     );
   }
 
@@ -922,6 +1061,57 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         ),
       ),
     );
+  }
+
+  /// Fotoğraf seçim dialogunu göster
+  Future<void> _showPhotoSelectionDialog() async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Fotoğraf Seç'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                radius: 24,
+                backgroundImage: _currentSellerProfil.profilFotograf?.isNotEmpty == true
+                    ? NetworkImage(_currentSellerProfil.profilFotograf!)
+                    : NetworkImage(NotFound.defaultProfileImageUrl) as ImageProvider,
+              ),
+              title: Text('Profil Fotoğrafı'),
+              subtitle: Text('Profil resminizi değiştirin'),
+              onTap: () => Navigator.pop(ctx, 'profile'),
+            ),
+            SizedBox(height: 8),
+            ListTile(
+              leading: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: _currentSellerProfil.saticiProfili?.profilBanner?.isNotEmpty == true
+                        ? NetworkImage(_currentSellerProfil.saticiProfili!.profilBanner!)
+                        : NetworkImage(NotFound.defaultBannerImageUrl) as ImageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              title: Text('Kapak Fotoğrafı'),
+              subtitle: Text('Kapak resminizi değiştirin'),
+              onTap: () => Navigator.pop(ctx, 'cover'),
+            ),
+          ],
+        ),
+      ),
+    );
+    
+    if (choice == 'profile') {
+      await _pickImage(true);
+    } else if (choice == 'cover') {
+      await _pickImage(false);
+    }
   }
 
   Future<void> _pickImage(bool isProfilFoto) async {
@@ -1465,22 +1655,27 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       top: coverHeight - profileSize / 1.5,
       left: 20, // Ortalamak için
       child: Stack(
+        clipBehavior: Clip.none, // Allow overflow for the button
         children: [
-          Container(
-            width: profileSize,
-            height: profileSize,
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.r12,
-              border: Border.all(color: Colors.white, width: 2),
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: _selectedProfilFoto != null
-                    ? FileImage(_selectedProfilFoto!) as ImageProvider
-                    : NetworkImage(
-                        _currentSellerProfil.profilFotograf?.isNotEmpty == true
-                            ? _currentSellerProfil.profilFotograf!
-                            : NotFound.defaultProfileImageUrl,
-                      ),
+          // Profil fotoğrafı container - IgnorePointer ile touch eventleri geçiyor
+          IgnorePointer(
+            ignoring: false,
+            child: Container(
+              width: profileSize,
+              height: profileSize,
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.r12,
+                border: Border.all(color: Colors.white, width: 2),
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: _selectedProfilFoto != null
+                      ? FileImage(_selectedProfilFoto!) as ImageProvider
+                      : NetworkImage(
+                          _currentSellerProfil.profilFotograf?.isNotEmpty == true
+                              ? _currentSellerProfil.profilFotograf!
+                              : NotFound.defaultProfileImageUrl,
+                        ),
+                ),
               ),
             ),
           ),
@@ -1500,34 +1695,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               ),
             ),
           ),
-          // Düzenle butonu (sol alt köşe - sadece kendi profiliyse)
-          if (widget.myProfile)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              child: GestureDetector(
-                onTap: () {
-                  debugPrint('Profil fotoğrafı düzenle butonuna tıklandı');
-                  _pickImage(true);
-                },
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.secondary(context),
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: AppColors.secondary(context),
-                  ),
-                ),
-              ),
-            ),
+          
+            
         ],
       ),
     );
@@ -1561,7 +1730,10 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               child: Padding(
                 padding: EdgeInsets.all(8),
                 child: GestureDetector(
-                  onTap: () => _pickImage(false),
+                  onTap: () async {
+                    debugPrint('Kapak fotoğrafı düzenle butonuna tıklandı');
+                    await _showPhotoSelectionDialog();
+                  },
                   child: Container(
                     width: 36,
                     height: 36,

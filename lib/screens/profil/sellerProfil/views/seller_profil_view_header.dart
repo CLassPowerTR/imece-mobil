@@ -29,12 +29,21 @@ PopupMenuButton<String> _sellerSettingsMenu(BuildContext context, bool myProfile
         final bool? confirm = await _confirmLogoutDialog(context, myProfile);
         if (confirm != true) return;
         await _handleLogout(context);
+      } else if (value == 'whoWeAre') {
+        // Biz Kimiz sayfasına yönlendir
+        // Navigator.pushNamed(context, '/whoWeAre');
+      } else if (value == 'contact') {
+        // İletişim sayfasına yönlendir
+        // Navigator.pushNamed(context, '/contact');
       }
     },
     itemBuilder: (ctx) => [
-      if (myProfile)...[
-      PopupMenuItem(value: 'logout', child: Text('Çıkış Yap')),
-    ],
+      // Herkes için görünen seçenekler
+      PopupMenuItem(value: 'whoWeAre', child: Text('Biz Kimiz')),
+      PopupMenuItem(value: 'contact', child: Text('Bizimle İletişime Geç')),
+      // Sadece kendi profili için çıkış yap
+      if (myProfile)
+        PopupMenuItem(value: 'logout', child: Text('Çıkış Yap')),
     ],
   );
 }
@@ -63,9 +72,9 @@ Future<void> _handleLogout(BuildContext context) async {
   final container = ProviderScope.containerOf(context, listen: false);
   try {
     final result = await container.read(userProvider.notifier).logout();
-    showTemporarySnackBar(context, result);
+    showTemporarySnackBar(context, result, type: SnackBarType.success);
   } catch (e) {
-    showTemporarySnackBar(context, e.toString());
+    showTemporarySnackBar(context, e.toString(), type: SnackBarType.error);
   } finally {
     if (context.mounted) {
       Navigator.pushNamedAndRemoveUntil(
