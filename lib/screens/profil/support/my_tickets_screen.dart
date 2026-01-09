@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../providers/supports_provider.dart';
 import 'widgets/neumorphic_container.dart';
 
 class MyTicketsScreen extends ConsumerStatefulWidget {
@@ -80,17 +79,10 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref
-          .read(supportsProvider.notifier)
-          .fetchTickets(
-            status: _selectedFilter?.isEmpty ?? true ? null : _selectedFilter,
-          );
-
-      final supportsState = ref.read(supportsProvider);
-      _allTickets = List<Map<String, dynamic>>.from(
-        supportsState.tickets.map((e) => Map<String, dynamic>.from(e)),
-      );
-
+      // Not: Ticket listeleme özelliği şu anda devre dışı.
+      // Provider'dan ticket getirme işlevi kaldırıldı.
+      // Bu ekran ileride güncellenecek.
+      _allTickets = [];
       _applyFiltersAndSort();
     } catch (e) {
       if (mounted) {

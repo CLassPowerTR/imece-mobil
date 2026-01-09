@@ -1,141 +1,234 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/userAdress.dart';
+import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class AdressCard extends StatelessWidget {
   final UserAdress adres;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final String? phoneNumber;
+
   const AdressCard({
     Key? key,
     required this.adres,
     this.onEdit,
     this.onDelete,
+    this.phoneNumber,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = HomeStyle(context: context);
-    return Card(
-      color: Colors.grey.shade100,
-      elevation: 2,
-      shadowColor: HomeStyle(context: context).outline,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF000000).withOpacity(0.05),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+            spreadRadius: -5,
+          ),
+          BoxShadow(
+            color: const Color(0xFF007AFF).withOpacity(0.02),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white,
+          width: 0.8,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
           children: [
-            // Sol kısım: Adres detayları
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 8,
                 children: [
-                  // Başlık ve varsa yıldız
+                  // --- HEADER: ICON, TITLE, MENU ---
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      Builder(builder: (context) {
-                        if (adres.adresTipi == 'ev') {
-                          return Icon(Icons.home,
-                              color: theme.secondary, size: 22);
-                        } else if (adres.adresTipi == 'is') {
-                          return Icon(Icons.business,
-                              color: theme.secondary, size: 22);
-                        } else if (adres.adresTipi == 'teslimat') {
-                          return Icon(Icons.delivery_dining,
-                              color: theme.secondary, size: 22);
-                        } else if (adres.adresTipi == 'fatura') {
-                          return Icon(Icons.receipt,
-                              color: theme.secondary, size: 22);
-                        } else {
-                          return Icon(Icons.location_on,
-                              color: theme.secondary, size: 22);
-                        }
-                      }),
+                      _buildHeaderIcon(),
+                      const SizedBox(width: 14),
                       Expanded(
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               adres.baslik,
-                              style: theme.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: theme.secondary,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1D1D1F),
+                                letterSpacing: -0.4,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
-                            if (adres.varsayilanAdres) ...[
-                              const SizedBox(width: 6),
-                              Icon(Icons.star, color: Colors.amber, size: 18),
-                            ],
+                            if (adres.varsayilanAdres)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  "Varsayılan Teslimat Adresi",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: const Color(0xFF007AFF).withOpacity(0.8),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 20),
-                              color: theme.secondary,
-                              onPressed: onEdit,
-                              tooltip: 'Düzenle',
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, size: 20),
-                              color: Colors.red,
-                              onPressed: onDelete,
-                              tooltip: 'Sil',
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildActionMenu(),
                     ],
                   ),
-                  customText(adres.mahalle, context),
-                  // Adres satırları alt alta
-                  if (adres.adresSatiri1.isNotEmpty) ...[
-                    Text(
-                      adres.adresSatiri1,
-                      style: theme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ],
-                  if (adres.adresSatiri2.isNotEmpty) ...[
-                    Text(
-                      adres.adresSatiri2,
-                      style: theme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ],
-                  // İl / İlçe en altta
+                  
+                  const SizedBox(height: 20),
+
+                  // --- ADDRESS BODY ---
                   Text(
-                    '${adres.il} / ${adres.ilce}',
-                    style:
-                        theme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                    '${adres.mahalle} ${adres.adresSatiri1}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.5,
+                      color: Color(0xFF424245),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (adres.adresSatiri2.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        adres.adresSatiri2,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF86868B),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  
+                  const SizedBox(height: 18),
+
+                  // --- DATA FOOTER: CHIPS ---
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      if (phoneNumber != null && phoneNumber!.isNotEmpty)
+                        _buildDataChip(Icons.phone_iphone_rounded, phoneNumber!),
+                      _buildDataChip(Icons.map_rounded, '${adres.ilce}, ${adres.il}'),
+                      _buildDataChip(Icons.pin_drop_rounded, adres.postaKodu),
+                    ],
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderIcon() {
+    final bool isSpecial = adres.varsayilanAdres;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isSpecial ? const Color(0xFF007AFF).withOpacity(0.08) : const Color(0xFFF5F5F7),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          if (isSpecial)
+            BoxShadow(
+              color: const Color(0xFF007AFF).withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+        ],
+      ),
+      child: Icon(
+        _getModernIcon(adres.adresTipi),
+        color: isSpecial ? const Color(0xFF007AFF) : const Color(0xFF86868B),
+        size: 22,
+      ),
+    );
+  }
+
+  Widget _buildActionMenu() {
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      icon: const Icon(Icons.more_horiz_rounded, color: Color(0xFF86868B)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 4,
+      offset: const Offset(0, 40),
+      onSelected: (value) {
+        if (value == 'edit') onEdit?.call();
+        if (value == 'delete') onDelete?.call();
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_note_rounded, size: 20, color: Colors.blue[600]),
+              const SizedBox(width: 12),
+              const Text('Düzenle', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_sweep_rounded, size: 20, color: Colors.redAccent),
+              const SizedBox(width: 12),
+              Text('Sil', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _getModernIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'ev': return Icons.home_outlined;
+      case 'is':
+      case 'iş': return Icons.business_center_rounded;
+      case 'teslimat': return Icons.local_shipping_rounded;
+      case 'fatura': return Icons.receipt_long_rounded;
+      default: return Icons.location_on_rounded;
+    }
+  }
+
+  Widget _buildDataChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F7).withOpacity(0.8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8E8ED), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: const Color(0xFF86868B)),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF424245),
+              letterSpacing: -0.2,
+            ),
+          ),
+        ],
       ),
     );
   }

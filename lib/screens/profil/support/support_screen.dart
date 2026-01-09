@@ -32,6 +32,7 @@ class SupportScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        /*
         actions: [
           TextButton.icon(
             onPressed: () {
@@ -53,6 +54,7 @@ class SupportScreen extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
+        */
       ),
       body: SafeArea(
         child: SingleChildScrollView(

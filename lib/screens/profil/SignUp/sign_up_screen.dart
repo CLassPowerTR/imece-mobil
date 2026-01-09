@@ -14,43 +14,47 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   Map<String, dynamic>? errorMessage;
+  String? emailValidationError; // E-posta format hatası
   bool showPassword = true;
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, // Klavye açıldığında UI'nın kaymasını engeller
+      resizeToAvoidBottomInset: true,
       appBar: SignInAppBar(context),
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25),
-              child: Column(
-                spacing: 15,
-                //crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  headText(context),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 40,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        headText(context),
+                        const SizedBox(height: 15),
                   emailAdressContainer(
                     width,
                     context,
-                    textFieldHeight: 50,
-                    containerHeight: 90,
                     controller: emailController,
-                    errorText: errorMessage?['email'] != null
-                        ? (errorMessage?['email'] is List
-                              ? (errorMessage?['email'] as List).join(', ')
-                              : errorMessage?['email'].toString())
-                        : null,
+                    errorText: emailValidationError ?? 
+                        (errorMessage?['email'] != null
+                            ? (errorMessage?['email'] is List
+                                  ? (errorMessage?['email'] as List).join(', ')
+                                  : errorMessage?['email'].toString())
+                            : null),
                   ),
+                  const SizedBox(height: 15),
                   usernameContainer(
                     width,
                     context,
-                    textFieldHeight: 50,
-                    containerHeight: 90,
                     controller: usernameController,
                     errorText: errorMessage?['username'] != null
                         ? (errorMessage?['username'] is List
@@ -58,11 +62,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               : errorMessage?['username'].toString())
                         : null,
                   ),
+                  const SizedBox(height: 15),
                   passwordContainer(
                     width,
                     context,
-                    textFieldHeight: 50,
-                    containerHeight: 90,
                     obscureText: showPassword,
                     showSuffixIcon: true,
                     onTap: () {
@@ -77,11 +80,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               : errorMessage?['password'].toString())
                         : null,
                   ),
+                  const SizedBox(height: 15),
                   checkContract(width, context, isCheckedContract, (value) {
                     setState(() {
                       isCheckedContract = value!;
                     });
                   }),
+                  const SizedBox(height: 10),
                   // Alan bazlı hata gösterimi input altında yapıldığı için üst genel hata alanını kaldırdık
                   NextButton(
                     context,
@@ -89,9 +94,44 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     isCheckedContract,
                     minSizeHeight: 50,
                     onPressed: () async {
+                      // E-posta format kontrolü
+                      final email = emailController.text.trim();
+                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      
+                      if (email.isEmpty) {
+                        setState(() {
+                          emailValidationError = 'E-posta adresi giriniz';
+                        });
+                        return;
+                      }
+                      
+                      if (!emailRegex.hasMatch(email)) {
+                        setState(() {
+                          emailValidationError = 'Geçerli bir e-posta adresi giriniz';
+                        });
+                        return;
+                      }
+                      
+                      if (usernameController.text.trim().isEmpty) {
+                        setState(() {
+                          emailValidationError = null;
+                          errorMessage = {'username': 'Kullanıcı adı giriniz'};
+                        });
+                        return;
+                      }
+                      
+                      if (passwordController.text.trim().isEmpty) {
+                        setState(() {
+                          emailValidationError = null;
+                          errorMessage = {'password': 'Şifre giriniz'};
+                        });
+                        return;
+                      }
+                      
                       setState(() {
                         isLoading = true;
                         errorMessage = null;
+                        emailValidationError = null;
                       });
                       try {
                         await ref
@@ -161,9 +201,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       }
                     },
                   ),
+                  const SizedBox(height: 15),
                   orLine(width, context, containerHeight: 16),
+                  const SizedBox(height: 15),
                   signInWithGoogle(context, width, containerHeight: 50),
-                  //SizedBox(height: 5),
+                  const SizedBox(height: 15),
                   signUpText(
                     textFirst: 'Already have an account?',
                     textSecond: 'Sign in',
@@ -174,8 +216,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       });
                     },
                   ),
-                ],
-              ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             if (isLoading)
               Positioned.fill(

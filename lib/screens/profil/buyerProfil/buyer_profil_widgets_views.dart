@@ -231,6 +231,7 @@ class _userMenu extends StatelessWidget {
           arguments: buyerProfil,
         ),
       ),
+      /*
       _MenuItem(
         icon: Icons.card_giftcard_rounded,
         title: 'İndirim Kuponlarım',
@@ -240,6 +241,7 @@ class _userMenu extends StatelessWidget {
           arguments: buyerProfil,
         ),
       ),
+      */
       _MenuItem(
         icon: Icons.location_on_outlined,
         title: 'Adreslerim',

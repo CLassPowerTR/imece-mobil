@@ -238,6 +238,13 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         'iconColor': AppColors.orange(context),
         'router': '/profil/settings/seller',
       },
+      {
+        'title': 'Destek',
+        'subtitle': 'Sorunuz varsa buraya yazabilirsiniz',
+        'icon': Icons.support_agent_outlined,
+        'iconColor': AppColors.iosBlue(context),
+        'router': '/profil/support',
+      }
     ];
     return Builder(
       builder: (context) {

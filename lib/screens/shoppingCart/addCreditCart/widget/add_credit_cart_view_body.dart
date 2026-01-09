@@ -1,13 +1,18 @@
 part of '../add_credit_cart.dart';
 
 class AddCreditCartViewBody extends StatefulWidget {
+  final bool editMode;
+  final String? cardId;
   final TextEditingController cartNumberController;
   final TextEditingController lateUseDateController;
   final TextEditingController cvvController;
   final TextEditingController cartUserNameController;
   final TextEditingController cartNameController;
+
   const AddCreditCartViewBody(
       {super.key,
+      this.editMode = false,
+      this.cardId,
       required this.cartNumberController,
       required this.lateUseDateController,
       required this.cvvController,
@@ -27,6 +32,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
   String? cardLateUseDate;
   bool _isSaveButton = false;
   bool _isChecked = false;
+  bool _isDefault = false;
 
   @override
   void initState() {
@@ -42,6 +48,26 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
     widget.cvvController.addListener(validateForm);
     widget.cartNameController.addListener(validateForm);
     widget.cartUserNameController.addListener(validateForm);
+
+    if (widget.editMode) {
+      _isChecked = true; // Kayıtlı kart ise işaretli gelmeli
+      _loadCardDetails();
+    }
+  }
+
+  Future<void> _loadCardDetails() async {
+    final storedCards = await storage.read(key: 'savedCards');
+    if (storedCards != null && storedCards.isNotEmpty) {
+      final List<dynamic> decoded = jsonDecode(storedCards);
+      final cardsList = decoded.map((c) => CardInfo.fromJson(c)).toList();
+      final card = cardsList.where((c) => c.id == widget.cardId).firstOrNull;
+      if (card != null) {
+        setState(() {
+          _isDefault = card.isDefault;
+        });
+      }
+    }
+    validateForm();
   }
 
   void validateForm() {
@@ -161,29 +187,28 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
                     controller: widget.cartUserNameController),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 5,
-              children: [
-                _headerText(context, themeData, 'Kart İsmi'),
-                textField(context,
-                    hintText: 'Kart ismini giriniz',
-                    keyboardType: TextInputType.name,
-                    controller: widget.cartNameController),
-              ],
-            ),
             CheckboxListTile(
               title: customText('Kartı daha sonrası için kaydet', context),
               value: _isChecked,
-              activeColor: Colors.blue,
+              activeColor: themeData.primary,
               onChanged: (bool? newValue) {
                 setState(() {
                   _isChecked = newValue ?? false;
                   validateForm();
                 });
               },
-              controlAffinity:
-                  ListTileControlAffinity.leading, // Onay kutusunu başa alır
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+            CheckboxListTile(
+              title: customText('Varsayılan kart olarak ayarla', context),
+              value: _isDefault,
+              activeColor: themeData.primary,
+              onChanged: (bool? newValue) {
+                setState(() {
+                  _isDefault = newValue ?? false;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
             ),
             textButton(
               context,
@@ -198,17 +223,66 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
                   ? themeData.secondary
                   : themeData.primary.withOpacity(0.3),
               onPressed: _isSaveButton
-                  ? () {
-                      setState(() {
-                        storage.write(key: 'cardNumber', value: cardNumber);
-                        storage.write(key: 'lateDate', value: cardLateUseDate);
-                        storage.write(key: 'cvv', value: cardCvv);
-                        storage.write(key: 'cartUserName', value: cardUserName);
-                        storage.write(key: 'cartName', value: cardName);
+                  ? () async {
+                      try {
+                        final storedCards = await storage.read(key: 'savedCards');
+                        List<CardInfo> cardsList = [];
+                        if (storedCards != null && storedCards.isNotEmpty) {
+                          final List<dynamic> decoded = jsonDecode(storedCards);
+                          cardsList = decoded.map((c) => CardInfo.fromJson(c)).toList();
+                        }
 
-                        showTemporarySnackBar(context, 'Kart kaydedildi');
-                        Navigator.pop(context);
-                      });
+                        if (_isDefault) {
+                          // Diğer kartların varsayılan durumunu kaldır
+                          for (var i = 0; i < cardsList.length; i++) {
+                            final c = cardsList[i];
+                            cardsList[i] = CardInfo(
+                              id: c.id,
+                              cardNumber: c.cardNumber,
+                              cardLateUseDate: c.cardLateUseDate,
+                              cardCvv: c.cardCvv,
+                              cardUserName: c.cardUserName,
+                              cardName: c.cardName,
+                              isDefault: false,
+                              customColors: c.customColors,
+                            );
+                          }
+                        }
+
+                        final newCard = CardInfo(
+                          id: widget.editMode ? (widget.cardId ?? DateTime.now().millisecondsSinceEpoch.toString()) : DateTime.now().millisecondsSinceEpoch.toString(),
+                          cardNumber: cardNumber!,
+                          cardLateUseDate: cardLateUseDate!,
+                          cardCvv: cardCvv!,
+                          cardUserName: cardUserName!,
+                          cardName: cardName ?? 'Kartım',
+                          isDefault: _isDefault,
+                        );
+
+                        if (widget.editMode) {
+                          final index = cardsList.indexWhere((c) => c.id == widget.cardId);
+                          if (index != -1) {
+                            cardsList[index] = newCard;
+                          } else {
+                            cardsList.add(newCard);
+                          }
+                        } else {
+                          cardsList.add(newCard);
+                        }
+
+                        final cardsJson = jsonEncode(cardsList.map((c) => c.toJson()).toList());
+                        await storage.write(key: 'savedCards', value: cardsJson);
+
+                        if (mounted) {
+                          showTemporarySnackBar(context, 'Kart kaydedildi', type: SnackBarType.success);
+                          Navigator.pop(context, true);
+                        }
+                      } catch (e) {
+                        debugPrint('Kart kaydetme hatası: $e');
+                        if (mounted) {
+                          showTemporarySnackBar(context, 'Hata oluştu', type: SnackBarType.error);
+                        }
+                      }
                     }
                   : null,
             ),

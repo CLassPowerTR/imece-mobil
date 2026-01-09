@@ -49,7 +49,8 @@ class _AdressScreenState extends State<AdressScreen> {
                 size: HomeStyle(context: context).bodyLarge.fontSize,
                 weight: FontWeight.w600,
                 color: HomeStyle(context: context).secondary),
-          ),
+            ),
+          
         ],
       ),
       body: Stack(
@@ -58,7 +59,6 @@ class _AdressScreenState extends State<AdressScreen> {
             future: _adressFuture,
             builder: (context, snapshot) {
               if (_isDeleting) {
-                // Silme sırasında loading bar zaten Stack ile gösteriliyor, burada tekrar gösterme
                 return const SizedBox.shrink();
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -76,11 +76,13 @@ class _AdressScreenState extends State<AdressScreen> {
               } else {
                 final adresler = snapshot.data!;
                 return ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   itemCount: adresler.length,
                   itemBuilder: (context, index) {
                     final adres = adresler[index];
                     return AdressCard(
                       adres: adres,
+                      phoneNumber: widget.buyerProfil.telno,
                       onEdit: () async {
                         await Navigator.pushNamed(context, '/profil/adress/add',
                             arguments: {
@@ -94,6 +96,25 @@ class _AdressScreenState extends State<AdressScreen> {
                         });
                       },
                       onDelete: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Adresi Sil'),
+                            content: const Text('Bu adresi silmek istediğinizden emin misiniz?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('İptal'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Sil', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm != true) return;
+
                         setState(() {
                           _isDeleting = true;
                         });

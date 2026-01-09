@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
+import 'package:imecehub/providers/auth_provider.dart';
 import 'neumorphic_container.dart';
 import '../../../../providers/supports_provider.dart';
 
@@ -27,6 +30,9 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
   String _selectedSubject = 'Diğer';
   PlatformFile? _selectedFile;
   bool _isUploading = false;
+
+  // Alan bazlı API hata mesajları
+  Map<String, String> _fieldErrors = {};
 
   final List<String> _subjects = [
     'Sipariş Sorunu',
@@ -76,14 +82,52 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
     setState(() => _isUploading = true);
 
     try {
+      final isSeller = ref.read(userProvider)!.rol == 'satici';
       // Dosya varsa multipart file'a çevir
       http.MultipartFile? attachment;
-      if (_selectedFile != null && _selectedFile!.bytes != null) {
-        attachment = http.MultipartFile.fromBytes(
-          'attachment',
-          _selectedFile!.bytes!,
-          filename: _selectedFile!.name,
-        );
+      if (_selectedFile != null) {
+        // Dosya uzantısından content type belirle
+        final extension = _selectedFile!.extension?.toLowerCase() ?? '';
+        String mimeType;
+        switch (extension) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'pdf':
+            mimeType = 'application/pdf';
+            break;
+          case 'doc':
+            mimeType = 'application/msword';
+            break;
+          case 'docx':
+            mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            break;
+          default:
+            mimeType = 'application/octet-stream';
+        }
+
+        // Web platformunda bytes kullan, mobilde path'den oku
+        if (_selectedFile!.bytes != null) {
+          // Web platform - bytes mevcut
+          attachment = http.MultipartFile.fromBytes(
+            'attachment',
+            _selectedFile!.bytes!,
+            filename: _selectedFile!.name,
+            contentType: MediaType.parse(mimeType),
+          );
+        } else if (_selectedFile!.path != null) {
+          // Mobile platform - dosya yolundan oku
+          attachment = await http.MultipartFile.fromPath(
+            'attachment',
+            _selectedFile!.path!,
+            filename: _selectedFile!.name,
+            contentType: MediaType.parse(mimeType),
+          );
+        }
       }
 
       // Telefon numarasını formatla - sadece rakamları al ve +90 ekle
@@ -94,30 +138,47 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
           phoneNumber = '+90$digits';
         }
       }
-
-      await ref
-          .read(supportsProvider.notifier)
-          .createSupportTicket(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: phoneNumber,
-            subject: _selectedSubject,
-            message: _messageController.text.trim(),
-            attachment: attachment,
-          );
+      // Kullanıcının satıcı mı alıcı mı olduğuna göre farklı metod çağır
+      if (isSeller) {
+        await ref
+            .read(supportsProvider.notifier)
+            .createSellerSupportTicket(
+              subject: _selectedSubject,
+              message: _messageController.text.trim(),
+              attachment: attachment,
+            );
+      } else {
+        await ref
+            .read(supportsProvider.notifier)
+            .createBuyerSupportTicket(
+              name: _nameController.text.trim(),
+              email: _emailController.text.trim(),
+              phone: phoneNumber,
+              subject: _selectedSubject,
+              message: _messageController.text.trim(),
+              attachment: attachment,
+            );
+      }
 
       showTemporarySnackBar(
         context,
         'Destek talebiniz başarıyla oluşturuldu!',
         type: SnackBarType.success,
+        duration: 3,
       );
       _clearForm();
     } catch (e) {
-      showTemporarySnackBar(
-        context,
-        'Bir hata oluştu: ${e.toString()}',
-        type: SnackBarType.error,
-      );
+      // API hata yanıtını parse et
+      _parseApiError(e.toString());
+      
+      // Genel hata mesajını göster
+      if (_fieldErrors.isEmpty) {
+        showTemporarySnackBar(
+          context,
+          'Bir hata oluştu: ${e.toString()}',
+          type: SnackBarType.error,
+        );
+      }
     } finally {
       setState(() => _isUploading = false);
     }
@@ -131,7 +192,42 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
     setState(() {
       _selectedSubject = 'Diğer';
       _selectedFile = null;
+      _fieldErrors = {};
     });
+  }
+
+  /// API hata yanıtını parse eder ve alan bazlı hataları ayıklar
+  void _parseApiError(String errorMessage) {
+    setState(() {
+      _fieldErrors = {};
+    });
+
+    // Exception prefix'ini kaldır
+    String cleanedError = errorMessage;
+    if (cleanedError.startsWith('Exception: ')) {
+      cleanedError = cleanedError.substring(11);
+    }
+
+    // JSON formatında hata mı kontrol et: {field: [error message]}
+    if (cleanedError.startsWith('{') && cleanedError.endsWith('}')) {
+      try {
+        // Basit regex ile parse et
+        final fieldPattern = RegExp(r"(\w+):\s*\[([^\]]+)\]");
+        final matches = fieldPattern.allMatches(cleanedError);
+        
+        for (final match in matches) {
+          final fieldName = match.group(1);
+          final errorMsg = match.group(2);
+          if (fieldName != null && errorMsg != null) {
+            setState(() {
+              _fieldErrors[fieldName] = errorMsg.trim();
+            });
+          }
+        }
+      } catch (_) {
+        // Parse edilemezse genel hata olarak bırak
+      }
+    }
   }
 
   @override
@@ -139,6 +235,9 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
     final isMediumScreen = screenWidth < 400;
+    
+    // Satıcı mı kontrolü
+    final isSeller = ref.watch(userProvider)?.rol == 'satici';
 
     return NeumorphicContainer(
       margin: EdgeInsets.all(isSmallScreen ? 12 : 16),
@@ -165,81 +264,126 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
               ),
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
-            // Ad Soyad ve E-posta - Küçük ekranlarda alt alta
-            if (isSmallScreen) ...[
-              _NeumorphicTextField(
-                controller: _nameController,
-                hintText: 'Ad Soyad',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Zorunlu';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              _NeumorphicTextField(
-                controller: _emailController,
-                hintText: 'E-posta',
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Zorunlu';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Geçersiz';
-                  }
-                  return null;
-                },
-              ),
-            ] else
-              Row(
-                children: [
-                  Expanded(
-                    child: _NeumorphicTextField(
-                      controller: _nameController,
-                      hintText: 'Ad Soyad',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Zorunlu';
-                        }
-                        return null;
-                      },
+            
+            // Satıcı değilse Ad Soyad ve E-posta göster
+            if (!isSeller) ...[
+              // Ad Soyad ve E-posta - Küçük ekranlarda alt alta
+              if (isSmallScreen) ...[
+                _NeumorphicTextField(
+                  controller: _nameController,
+                  hintText: 'Ad Soyad',
+                  errorText: _fieldErrors['name'],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Zorunlu';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                _NeumorphicTextField(
+                  controller: _emailController,
+                  hintText: 'E-posta',
+                  keyboardType: TextInputType.emailAddress,
+                  errorText: _fieldErrors['email'],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Zorunlu';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Geçersiz';
+                    }
+                    return null;
+                  },
+                ),
+              ] else
+                Row(
+                  children: [
+                    Expanded(
+                      child: _NeumorphicTextField(
+                        controller: _nameController,
+                        hintText: 'Ad Soyad',
+                        errorText: _fieldErrors['name'],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Zorunlu';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  ),
-                  SizedBox(width: isMediumScreen ? 12 : 16),
-                  Expanded(
-                    child: _NeumorphicTextField(
-                      controller: _emailController,
-                      hintText: 'E-posta',
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Zorunlu';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Geçersiz';
-                        }
-                        return null;
-                      },
+                    SizedBox(width: isMediumScreen ? 12 : 16),
+                    Expanded(
+                      child: _NeumorphicTextField(
+                        controller: _emailController,
+                        hintText: 'E-posta',
+                        keyboardType: TextInputType.emailAddress,
+                        errorText: _fieldErrors['email'],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Zorunlu';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Geçersiz';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            SizedBox(height: isSmallScreen ? 12 : 16),
-            // Telefon ve Konu - Küçük ekranlarda alt alta
-            if (isSmallScreen) ...[
-              _NeumorphicTextField(
-                controller: _phoneController,
-                hintText: '(555) 123 45 67',
-                keyboardType: TextInputType.phone,
-                prefixText: '+90 ',
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  PhoneInputFormatter(),
-                ],
-              ),
-              const SizedBox(height: 12),
+                  ],
+                ),
+              SizedBox(height: isSmallScreen ? 12 : 16),
+              // Telefon ve Konu - Küçük ekranlarda alt alta
+              if (isSmallScreen) ...[
+                _NeumorphicTextField(
+                  controller: _phoneController,
+                  hintText: '(555) 123 45 67',
+                  keyboardType: TextInputType.phone,
+                  prefixText: '+90 ',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    PhoneInputFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _NeumorphicDropdown(
+                  value: _selectedSubject,
+                  items: _subjects,
+                  onChanged: (value) {
+                    setState(() => _selectedSubject = value);
+                  },
+                ),
+              ] else
+                Row(
+                  children: [
+                    Expanded(
+                      child: _NeumorphicTextField(
+                        controller: _phoneController,
+                        hintText: '(555) 123 45 67',
+                        keyboardType: TextInputType.phone,
+                        prefixText: '+90 ',
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          PhoneInputFormatter(),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: isMediumScreen ? 12 : 16),
+                    Expanded(
+                      child: _NeumorphicDropdown(
+                        value: _selectedSubject,
+                        items: _subjects,
+                        onChanged: (value) {
+                          setState(() => _selectedSubject = value);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+            
+            // Satıcı ise sadece konu dropdown göster
+            if (isSeller) ...[
               _NeumorphicDropdown(
                 value: _selectedSubject,
                 items: _subjects,
@@ -247,41 +391,19 @@ class _ContactFormCardState extends ConsumerState<ContactFormCard> {
                   setState(() => _selectedSubject = value);
                 },
               ),
-            ] else
-              Row(
-                children: [
-                  Expanded(
-                    child: _NeumorphicTextField(
-                      controller: _phoneController,
-                      hintText: '(555) 123 45 67',
-                      keyboardType: TextInputType.phone,
-                      prefixText: '+90 ',
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        PhoneInputFormatter(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: isMediumScreen ? 12 : 16),
-                  Expanded(
-                    child: _NeumorphicDropdown(
-                      value: _selectedSubject,
-                      items: _subjects,
-                      onChanged: (value) {
-                        setState(() => _selectedSubject = value);
-                      },
-                    ),
-                  ),
-                ],
-              ),
+            ],
+            
             SizedBox(height: isSmallScreen ? 12 : 16),
             _NeumorphicTextField(
               controller: _messageController,
-              hintText: 'Mesajınız',
+              hintText: 'Mesajınız (en az 10 karakter)',
               maxLines: isSmallScreen ? 4 : 5,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Lütfen mesajınızı yazın';
+                }
+                if (value.length < 10) {
+                  return 'Mesaj en az 10 karakter olmalıdır';
                 }
                 return null;
               },
@@ -337,6 +459,7 @@ class _NeumorphicTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final String? prefixText;
   final List<TextInputFormatter>? inputFormatters;
+  final String? errorText;
 
   const _NeumorphicTextField({
     required this.controller,
@@ -346,6 +469,7 @@ class _NeumorphicTextField extends StatelessWidget {
     this.validator,
     this.prefixText,
     this.inputFormatters,
+    this.errorText,
   });
 
   @override
@@ -381,6 +505,11 @@ class _NeumorphicTextField extends StatelessWidget {
             fontSize: isSmallScreen ? 12 : 14,
             color: const Color(0xFF2D3142),
             fontWeight: FontWeight.w600,
+          ),
+          errorText: errorText,
+          errorStyle: GoogleFonts.poppins(
+            fontSize: isSmallScreen ? 10 : 11,
+            color: Colors.red,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(

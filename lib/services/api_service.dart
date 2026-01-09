@@ -2206,11 +2206,11 @@ class ApiService {
   // SUPPORT TICKET API METHODS
   // ============================================================================
 
-  /// 1. Yeni Destek Talebi Oluştur
+  /// Buyer için yeni destek talebi oluşturur
   /// Method: POST
-  /// URL: {config.supportTicketApiUrl}
+  /// URL: {config.buyerSupportTicketApiUrl}
   /// Body (FormData): name, email, phone, subject, message, attachment (optional)
-  static Future<Map<String, dynamic>> postSupportTicket({
+  static Future<Map<String, dynamic>> postBuyerSupportTicket({
     required String name,
     required String email,
     String? phone,
@@ -2218,15 +2218,15 @@ class ApiService {
     required String message,
     http.MultipartFile? attachment,
   }) async {
-    debugPrint('postSupportTicket: Başlatılıyor');
+    debugPrint('postBuyerSupportTicket: Başlatılıyor');
 
-    if (config.supportTicketApiUrl.isEmpty) {
+    if (config.buyerSupportTicketApiUrl.isEmpty) {
       throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
+        'API yapılandırmasında "buyerSupportTicketApiUrl" bulunmuyor.',
       );
     }
 
-    final uri = Uri.parse(config.supportTicketApiUrl);
+    final uri = Uri.parse(config.buyerSupportTicketApiUrl);
     final request = http.MultipartRequest('POST', uri)
       ..headers.addAll({
         'X-API-Key': config.apiKey,
@@ -2243,37 +2243,37 @@ class ApiService {
     request.fields['message'] = message;
 
     debugPrint(
-      'postSupportTicket: Fields eklendi - ${request.fields.keys.toList()}',
+      'postBuyerSupportTicket: Fields eklendi - ${request.fields.keys.toList()}',
     );
 
     // Dosyayı ekle (varsa)
     if (attachment != null) {
       debugPrint(
-        'postSupportTicket: Dosya ekleniyor - filename: ${attachment.filename}, '
+        'postBuyerSupportTicket: Dosya ekleniyor - filename: ${attachment.filename}, '
         'length: ${attachment.length} bytes, '
         'contentType: ${attachment.contentType}',
       );
       request.files.add(attachment);
       debugPrint(
-        'postSupportTicket: Dosya eklendi - Total files: ${request.files.length}',
+        'postBuyerSupportTicket: Dosya eklendi - Total files: ${request.files.length}',
       );
     }
 
     http.StreamedResponse streamedResponse;
     try {
       debugPrint(
-        'postSupportTicket: Multipart request gönderiliyor - '
+        'postBuyerSupportTicket: Multipart request gönderiliyor - '
         'URL: $uri, '
         'fields: ${request.fields.keys.toList()}, '
         'files: ${request.files.length}',
       );
       streamedResponse = await _deps.httpClient.send(request);
       debugPrint(
-        'postSupportTicket: Response alındı - Status: ${streamedResponse.statusCode}',
+        'postBuyerSupportTicket: Response alındı - Status: ${streamedResponse.statusCode}',
       );
     } catch (e, stackTrace) {
-      debugPrint('postSupportTicket: İstek gönderilirken hata - Hata: $e');
-      debugPrint('postSupportTicket: Stack trace: $stackTrace');
+      debugPrint('postBuyerSupportTicket: İstek gönderilirken hata - Hata: $e');
+      debugPrint('postBuyerSupportTicket: Stack trace: $stackTrace');
       rethrow;
     }
 
@@ -2281,7 +2281,7 @@ class ApiService {
     final bodyText = utf8.decode(response.bodyBytes);
 
     debugPrint(
-      'postSupportTicket: Response body length: ${bodyText.length}, '
+      'postBuyerSupportTicket: Response body length: ${bodyText.length}, '
       'Status: ${response.statusCode}',
     );
 
@@ -2291,25 +2291,25 @@ class ApiService {
         final decoded = json.decode(bodyText);
         if (decoded is Map<String, dynamic>) {
           jsonData = decoded;
-          debugPrint('postSupportTicket: JSON parse başarılı');
+          debugPrint('postBuyerSupportTicket: JSON parse başarılı');
         } else {
           debugPrint(
-            'postSupportTicket: JSON parse uyarısı - Beklenen Map, alınan: ${decoded.runtimeType}',
+            'postBuyerSupportTicket: JSON parse uyarısı - Beklenen Map, alınan: ${decoded.runtimeType}',
           );
         }
       } catch (e, stackTrace) {
         debugPrint(
-          'postSupportTicket: JSON parse hatası - $e, Body: ${bodyText.length > 200 ? bodyText.substring(0, 200) + "..." : bodyText}',
+          'postBuyerSupportTicket: JSON parse hatası - $e, Body: ${bodyText.length > 200 ? bodyText.substring(0, 200) + "..." : bodyText}',
         );
-        debugPrint('postSupportTicket: Stack trace: $stackTrace');
+        debugPrint('postBuyerSupportTicket: Stack trace: $stackTrace');
       }
     } else {
-      debugPrint('postSupportTicket: Response body boş');
+      debugPrint('postBuyerSupportTicket: Response body boş');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       debugPrint(
-        'postSupportTicket: Başarılı - Status: ${response.statusCode}',
+        'postBuyerSupportTicket: Başarılı - Status: ${response.statusCode}',
       );
       return jsonData ?? {'raw': bodyText, 'status': 'success'};
     }
@@ -2319,410 +2319,380 @@ class ApiService {
         jsonData?['detail'] ??
         jsonData?['error'] ??
         jsonData?.toString() ??
-        (bodyText.isNotEmpty ? bodyText : 'Destek talebi oluşturulamadı.');
+        (bodyText.isNotEmpty ? bodyText : 'Buyer destek talebi oluşturulamadı.');
 
     debugPrint(
-      'postSupportTicket: HATA - Status: ${response.statusCode}, Message: $errorMessage',
+      'postBuyerSupportTicket: HATA - Status: ${response.statusCode}, Message: $errorMessage',
     );
     throw Exception(errorMessage);
   }
 
-  /// 2. Ticket Listesi (Admin)
-  /// Method: GET
-  /// URL: {config.supportTicketApiUrl}
-  /// Query Parameters: status, subject, search
-  static Future<List<dynamic>> fetchSupportTickets({
-    String? status,
-    String? subject,
-    String? search,
+  /// Seller için yeni destek talebi oluşturur
+  /// Method: POST
+  /// URL: {config.sellerSupportTicketApiUrl}
+  /// Body (FormData): subject, message, attachment (optional)
+  /// Headers: Authorization: Bearer JWT_TOKEN
+  static Future<Map<String, dynamic>> postSellerSupportTicket({
+    required String subject,
+    required String message,
+    http.MultipartFile? attachment,
   }) async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
-    }
+    debugPrint('postSellerSupportTicket: Başlatılıyor');
 
-    if (config.supportTicketApiUrl.isEmpty) {
+    if (config.sellerSupportTicketApiUrl.isEmpty) {
       throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
+        'API yapılandırmasında "sellerSupportTicketApiUrl" bulunmuyor.',
       );
     }
 
-    // Query parametrelerini oluştur
-    final queryParams = <String, String>{};
-    if (status != null && status.isNotEmpty) {
-      queryParams['status'] = status;
-    }
-    if (subject != null && subject.isNotEmpty) {
-      queryParams['subject'] = subject;
-    }
-    if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      debugPrint('putSellerUpdate: HATA - Access token boş!');
+      throw Exception('Kullanıcı oturumu kapalı.');
     }
 
-    final uri = Uri.parse(
-      config.supportTicketApiUrl,
-    ).replace(queryParameters: queryParams);
+    final uri = Uri.parse(config.sellerSupportTicketApiUrl);
+    final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll({
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      });
 
-    debugPrint('fetchSupportTickets: İstek gönderiliyor - URL: $uri');
+    // Field'ları ekle (Seller endpoint'te sadece subject ve message gerekli)
+    request.fields['subject'] = subject;
+    request.fields['message'] = message;
 
+    debugPrint(
+      'postSellerSupportTicket: Fields eklendi - ${request.fields.keys.toList()}',
+    );
+
+    // Dosyayı ekle (varsa)
+    if (attachment != null) {
+      debugPrint(
+        'postSellerSupportTicket: Dosya ekleniyor - filename: ${attachment.filename}, '
+        'length: ${attachment.length} bytes, '
+        'contentType: ${attachment.contentType}',
+      );
+      request.files.add(attachment);
+      debugPrint(
+        'postSellerSupportTicket: Dosya eklendi - Total files: ${request.files.length}',
+      );
+    }
+
+    http.StreamedResponse streamedResponse;
+    try {
+      debugPrint(
+        'postSellerSupportTicket: Multipart request gönderiliyor - '
+        'URL: $uri, '
+        'fields: ${request.fields.keys.toList()}, '
+        'files: ${request.files.length}',
+      );
+      streamedResponse = await _deps.httpClient.send(request);
+      debugPrint(
+        'postSellerSupportTicket: Response alındı - Status: ${streamedResponse.statusCode}',
+      );
+    } catch (e, stackTrace) {
+      debugPrint('postSellerSupportTicket: İstek gönderilirken hata - Hata: $e');
+      debugPrint('postSellerSupportTicket: Stack trace: $stackTrace');
+      rethrow;
+    }
+
+    final response = await http.Response.fromStream(streamedResponse);
+    final bodyText = utf8.decode(response.bodyBytes);
+
+    debugPrint(
+      'postSellerSupportTicket: Response body length: ${bodyText.length}, '
+      'Status: ${response.statusCode}',
+    );
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+          debugPrint('postSellerSupportTicket: JSON parse başarılı');
+        } else {
+          debugPrint(
+            'postSellerSupportTicket: JSON parse uyarısı - Beklenen Map, alınan: ${decoded.runtimeType}',
+          );
+        }
+      } catch (e, stackTrace) {
+        debugPrint(
+          'postSellerSupportTicket: JSON parse hatası - $e, Body: ${bodyText.length > 200 ? bodyText.substring(0, 200) + "..." : bodyText}',
+        );
+        debugPrint('postSellerSupportTicket: Stack trace: $stackTrace');
+      }
+    } else {
+      debugPrint('postSellerSupportTicket: Response body boş');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      debugPrint(
+        'postSellerSupportTicket: Başarılı - Status: ${response.statusCode}',
+      );
+      return jsonData ?? {'raw': bodyText, 'status': 'success'};
+    }
+
+    final errorMessage =
+        jsonData?['message'] ??
+        jsonData?['detail'] ??
+        jsonData?['error'] ??
+        jsonData?.toString() ??
+        (bodyText.isNotEmpty ? bodyText : 'Seller destek talebi oluşturulamadı.');
+
+    debugPrint(
+      'postSellerSupportTicket: HATA - Status: ${response.statusCode}, Message: $errorMessage',
+    );
+    throw Exception(errorMessage);
+  }
+
+  // ============================================================================
+  // GROUPS API METHODS
+  // ============================================================================
+
+  /// Gruba katılma
+  /// Method: POST
+  /// URL: {config.groupsApiUrl}join/
+  /// Body: { group_id, amount, address_id }
+  /// Headers: Authorization: Bearer JWT_TOKEN
+  static Future<Map<String, dynamic>> joinGroup({
+    required int groupId,
+    required int amount,
+    required int addressId,
+  }) async {
+    debugPrint('joinGroup: Başlatılıyor - groupId: $groupId, amount: $amount, addressId: $addressId');
+
+    if (config.groupsApiUrl.isEmpty) {
+      throw Exception('API yapılandırmasında "groupsApiUrl" bulunmuyor.');
+    }
+
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      debugPrint('joinGroup: HATA - Access token boş!');
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final uri = Uri.parse('${config.groupsApiUrl}join/');
+    final response = await _deps.httpClient.post(
+      uri,
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: json.encode({
+        'group_id': groupId,
+        'amount': amount,
+        'address_id': addressId,
+      }),
+    );
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    debugPrint('joinGroup: Response - Status: ${response.statusCode}, Body: $bodyText');
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        jsonData = json.decode(bodyText) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'status': 'success'};
+    }
+
+    final errorMessage = jsonData?['error'] ?? jsonData?['detail'] ?? 'Gruba katılınamadı.';
+    throw Exception(errorMessage);
+  }
+
+  /// Gruptan çıkma
+  /// Method: POST
+  /// URL: {config.groupsApiUrl}leave/
+  /// Body: { group_id }
+  /// Headers: Authorization: Bearer JWT_TOKEN
+  static Future<Map<String, dynamic>> leaveGroup({
+    required int groupId,
+  }) async {
+    debugPrint('leaveGroup: Başlatılıyor - groupId: $groupId');
+
+    if (config.groupsApiUrl.isEmpty) {
+      throw Exception('API yapılandırmasında "groupsApiUrl" bulunmuyor.');
+    }
+
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      debugPrint('leaveGroup: HATA - Access token boş!');
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final uri = Uri.parse('${config.groupsApiUrl}leave/');
+    final response = await _deps.httpClient.post(
+      uri,
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: json.encode({
+        'group_id': groupId,
+      }),
+    );
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    debugPrint('leaveGroup: Response - Status: ${response.statusCode}, Body: $bodyText');
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        jsonData = json.decode(bodyText) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'status': 'success'};
+    }
+
+    final errorMessage = jsonData?['error'] ?? jsonData?['detail'] ?? 'Gruptan çıkılamadı.';
+    throw Exception(errorMessage);
+  }
+
+  /// Katıldığım grupları listeleme
+  /// Method: GET
+  /// URL: {config.groupsApiUrl}list/
+  /// Headers: Authorization: Bearer JWT_TOKEN
+  static Future<Map<String, dynamic>> getJoinedGroups() async {
+    debugPrint('getJoinedGroups: Başlatılıyor');
+
+    if (config.groupsApiUrl.isEmpty) {
+      throw Exception('API yapılandırmasında "groupsApiUrl" bulunmuyor.');
+    }
+
+    final accessToken = await getAccessToken();
+    if (accessToken.isEmpty) {
+      debugPrint('getJoinedGroups: HATA - Access token boş!');
+      throw Exception('Kullanıcı oturumu kapalı.');
+    }
+
+    final uri = Uri.parse('${config.groupsApiUrl}list/');
     final response = await _deps.httpClient.get(
       uri,
       headers: {
-        'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $accessToken',
       },
     );
 
-    if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final decoded = json.decode(utf8.decode(response.bodyBytes));
-      if (decoded is List) {
-        debugPrint(
-          'fetchSupportTickets: Başarılı - ${decoded.length} ticket bulundu',
-        );
-        return decoded;
-      } else if (decoded is Map<String, dynamic>) {
-        if (decoded['results'] is List) {
-          debugPrint(
-            'fetchSupportTickets: Başarılı - ${(decoded['results'] as List).length} ticket bulundu',
-          );
-          return decoded['results'] as List;
-        }
-        return [decoded];
-      } else {
-        return [];
-      }
-    } else {
-      throw Exception(
-        'Ticket listesi alınamadı. Durum kodu: ${response.statusCode}',
-      );
+    final bodyText = utf8.decode(response.bodyBytes);
+    debugPrint('getJoinedGroups: Response - Status: ${response.statusCode}, Body length: ${bodyText.length}');
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        jsonData = json.decode(bodyText) as Map<String, dynamic>;
+      } catch (_) {}
     }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {'joined_groups': []};
+    }
+
+    final errorMessage = jsonData?['error'] ?? jsonData?['detail'] ?? 'Gruplar alınamadı.';
+    throw Exception(errorMessage);
   }
 
-  /// 3. Ticket Detayı (Admin)
-  /// Method: GET
-  /// URL: {config.supportTicketApiUrl}{ticketId}/
-  static Future<Map<String, dynamic>> fetchSupportTicketDetail(
-    int ticketId,
-  ) async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
+  /// Ürün ID'sine göre grup bilgisi
+  /// Method: POST
+  /// URL: {config.groupsApiUrl}getGroupInfoByProduct/
+  /// Body: { urun_id }
+  /// Auth: Gerekli değil
+  static Future<Map<String, dynamic>> getGroupInfoByProduct({
+    required int urunId,
+  }) async {
+    debugPrint('getGroupInfoByProduct: Başlatılıyor - urunId: $urunId');
+
+    if (config.groupsApiUrl.isEmpty) {
+      throw Exception('API yapılandırmasında "groupsApiUrl" bulunmuyor.');
     }
 
-    if (config.supportTicketApiUrl.isEmpty) {
-      throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
-      );
-    }
-
-    final String url = config.supportTicketApiUrl.endsWith('/')
-        ? '${config.supportTicketApiUrl}$ticketId/'
-        : '${config.supportTicketApiUrl}/$ticketId/';
-
-    debugPrint('fetchSupportTicketDetail: İstek gönderiliyor - URL: $url');
-
-    final response = await _deps.httpClient.get(
-      Uri.parse(url),
+    final uri = Uri.parse('${config.groupsApiUrl}getGroupInfoByProduct/');
+    final response = await _deps.httpClient.post(
+      uri,
       headers: {
-        'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
+      body: json.encode({
+        'urun_id': urunId,
+      }),
     );
 
-    if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final jsonData = json.decode(utf8.decode(response.bodyBytes));
-      if (jsonData is Map<String, dynamic>) {
-        debugPrint('fetchSupportTicketDetail: Başarılı');
-        return jsonData;
-      } else {
-        throw Exception('Ticket detayı beklenen formatta değil.');
-      }
-    } else {
-      throw Exception(
-        'Ticket detayı alınamadı. Durum kodu: ${response.statusCode}',
-      );
-    }
-  }
-
-  /// 4. Ticket Durumunu Güncelle (Admin)
-  /// Method: PATCH
-  /// URL: {config.supportTicketApiUrl}{ticketId}/update_status/
-  /// Body (FormData): status
-  static Future<Map<String, dynamic>> patchSupportTicketStatus({
-    required int ticketId,
-    required String status,
-  }) async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
-    }
-
-    if (config.supportTicketApiUrl.isEmpty) {
-      throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
-      );
-    }
-
-    final String baseUrl = config.supportTicketApiUrl.endsWith('/')
-        ? config.supportTicketApiUrl
-        : '${config.supportTicketApiUrl}/';
-    final String url = '${baseUrl}$ticketId/update_status/';
-
-    debugPrint('patchSupportTicketStatus: İstek gönderiliyor - URL: $url');
-
-    final uri = Uri.parse(url);
-    final request = http.MultipartRequest('PATCH', uri)
-      ..headers.addAll({
-        'Authorization': 'Bearer $accessToken',
-        'X-API-Key': config.apiKey,
-      })
-      ..fields['status'] = status;
-
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await _deps.httpClient.send(request);
-      debugPrint(
-        'patchSupportTicketStatus: İstek gönderildi - Status: ${streamedResponse.statusCode}',
-      );
-    } catch (e, stackTrace) {
-      debugPrint(
-        'patchSupportTicketStatus: İstek gönderilirken hata - Hata: $e',
-      );
-      debugPrint('patchSupportTicketStatus: Stack trace: $stackTrace');
-      rethrow;
-    }
-
-    final response = await http.Response.fromStream(streamedResponse);
     final bodyText = utf8.decode(response.bodyBytes);
+    debugPrint('getGroupInfoByProduct: Response - Status: ${response.statusCode}, Body: $bodyText');
 
     Map<String, dynamic>? jsonData;
     if (bodyText.isNotEmpty) {
       try {
-        final decoded = json.decode(bodyText);
-        if (decoded is Map<String, dynamic>) {
-          jsonData = decoded;
-        }
-      } catch (e) {
-        debugPrint('patchSupportTicketStatus: JSON parse hatası - $e');
-      }
+        jsonData = json.decode(bodyText) as Map<String, dynamic>;
+      } catch (_) {}
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      debugPrint('patchSupportTicketStatus: Başarılı');
-      return jsonData ?? {'raw': bodyText};
+      return jsonData ?? {};
     }
 
-    final errorMessage =
-        jsonData?['message'] ??
-        jsonData?['detail'] ??
-        jsonData?.toString() ??
-        (bodyText.isNotEmpty ? bodyText : 'Ticket durumu güncellenemedi.');
-
-    debugPrint('patchSupportTicketStatus: Hata mesajı: $errorMessage');
+    final errorMessage = jsonData?['error'] ?? jsonData?['detail'] ?? 'Grup bilgisi alınamadı.';
     throw Exception(errorMessage);
   }
 
-  /// 5. Ticket'ı Personele Ata (Admin)
-  /// Method: PATCH
-  /// URL: {config.supportTicketApiUrl}{ticketId}/assign/
-  /// Body (FormData): assigned_to
-  static Future<Map<String, dynamic>> patchSupportTicketAssign({
-    required int ticketId,
-    required int assignedTo,
+  /// Grup ID'sine göre grup bilgisi
+  /// Method: POST
+  /// URL: {config.groupsApiUrl}getGroupInfoByGroupId/
+  /// Body: { group_id }
+  /// Auth: Gerekli değil
+  static Future<Map<String, dynamic>> getGroupInfoByGroupId({
+    required int groupId,
   }) async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
+    debugPrint('getGroupInfoByGroupId: Başlatılıyor - groupId: $groupId');
+
+    if (config.groupsApiUrl.isEmpty) {
+      throw Exception('API yapılandırmasında "groupsApiUrl" bulunmuyor.');
     }
 
-    if (config.supportTicketApiUrl.isEmpty) {
-      throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
-      );
-    }
-
-    final String baseUrl = config.supportTicketApiUrl.endsWith('/')
-        ? config.supportTicketApiUrl
-        : '${config.supportTicketApiUrl}/';
-    final String url = '${baseUrl}$ticketId/assign/';
-
-    debugPrint('patchSupportTicketAssign: İstek gönderiliyor - URL: $url');
-
-    final uri = Uri.parse(url);
-    final request = http.MultipartRequest('PATCH', uri)
-      ..headers.addAll({
-        'Authorization': 'Bearer $accessToken',
-        'X-API-Key': config.apiKey,
-      })
-      ..fields['assigned_to'] = assignedTo.toString();
-
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await _deps.httpClient.send(request);
-      debugPrint(
-        'patchSupportTicketAssign: İstek gönderildi - Status: ${streamedResponse.statusCode}',
-      );
-    } catch (e, stackTrace) {
-      debugPrint(
-        'patchSupportTicketAssign: İstek gönderilirken hata - Hata: $e',
-      );
-      debugPrint('patchSupportTicketAssign: Stack trace: $stackTrace');
-      rethrow;
-    }
-
-    final response = await http.Response.fromStream(streamedResponse);
-    final bodyText = utf8.decode(response.bodyBytes);
-
-    Map<String, dynamic>? jsonData;
-    if (bodyText.isNotEmpty) {
-      try {
-        final decoded = json.decode(bodyText);
-        if (decoded is Map<String, dynamic>) {
-          jsonData = decoded;
-        }
-      } catch (e) {
-        debugPrint('patchSupportTicketAssign: JSON parse hatası - $e');
-      }
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      debugPrint('patchSupportTicketAssign: Başarılı');
-      return jsonData ?? {'raw': bodyText};
-    }
-
-    final errorMessage =
-        jsonData?['message'] ??
-        jsonData?['detail'] ??
-        jsonData?.toString() ??
-        (bodyText.isNotEmpty ? bodyText : 'Ticket atanamadı.');
-
-    debugPrint('patchSupportTicketAssign: Hata mesajı: $errorMessage');
-    throw Exception(errorMessage);
-  }
-
-  /// 6. Ticket Notlarını Güncelle (Admin)
-  /// Method: PATCH
-  /// URL: {config.supportTicketApiUrl}{ticketId}/
-  /// Body (FormData): notes
-  static Future<Map<String, dynamic>> patchSupportTicketNotes({
-    required int ticketId,
-    required String notes,
-  }) async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
-    }
-
-    if (config.supportTicketApiUrl.isEmpty) {
-      throw Exception(
-        'API yapılandırmasında "supportTicketApiUrl" bulunmuyor.',
-      );
-    }
-
-    final String url = config.supportTicketApiUrl.endsWith('/')
-        ? '${config.supportTicketApiUrl}$ticketId/'
-        : '${config.supportTicketApiUrl}/$ticketId/';
-
-    debugPrint('patchSupportTicketNotes: İstek gönderiliyor - URL: $url');
-
-    final uri = Uri.parse(url);
-    final request = http.MultipartRequest('PATCH', uri)
-      ..headers.addAll({
-        'Authorization': 'Bearer $accessToken',
-        'X-API-Key': config.apiKey,
-      })
-      ..fields['notes'] = notes;
-
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await _deps.httpClient.send(request);
-      debugPrint(
-        'patchSupportTicketNotes: İstek gönderildi - Status: ${streamedResponse.statusCode}',
-      );
-    } catch (e, stackTrace) {
-      debugPrint(
-        'patchSupportTicketNotes: İstek gönderilirken hata - Hata: $e',
-      );
-      debugPrint('patchSupportTicketNotes: Stack trace: $stackTrace');
-      rethrow;
-    }
-
-    final response = await http.Response.fromStream(streamedResponse);
-    final bodyText = utf8.decode(response.bodyBytes);
-
-    Map<String, dynamic>? jsonData;
-    if (bodyText.isNotEmpty) {
-      try {
-        final decoded = json.decode(bodyText);
-        if (decoded is Map<String, dynamic>) {
-          jsonData = decoded;
-        }
-      } catch (e) {
-        debugPrint('patchSupportTicketNotes: JSON parse hatası - $e');
-      }
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      debugPrint('patchSupportTicketNotes: Başarılı');
-      return jsonData ?? {'raw': bodyText};
-    }
-
-    final errorMessage =
-        jsonData?['message'] ??
-        jsonData?['detail'] ??
-        jsonData?.toString() ??
-        (bodyText.isNotEmpty ? bodyText : 'Ticket notları güncellenemedi.');
-
-    debugPrint('patchSupportTicketNotes: Hata mesajı: $errorMessage');
-    throw Exception(errorMessage);
-  }
-
-  /// 7. Staff Kullanıcıları Listesi (Admin)
-  /// Method: GET
-  /// URL: {config.baseUrl}/api/users/staff-users/
-  static Future<List<dynamic>> fetchStaffUsers() async {
-    final accessToken = await getAccessToken();
-    if (accessToken.isEmpty) {
-      throw Exception('Kullanıcı oturumu kapalı.');
-    }
-
-    // Staff users için özel URL oluştur
-    final String staffUsersUrl = config.baseUrl.endsWith('/')
-        ? '${config.baseUrl}api/users/staff-users/'
-        : '${config.baseUrl}/api/users/staff-users/';
-
-    debugPrint('fetchStaffUsers: İstek gönderiliyor - URL: $staffUsersUrl');
-
-    final response = await _deps.httpClient.get(
-      Uri.parse(staffUsersUrl),
+    final uri = Uri.parse('${config.groupsApiUrl}getGroupInfoByGroupId/');
+    final response = await _deps.httpClient.post(
+      uri,
       headers: {
-        'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
+      body: json.encode({
+        'group_id': groupId,
+      }),
     );
 
-    if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final decoded = json.decode(utf8.decode(response.bodyBytes));
-      if (decoded is List) {
-        debugPrint(
-          'fetchStaffUsers: Başarılı - ${decoded.length} staff kullanıcı bulundu',
-        );
-        return decoded;
-      } else if (decoded is Map<String, dynamic>) {
-        if (decoded['results'] is List) {
-          return decoded['results'] as List;
-        }
-        return [decoded];
-      } else {
-        return [];
-      }
-    } else {
-      throw Exception(
-        'Staff kullanıcıları alınamadı. Durum kodu: ${response.statusCode}',
-      );
+    final bodyText = utf8.decode(response.bodyBytes);
+    debugPrint('getGroupInfoByGroupId: Response - Status: ${response.statusCode}, Body: $bodyText');
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        jsonData = json.decode(bodyText) as Map<String, dynamic>;
+      } catch (_) {}
     }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonData ?? {};
+    }
+
+    final errorMessage = jsonData?['error'] ?? jsonData?['detail'] ?? 'Grup bilgisi alınamadı.';
+    throw Exception(errorMessage);
   }
 }

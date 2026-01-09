@@ -29,5 +29,6 @@ class AppColors {
   static Color succesful(BuildContext context) => Colors.green;
   static Color orange(BuildContext context) => Colors.orange;
   static Color blue(BuildContext context) => Colors.blue;
+  static Color iosBlue(BuildContext context) => const Color(0xFF0087FF);
   static Color purple(BuildContext context) => Colors.purple;
 }

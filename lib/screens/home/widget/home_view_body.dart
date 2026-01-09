@@ -110,6 +110,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                         _futureSellersView(height, width, themeData),
                         //_alimTipiContainer(height, context),
                         //_populerUrunCards(width, height),
+                        
                         _futurePopulerProductsView(width, height),
                         //_onerilerContainer(height, context, width),
                         SizedBox(
@@ -127,22 +128,13 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     );
   }
 
-  Column _futurePopulerProductsView(double width, double height) {
+  Widget _futurePopulerProductsView(double width, double height) {
     final populerProductsAsync = ref.watch(populerProductsProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _populerUrunlerText(context),
-        populerProductsAsync.when(
-          loading: () => ProductsGridShimmer(itemCount: 2),
-          error: (error, _) => Text("Hata oluştu: $error"),
-          data: (populerProducts) =>
-              _populerUrunCards(width, height, populerProducts),
-        ),
-      ],
+    return populerProductsAsync.when(
+      loading: () => ProductsGridShimmer(itemCount: 2),
+      error: (error, _) => Text("Hata oluştu: $error"),
+      data: (populerProducts) =>  _populerUrunCards(width, height, populerProducts),
     );
   }
 

@@ -36,14 +36,16 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profil': (context) => ProfileScreen(),
   '/cart/addCreditCart': (context) {
     final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, String?>;
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
 
     return AddCreditCartScreen(
-      cartNameController: TextEditingController(text: args['cartName']),
-      cartNumberController: TextEditingController(text: args['cardNumber']),
-      cartUserNameController: TextEditingController(text: args['cartUserName']),
-      cvvController: TextEditingController(text: args['cvv']),
-      lateUseDateController: TextEditingController(text: args['lateUseDate']),
+      editMode: args['editMode'] ?? false,
+      cardId: args['cardId'],
+      cartNameController: TextEditingController(text: args['cartName']?.toString()),
+      cartNumberController: TextEditingController(text: args['cardNumber']?.toString()),
+      cartUserNameController: TextEditingController(text: args['cartUserName']?.toString()),
+      cvvController: TextEditingController(text: args['cvv']?.toString()),
+      lateUseDateController: TextEditingController(text: args['lateUseDate']?.toString()),
     );
   },
   '/profil/signIn': (context) => SignInScreen(),

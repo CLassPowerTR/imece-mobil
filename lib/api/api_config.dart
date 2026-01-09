@@ -44,7 +44,9 @@ class ApiConfig {
   final String logisticOrderApiUrl = dotenv.env['LOGISTIC_ORDER_API_URL'] ?? '';
   final String paymentSiparisApiUrl =
       dotenv.env['PAYMENT_SIPARIS_API_URL'] ?? '';
-  final String supportTicketApiUrl = dotenv.env['SUPPOR_TICKET_API_URL'] ?? '';
+  final String buyerSupportTicketApiUrl = dotenv.env['BUYER_SUPPORT_TICKET_API_URL'] ?? '';
+  final String sellerSupportTicketApiUrl = dotenv.env['SELLER_SUPPORT_TICKET_API_URL'] ?? '';
+  final String groupsApiUrl = dotenv.env['GROUPS_API_URL'] ?? '';
   final String paymentTriggerApiUrl =
       dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';

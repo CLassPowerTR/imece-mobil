@@ -228,7 +228,7 @@ SizedBox checkContract(
   );
 }
 
-SizedBox passwordContainer(
+Widget passwordContainer(
   double width,
   BuildContext context, {
   String containerText = 'Password',
@@ -242,11 +242,10 @@ SizedBox passwordContainer(
   String? errorText,
 }) {
   return SizedBox(
-    height: containerHeight ?? 90,
     width: width,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
         customText(
           containerText,
@@ -256,25 +255,23 @@ SizedBox passwordContainer(
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
-          child: textField(
-            context,
-            hintText: hintText,
-            controller: textFieldController,
-            obscureText: obscureText,
-            showSuffixIcon: showSuffixIcon,
-            onTap: onTap,
-            errorText: errorText,
-            errorColor: Colors.red,
-          ),
+        const SizedBox(height: 8),
+        textField(
+          context,
+          hintText: hintText,
+          controller: textFieldController,
+          obscureText: obscureText,
+          showSuffixIcon: showSuffixIcon,
+          onTap: onTap,
+          errorText: errorText,
+          errorColor: Colors.red,
         ),
       ],
     ),
   );
 }
 
-SizedBox emailAdressContainer(
+Widget emailAdressContainer(
   double width,
   BuildContext context, {
   double? textFieldHeight,
@@ -283,11 +280,10 @@ SizedBox emailAdressContainer(
   String? errorText,
 }) {
   return SizedBox(
-    height: containerHeight ?? 90,
     width: width,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
         customText(
           'Email Adress',
@@ -297,22 +293,20 @@ SizedBox emailAdressContainer(
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
-          child: textField(
-            context,
-            hintText: 'Enter your email adress',
-            controller: controller,
-            errorText: errorText,
-            errorColor: Colors.red,
-          ),
+        const SizedBox(height: 8),
+        textField(
+          context,
+          hintText: 'Enter your email adress',
+          controller: controller,
+          errorText: errorText,
+          errorColor: Colors.red,
         ),
       ],
     ),
   );
 }
 
-SizedBox usernameContainer(
+Widget usernameContainer(
   double width,
   BuildContext context, {
   double? textFieldHeight,
@@ -321,11 +315,10 @@ SizedBox usernameContainer(
   String? errorText,
 }) {
   return SizedBox(
-    height: containerHeight ?? 90,
     width: width,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
         customText(
           'Username',
@@ -335,15 +328,13 @@ SizedBox usernameContainer(
           weight: FontWeight.bold,
           decoration: TextDecoration.underline,
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: textFieldHeight ?? 55),
-          child: textField(
-            context,
-            hintText: 'Enter your username',
-            controller: controller,
-            errorText: errorText,
-            errorColor: Colors.red,
-          ),
+        const SizedBox(height: 8),
+        textField(
+          context,
+          hintText: 'Enter your username',
+          controller: controller,
+          errorText: errorText,
+          errorColor: Colors.red,
         ),
       ],
     ),

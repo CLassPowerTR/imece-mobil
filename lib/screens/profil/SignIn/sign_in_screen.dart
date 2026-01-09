@@ -33,6 +33,8 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
   bool isLoading = false;
   String? errorMessage; // Genel hata
   Map<String, dynamic>? fieldErrors; // Alan bazlı hatalar
+  String? emailValidationError; // E-posta format hatası
+  String? generalFieldError; // Genel giriş hatası (her iki alan için)
   bool showPassword = true;
 
   @override
@@ -56,30 +58,38 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, // Klavye açıldığında UI'nın kaymasını engeller
+      resizeToAvoidBottomInset: true,
       appBar: SignInAppBar(context),
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25),
-              child: Column(
-                spacing: 20,
-                //crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  headText(context),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 40,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        headText(context),
+                        const SizedBox(height: 20),
                   emailAdressContainer(
                     width,
                     context,
                     controller: emailController,
-                    errorText: fieldErrors?['email'] != null
-                        ? (fieldErrors?['email'] is List
-                              ? (fieldErrors?['email'] as List).join(', ')
-                              : fieldErrors?['email'].toString())
-                        : null,
+                    errorText: emailValidationError ?? 
+                        generalFieldError ?? 
+                        (fieldErrors?['email'] != null
+                            ? (fieldErrors?['email'] is List
+                                  ? (fieldErrors?['email'] as List).join(', ')
+                                  : fieldErrors?['email'].toString())
+                            : null),
                   ),
+                  const SizedBox(height: 12),
                   passwordContainer(
                     width,
                     context,
@@ -91,17 +101,20 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                       });
                     },
                     showSuffixIcon: true,
-                    errorText: fieldErrors?['password'] != null
-                        ? (fieldErrors?['password'] is List
-                              ? (fieldErrors?['password'] as List).join(', ')
-                              : fieldErrors?['password'].toString())
-                        : null,
+                    errorText: generalFieldError ?? 
+                        (fieldErrors?['password'] != null
+                            ? (fieldErrors?['password'] is List
+                                  ? (fieldErrors?['password'] as List).join(', ')
+                                  : fieldErrors?['password'].toString())
+                            : null),
                   ),
+                  const SizedBox(height: 12),
                   checkContract(width, context, isCheckedContract, (value) {
                     setState(() {
                       isCheckedContract = value!;
                     });
                   }),
+                  const SizedBox(height: 6),
                   if (errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -122,10 +135,34 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                     'Giriş Yap',
                     isCheckedContract,
                     onPressed: () async {
+                      // E-posta format kontrolü
+                      final email = emailController.text.trim();
+                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      
+                      if (email.isEmpty) {
+                        setState(() {
+                          emailValidationError = 'E-posta adresi giriniz';
+                          generalFieldError = null;
+                        });
+                        return;
+                      }
+                      
+                      
+                      
+                      if (passwordController.text.trim().isEmpty) {
+                        setState(() {
+                          emailValidationError = null;
+                          generalFieldError = 'Şifre giriniz';
+                        });
+                        return;
+                      }
+                      
                       setState(() {
                         isLoading = true;
                         errorMessage = null;
                         fieldErrors = null;
+                        emailValidationError = null;
+                        generalFieldError = null;
                       });
                       try {
                         await ref
@@ -156,17 +193,15 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                         }
                       } catch (e) {
                         final s = e.toString();
-                        if (s.contains('Invalid email or password')) {
+                        if (s.contains('Invalid email or password') || 
+                            s.contains('Kullanıcı adı veya şifre hatalı')) {
                           setState(() {
                             isLoading = false;
                             errorMessage = null;
                             fieldErrors = null;
+                            // Her iki alanın altında hata göster
+                            generalFieldError = 'Kullanıcı adı veya şifre hatalı';
                           });
-                          showTemporarySnackBar(
-                            context,
-                            'Kullanıcı adı veya şifre hatalı.',
-                            type: SnackBarType.error,
-                          );
                         } else {
                           setState(() {
                             isLoading = false;
@@ -185,24 +220,32 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                             if (parsed != null) {
                               fieldErrors = parsed;
                               errorMessage = null;
+                              generalFieldError = null;
                             } else {
-                              errorMessage = s;
+                              // Genel hata mesajını her iki alanda göster
+                              generalFieldError = s.replaceAll('Exception: ', '');
+                              errorMessage = null;
                             }
                           });
                         }
                       }
                     },
                   ),
+                  const SizedBox(height: 12),
                   orLine(width, context),
+                  const SizedBox(height: 12),
                   signInWithGoogle(context, width),
-                  //SizedBox(height: 5),
+                  const SizedBox(height: 12),
                   signUpText(context, () {
                     setState(() {
                       Navigator.pushNamed(context, '/profil/signUp');
                     });
                   }),
-                ],
-              ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             if (isLoading)
               Positioned.fill(
