@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/theme/design_tokens.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/richText.dart';
@@ -346,7 +347,7 @@ class _productsCardState extends State<productsCard2> {
             ),
             const SizedBox(height: 4),
             richText(
-              color: HomeStyle(context: context).secondary,
+              color: DesignTokens.textSecondary,
               fontSize: HomeStyle(context: context).bodyLarge.fontSize,
               textAlign: TextAlign.start,
               context,
@@ -470,7 +471,7 @@ class _productsCardState extends State<productsCard2> {
                     weight: FontWeight.bold,
                     fontSize: HomeStyle(context: context).bodyLarge.fontSize,
                     buttonColor: HomeStyle(context: context).surfaceContainer,
-                    titleColor: HomeStyle(context: context).secondary,
+                    titleColor: DesignTokens.primary,
                     border: true,
                     borderWidth: 1,
                     onPressed: () {

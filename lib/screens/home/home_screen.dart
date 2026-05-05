@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:imecehub/core/theme/design_tokens.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/container.dart';
@@ -32,6 +33,7 @@ import '../../services/api_service.dart';
 part 'widget/home_view_header.dart';
 part 'widget/home_view_bottom.dart';
 part 'widget/home_view_body.dart';
+part 'widget/home_drawer.dart';
 
 final bottomNavIndexProvider = NotifierProvider<BottomNavIndex, int>(
   BottomNavIndex.new,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/core/theme/design_tokens.dart';
 
 TextField textField(
   BuildContext context, {
@@ -138,32 +139,42 @@ TextField profilTextField(
   );
 }
 
-TextField homeTextFieldBar(BuildContext context) {
-  return TextField(
-    decoration: InputDecoration(
-      hintText: 'Arat...',
-      hintStyle: TextStyle(color: HomeStyle(context: context).outline),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: SvgPicture.asset(
-          'assets/vectors/search.svg',
-          // İkonun rengini de tercihinize göre belirleyebilirsiniz:
-          color: HomeStyle(context: context).secondary,
+Widget homeTextFieldBar(BuildContext context) {
+  return SizedBox(
+    height: 45,
+    child: TextField(
+      style: const TextStyle(color: DesignTokens.textSecondary),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: DesignTokens.textSecondary.withOpacity(0.08),
+        hintText: 'Ürün, Kategori veya marka ara...',
+        hintStyle: const TextStyle(
+          color: DesignTokens.textSecondary,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
         ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: SvgPicture.asset(
+            'assets/vectors/search.svg',
+            width: 16,
+            height: 16,
+            color: HomeStyle(context: context).primary,
+          ),
         ),
-        borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
         ),
-        borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: HomeStyle(context: context).primary,
+            width: 1.0,
+          ),
+          borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     ),
   );
 }

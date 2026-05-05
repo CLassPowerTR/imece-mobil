@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/theme/design_tokens.dart';
 
 final class HomeStyle {
   HomeStyle({required BuildContext context}) : _context = context;
   final BuildContext _context;
 
-  Color get primary => Theme.of(_context).colorScheme.primary;
-  Color get secondary => Theme.of(_context).colorScheme.secondary;
+  Color get primary => DesignTokens.primary;
+  Color get secondary => DesignTokens.secondary;
   Color get onPrimary => Theme.of(_context).colorScheme.onPrimary;
   Color get onSecondary => Theme.of(_context).colorScheme.onSecondary;
-  Color get outline => Theme.of(_context).colorScheme.outline;
+  Color get outline => DesignTokens.borderColor;
   Color get surface => Theme.of(_context).colorScheme.surface;
   Color get secondaryFixedDim =>
       Theme.of(_context).colorScheme.secondaryFixedDim;

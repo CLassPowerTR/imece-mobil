@@ -79,6 +79,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     final isOnline = ref.watch(isOnlineProvider);
 
     return Scaffold(
+      drawer: const HomeDrawer(),
       appBar: HomeHeaderAppBar(),
       body: Column(
         children: [
@@ -259,7 +260,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             children: [
               _categoriesText(context),
               SizedBox(
-                height: 120, // Responsive height for icon + text
+                height: 40, // Height for text pill
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   clipBehavior: Clip.none,
@@ -661,63 +662,31 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
   }
 
   Widget _categories(Category category, double screenWidth) {
-    final double iconSize = (screenWidth * 0.18).clamp(60.0, 75.0);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/home/category',
-              arguments: category.kategoriId,
-            );
-          },
-          child: Container(
-            width: iconSize,
-            height: iconSize,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFF3F4F6), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(iconSize / 2),
-              child: category.gorsel.isNotEmpty
-                  ? Image.network(
-                      category.gorsel,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Image.network(NotFound.LogoPNGUrl),
-                    )
-                  : Image.network(NotFound.LogoPNGUrl),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/home/category',
+          arguments: category.kategoriId,
+        );
+      },
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        ),
+        child: Text(
+          category.altKategoriAdi.toString(),
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF4B5563),
           ),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: iconSize + 10,
-          child: Text(
-            category.altKategoriAdi.toString(),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF4B5563),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

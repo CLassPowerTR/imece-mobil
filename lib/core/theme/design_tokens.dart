@@ -4,18 +4,20 @@ import 'package:flutter/material.dart';
 
 class DesignTokens {
   // Colors
-  static const Color primary = Color(0xFF4ECDC4);
-  static const Color secondary = Color(0xFF2D3142);
-  static const Color error = Color(0xFFE74C3C);
-  static const Color success = Color(0xFF27AE60);
-  static const Color warning = Color(0xFFF39C12);
-  static const Color info = Color(0xFF3498DB);
+  static const Color primary = Color(0xFFFF6000);
+  static const Color secondary = Color(0xFF6366F1);
+  static const Color error = Color(0xFFEF4444);
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color info = Color(0xFF3B82F6);
   
-  static const Color backgroundLight = Color(0xFFE0E5EC);
+  static const Color backgroundLight = Color(0xFFFFFFFF);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color textPrimary = Color(0xFF2D3142);
-  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color textPrimary = Color(0xFF1E293B);
+  static const Color textSecondary = Color(0xFF64748B);
   static const Color textTertiary = Color(0xFF9CA3AF);
+
+  static const Color borderColor = Color(0xFFE2E8F0);
   
   // Spacing
   static const double spacing2xs = 4;
