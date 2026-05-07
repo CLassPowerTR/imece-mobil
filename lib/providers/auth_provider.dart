@@ -132,22 +132,8 @@ class UserNotifier extends Notifier<User?> {
     required String password,
   }) async {
     await ApiService.fetchUserRegister(email, username, password);
-    await fetchUserMe();
-
-    // Register sonrası online yap
-    if (state != null) {
-      try {
-        final isSeller = state?.rol == 'satici';
-        if (isSeller) {
-          await ApiService.putSellerUpdate({'is_online': true});
-        } else {
-          await ApiService.putBuyerUpdate({'is_online': true});
-        }
-        debugPrint('Auth: Register sonrası kullanıcı online yapıldı');
-      } catch (e) {
-        debugPrint('Auth: Register sonrası online durumu güncellenemedi: $e');
-      }
-    }
+    // Kayıt sonrası otomatik login yapılmaz.
+    // E-posta doğrulaması sonrası token kaydedilecek ve fetchUserMe çağrılacak.
   }
 
   /// Alıcı profilini günceller

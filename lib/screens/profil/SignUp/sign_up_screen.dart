@@ -537,16 +537,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           );
       setState(() => isLoading = false);
 
+      HapticFeedback.mediumImpact();
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kayıt başarılı!')),
-        );
-        ref.read(bottomNavIndexProvider.notifier).setIndex(3);
-        Navigator.pushNamedAndRemoveUntil(
+        // Kayıt başarılı — e-posta doğrulama sayfasına yönlendir
+        Navigator.pushReplacementNamed(
           context,
-          '/home',
-          (route) => false,
-          arguments: {'refresh': true},
+          '/profil/verifyEmail',
+          arguments: {'email': emailController.text.trim()},
         );
       }
     } catch (e) {
@@ -579,6 +577,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           };
         }
       });
+
+      HapticFeedback.heavyImpact();
     }
   }
 }

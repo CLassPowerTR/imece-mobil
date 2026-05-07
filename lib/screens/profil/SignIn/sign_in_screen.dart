@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:imecehub/core/theme/design_tokens.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
@@ -202,6 +203,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                           isLoading = false;
                         });
                         if (mounted) {
+                          
                           showTemporarySnackBar(
                             context,
                             'Giriş başarılı!',
@@ -220,6 +222,12 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                         }
                       } catch (e) {
                         final s = e.toString();
+
+                        if (s.contains('not_verified') || s.contains('doğrulanmamış')) {
+                            Navigator.pushNamed(context, '/profil/verifyEmail',arguments: {'email': emailController.text.trim()});
+                            return;
+                          }
+
                         if (s.contains('Invalid email or password') || 
                             s.contains('Kullanıcı adı veya şifre hatalı')) {
                           setState(() {
@@ -249,6 +257,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                               errorMessage = null;
                               generalFieldError = null;
                             } else {
+                              
                               // Genel hata mesajını her iki alanda göster
                               generalFieldError = s.replaceAll('Exception: ', '');
                               errorMessage = null;

@@ -368,14 +368,7 @@ class ApiService {
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (jsonData?['tokens'] is Map) {
-        final tokens = jsonData!['tokens'] as Map;
-        final accessToken = tokens['access']?.toString() ?? '';
-        final refreshToken = tokens['refresh']?.toString() ?? '';
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accesToken', accessToken);
-        await prefs.setString('refreshToken', refreshToken);
-      }
+      // Kayıt başarılı — token kaydetme, e-posta doğrulaması sonrası yapılacak
       return;
     }
 
@@ -389,6 +382,108 @@ class ApiService {
     throw Exception(
       bodyText.isNotEmpty ? bodyText : 'Kullanıcı kaydı başarısız.',
     );
+  }
+
+  /// E-posta doğrulama kodu ile hesabı doğrula.
+  /// Başarılı olursa token'ları kaydeder.
+  static Future<Map<String, dynamic>> verifyEmail(
+    String email,
+    String code,
+  ) async {
+    final url = config.verifyEmailApiUrl.isNotEmpty
+        ? config.verifyEmailApiUrl
+        : '${config.baseUrl}/users/rq_verify_email/';
+
+    http.Response response;
+    try {
+      response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: json.encode({'email': email, 'code': code}),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+    } catch (e) {
+      debugPrint('verifyEmail isteği başarısız: $e');
+      rethrow;
+    }
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (_) {}
+    }
+    if (jsonData != null && jsonData['not_verified'] == false) {
+      return jsonData;
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (jsonData != null && jsonData['status'] == 'success') {
+        // Token'ları kaydet
+        if (jsonData['tokens'] is Map) {
+          final tokens = jsonData['tokens'] as Map;
+          final accessToken = tokens['access']?.toString() ?? '';
+          final refreshToken = tokens['refresh']?.toString() ?? '';
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accesToken', accessToken);
+          await prefs.setString('refreshToken', refreshToken);
+        }
+        return jsonData;
+      }
+      return jsonData ?? {'status': 'success'};
+    }
+
+    final errorMsg = jsonData?['message']?.toString() ??
+        'Doğrulama kodu hatalı veya süresi dolmuş.';
+    throw Exception(errorMsg);
+  }
+
+  /// Doğrulama kodunu tekrar gönder.
+  static Future<void> resendVerificationCode(String email) async {
+    final url = config.resendCodeApiUrl.isNotEmpty
+        ? config.resendCodeApiUrl
+        : '${config.baseUrl}/users/rq_resend_code/';
+
+    http.Response response;
+    try {
+      response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: json.encode({'email': email}),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+    } catch (e) {
+      debugPrint('resendVerificationCode isteği başarısız: $e');
+      rethrow;
+    }
+
+    final bodyText = utf8.decode(response.bodyBytes);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (_) {}
+    }
+
+    final errorMsg =
+        jsonData?['message']?.toString() ?? 'Kod gönderilemedi.';
+    throw Exception(errorMsg);
   }
 
   static Future fetchUserLogin(String email, String password) async {

@@ -476,12 +476,12 @@ SizedBox NextButton(
     height: minSizeHeight ?? 56,
     child: Material(
       color: isEnabled
-          ? DesignTokens.textPrimary
+          ? DesignTokens.primary
           : DesignTokens.textTertiary.withOpacity(0.3),
       borderRadius: BorderRadius.circular(16),
       elevation: isEnabled ? 8 : 0,
       shadowColor: isEnabled
-          ? DesignTokens.textPrimary.withOpacity(0.25)
+          ? DesignTokens.primary.withOpacity(0.25)
           : Colors.transparent,
       child: InkWell(
         onTap: isEnabled ? onPressed : null,

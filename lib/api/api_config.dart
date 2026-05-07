@@ -49,6 +49,8 @@ class ApiConfig {
   final String groupsApiUrl = dotenv.env['GROUPS_API_URL'] ?? '';
   final String paymentTriggerApiUrl =
       dotenv.env['PAYMENT_TRIGGER_API_URL'] ?? '';
+  final String verifyEmailApiUrl = dotenv.env['VERIFY_EMAIL_API_URL'] ?? '';
+  final String resendCodeApiUrl = dotenv.env['RESEND_CODE_API_URL'] ?? '';
   final String apiKey = dotenv.env['API_KEY'] ?? '';
 
 
