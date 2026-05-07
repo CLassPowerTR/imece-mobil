@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:imecehub/core/theme/design_tokens.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
-import 'package:imecehub/core/widgets/buildLoadingBar.dart';
+import 'package:imecehub/core/widgets/loading_overlay.dart';
 // import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
@@ -75,8 +76,17 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // Logo
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Image.asset(
+                            'assets/image/website.png',
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                         headText(context),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 28),
                   emailAdressContainer(
                     width,
                     context,
@@ -108,28 +118,45 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                   : fieldErrors?['password'].toString())
                             : null),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   checkContract(width, context, isCheckedContract, (value) {
                     setState(() {
                       isCheckedContract = value!;
                     });
                   }),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 12),
+                  // Hata banner — React tarzı
                   if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 100, // Maksimum yükseklik belirleyin
-                        ),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            errorMessage!,
-                            style: const TextStyle(color: Colors.red),
-                          ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: DesignTokens.error.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: DesignTokens.error.withOpacity(0.15),
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.cancel_rounded,
+                              size: 20, color: DesignTokens.error),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: DesignTokens.error,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  const SizedBox(height: 6),
                   NextButton(
                     context,
                     'Giriş Yap',
@@ -231,15 +258,13 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   orLine(width, context),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   signInWithGoogle(context, width),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 28),
                   signUpText(context, () {
-                    setState(() {
-                      Navigator.pushNamed(context, '/profil/signUp');
-                    });
+                    Navigator.pushNamed(context, '/profil/signUp');
                   }),
                       ],
                     ),
@@ -248,11 +273,8 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
               },
             ),
             if (isLoading)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0.3),
-                  child: Center(child: buildLoadingBar(context)),
-                ),
+              const Positioned.fill(
+                child: LoadingOverlay(message: 'Giriş yapılıyor...'),
               ),
           ],
         ),
