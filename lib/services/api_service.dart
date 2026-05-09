@@ -486,6 +486,96 @@ class ApiService {
     throw Exception(errorMsg);
   }
 
+  /// Şifremi unuttum - Şifre sıfırlama kodu gönder.
+  static Future<Map<String, dynamic>> fetchForgotPassword(String email) async {
+    final url = '${config.baseUrl}/users/rq_forgot_password/';
+
+    http.Response response;
+    try {
+      response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: json.encode({'email': email}),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+    } catch (e) {
+      debugPrint('fetchForgotPassword isteği başarısız: $e');
+      rethrow;
+    }
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (_) {}
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (jsonData != null && jsonData['status'] == 'success') {
+        return jsonData;
+      }
+      return jsonData ?? {'status': 'success'};
+    }
+
+    final errorMsg = jsonData?['message']?.toString() ?? 'Şifre sıfırlama kodu gönderilemedi.';
+    throw Exception(errorMsg);
+  }
+
+  /// Şifre Yenileme - Kodu doğrulayıp şifreyi değiştirir.
+  static Future<Map<String, dynamic>> fetchResetPassword({
+    required String email,
+    required String code,
+    required String password,
+  }) async {
+    final url = '${config.baseUrl}/users/rq_reset_password/';
+
+    http.Response response;
+    try {
+      response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: json.encode({
+          'email': email,
+          'code': code,
+          'password': password,
+        }),
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+        },
+      );
+    } catch (e) {
+      debugPrint('fetchResetPassword isteği başarısız: $e');
+      rethrow;
+    }
+
+    final bodyText = utf8.decode(response.bodyBytes);
+    Map<String, dynamic>? jsonData;
+    if (bodyText.isNotEmpty) {
+      try {
+        final decoded = json.decode(bodyText);
+        if (decoded is Map<String, dynamic>) {
+          jsonData = decoded;
+        }
+      } catch (_) {}
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (jsonData != null && jsonData['status'] == 'success') {
+        return jsonData;
+      }
+      return jsonData ?? {'status': 'success'};
+    }
+
+    final errorMsg = jsonData?['message']?.toString() ?? 'Şifre yenileme başarısız. Kod geçersiz olabilir.';
+    throw Exception(errorMsg);
+  }
+
   static Future fetchUserLogin(String email, String password) async {
     final response = await _deps.httpClient.post(
       Uri.parse(config.userRqLoginApiUrl),

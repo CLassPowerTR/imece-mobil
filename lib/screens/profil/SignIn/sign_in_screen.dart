@@ -19,7 +19,6 @@ import 'dart:convert';
 part 'sign_in_view_header.dart';
 part 'sign_in_widget_items.dart';
 part '../SignUp/sign_up_screen.dart';
-part '../changePassword/change_password_screen.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -118,6 +117,9 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                   ? (fieldErrors?['password'] as List).join(', ')
                                   : fieldErrors?['password'].toString())
                             : null),
+                    onForgotPassword: () {
+                      Navigator.pushNamed(context, '/profil/changePassword');
+                    },
                   ),
                   const SizedBox(height: 16),
                   checkContract(width, context, isCheckedContract, (value) {

@@ -7,6 +7,8 @@ import 'package:imecehub/screens/home/categories/categories_screen.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/screens/products/productsDetail/products_detail_screen.dart';
 import 'package:imecehub/screens/profil/SignIn/sign_in_screen.dart';
+import 'package:imecehub/screens/profil/changePassword/change_password_screen.dart';
+import 'package:imecehub/screens/profil/refreshPassword/refresh_password_screen.dart';
 import 'package:imecehub/screens/profil/emailVerification/email_verification_screen.dart';
 import 'package:imecehub/screens/profil/addPost/add_post_screen.dart';
 import 'package:imecehub/screens/profil/buyerProfil/buyer_profil_screen.dart';
@@ -57,6 +59,11 @@ final Map<String, WidgetBuilder> appRoutes = {
     return EmailVerificationScreen(email: args['email'] as String);
   },
   '/profil/changePassword': (context) => ChangePasswordScreen(),
+  '/profil/refreshPassword': (context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    return RefreshPasswordScreen(initialEmail: args?['email'] as String?);
+  },
   '/profil/sellerProfile': (context) {
     final args = ModalRoute.of(context)!.settings.arguments as List;
     return SellerProfilScreen(sellerProfil: args[0], myProfile: args[1]);

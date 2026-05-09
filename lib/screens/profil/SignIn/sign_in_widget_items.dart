@@ -164,6 +164,7 @@ Widget passwordContainer(
   VoidCallback? onTap,
   bool showSuffixIcon = false,
   String? errorText,
+  VoidCallback? onForgotPassword,
 }) {
   return SizedBox(
     width: width,
@@ -186,6 +187,19 @@ Widget passwordContainer(
                   letterSpacing: 2.5,
                 ),
               ),
+              if (onForgotPassword != null)
+                GestureDetector(
+                  onTap: onForgotPassword,
+                  child: const Text(
+                    'ŞİFREMİ UNUTTUM',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: DesignTokens.primary,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
