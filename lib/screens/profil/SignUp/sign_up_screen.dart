@@ -52,7 +52,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = double.infinity;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -60,136 +60,174 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // ── Logo ──
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Image.asset(
-                      'assets/image/website.png',
-                      height: 36,
-                      fit: BoxFit.contain,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 40,
                     ),
-                  ),
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              DesignTokens.primary.withOpacity(0.05),
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 24,
+                              offset: const Offset(0, 40),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // ── Logo ──
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Image.asset(
+                                'assets/image/website.png',
+                                height: 36,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
 
-                  // ── Başlık ──
-                  _buildHeader(),
-                  const SizedBox(height: 24),
+                            // ── Başlık ──
+                            _buildHeader(),
+                            const SizedBox(height: 24),
 
-                  // ── Kullanıcı Adı ──
-                  usernameContainer(
-                    width,
-                    context,
-                    controller: usernameController,
-                    errorText: errorMessage?['username'] != null
-                        ? (errorMessage?['username'] is List
-                            ? (errorMessage?['username'] as List).join(', ')
-                            : errorMessage?['username'].toString())
-                        : null,
-                  ),
-                  const SizedBox(height: 14),
+                            // ── Kullanıcı Adı ──
+                            usernameContainer(
+                              width,
+                              context,
+                              controller: usernameController,
+                              errorText: errorMessage?['username'] != null
+                                  ? (errorMessage?['username'] is List
+                                      ? (errorMessage?['username'] as List).join(', ')
+                                      : errorMessage?['username'].toString())
+                                  : null,
+                            ),
+                            const SizedBox(height: 14),
 
-                  // ── E-posta ──
-                  emailAdressContainer(
-                    width,
-                    context,
-                    controller: emailController,
-                    errorText: emailValidationError ??
-                        (errorMessage?['email'] != null
-                            ? (errorMessage?['email'] is List
-                                ? (errorMessage?['email'] as List).join(', ')
-                                : errorMessage?['email'].toString())
-                            : null),
-                  ),
-                  const SizedBox(height: 14),
+                            // ── E-posta ──
+                            emailAdressContainer(
+                              width,
+                              context,
+                              controller: emailController,
+                              errorText: emailValidationError ??
+                                  (errorMessage?['email'] != null
+                                      ? (errorMessage?['email'] is List
+                                          ? (errorMessage?['email'] as List).join(', ')
+                                          : errorMessage?['email'].toString())
+                                      : null),
+                            ),
+                            const SizedBox(height: 14),
 
-                  // ── Şifre & Tekrar (yan yana) ──
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Şifre
-                      Expanded(
-                        child: _buildCompactPasswordField(
-                          label: 'ŞİFRE',
-                          controller: passwordController,
-                          obscure: showPassword,
-                          onToggle: () =>
-                              setState(() => showPassword = !showPassword),
-                          errorText: errorMessage?['password'] != null
-                              ? (errorMessage?['password'] is List
-                                  ? (errorMessage?['password'] as List)
-                                      .join(', ')
-                                  : errorMessage?['password'].toString())
-                              : null,
+                            // ── Şifre & Tekrar (yan yana) ──
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Şifre
+                                Expanded(
+                                  child: _buildCompactPasswordField(
+                                    label: 'ŞİFRE',
+                                    controller: passwordController,
+                                    obscure: showPassword,
+                                    onToggle: () =>
+                                        setState(() => showPassword = !showPassword),
+                                    errorText: errorMessage?['password'] != null
+                                        ? (errorMessage?['password'] is List
+                                            ? (errorMessage?['password'] as List)
+                                                .join(', ')
+                                            : errorMessage?['password'].toString())
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Tekrar
+                                Expanded(
+                                  child: _buildCompactPasswordField(
+                                    label: 'TEKRAR',
+                                    controller: confirmPasswordController,
+                                    obscure: showConfirmPassword,
+                                    onToggle: () => setState(
+                                        () => showConfirmPassword = !showConfirmPassword),
+                                    errorText: null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            // ── Şifre Kuralları ──
+                            if (passwordController.text.isNotEmpty)
+                              _buildPasswordRules(),
+                            const SizedBox(height: 12),
+
+                            // ── Sözleşme ──
+                            checkContract(width, context, isCheckedContract, (value) {
+                              setState(() {
+                                isCheckedContract = value!;
+                              });
+                            }),
+                            const SizedBox(height: 10),
+
+                            // ── Hata Banner ──
+                            if (errorMessage != null &&
+                                errorMessage!.values.any((v) => v != null))
+                              _buildErrorBanner(
+                                errorMessage!.values
+                                    .where((v) => v != null)
+                                    .map((v) =>
+                                        v is List ? v.join(', ') : v.toString())
+                                    .join('\n'),
+                              ),
+                            const SizedBox(height: 8),
+
+                            // ── Kayıt Ol Butonu ──
+                            _buildRegisterButton(context),
+                            const SizedBox(height: 16),
+
+                            // ── Veya ──
+                            orLine(width, context, containerHeight: 24),
+                            const SizedBox(height: 16),
+
+                            // ── Google ile Kayıt ──
+                            signInWithGoogle(context, width, containerHeight: 50),
+                            const SizedBox(height: 24),
+
+                            // ── Alt bağlantılar ──
+                            signUpText(
+                              context,
+                              () => Navigator.pushNamed(context, '/profil/signIn'),
+                              textFirst: 'Zaten bir hesabınız var mı?',
+                              textSecond: 'Giriş Yapın',
+                            ),
+                            const SizedBox(height: 10),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      // Tekrar
-                      Expanded(
-                        child: _buildCompactPasswordField(
-                          label: 'TEKRAR',
-                          controller: confirmPasswordController,
-                          obscure: showConfirmPassword,
-                          onToggle: () => setState(
-                              () => showConfirmPassword = !showConfirmPassword),
-                          errorText: null,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // ── Şifre Kuralları ──
-                  if (passwordController.text.isNotEmpty)
-                    _buildPasswordRules(),
-                  const SizedBox(height: 12),
-
-                  // ── Sözleşme ──
-                  checkContract(width, context, isCheckedContract, (value) {
-                    setState(() {
-                      isCheckedContract = value!;
-                    });
-                  }),
-                  const SizedBox(height: 10),
-
-                  // ── Hata Banner ──
-                  if (errorMessage != null &&
-                      errorMessage!.values.any((v) => v != null))
-                    _buildErrorBanner(
-                      errorMessage!.values
-                          .where((v) => v != null)
-                          .map((v) =>
-                              v is List ? v.join(', ') : v.toString())
-                          .join('\n'),
                     ),
-                  const SizedBox(height: 8),
-
-                  // ── Kayıt Ol Butonu ──
-                  _buildRegisterButton(context),
-                  const SizedBox(height: 16),
-
-                  // ── Veya ──
-                  orLine(width, context, containerHeight: 24),
-                  const SizedBox(height: 16),
-
-                  // ── Google ile Kayıt ──
-                  signInWithGoogle(context, width, containerHeight: 50),
-                  const SizedBox(height: 24),
-
-                  // ── Alt bağlantılar ──
-                  signUpText(
-                    context,
-                    () => Navigator.pushNamed(context, '/profil/signIn'),
-                    textFirst: 'Zaten bir hesabınız var mı?',
-                    textSecond: 'Giriş Yapın',
                   ),
-                  const SizedBox(height: 24),
-                ],
-              ),
+                );
+              },
             ),
 
             // ── Loading Overlay ──

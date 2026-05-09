@@ -141,7 +141,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = double.infinity;
     return Scaffold(
       appBar: SignInAppBar(context),
       body: SafeArea(
@@ -155,167 +155,196 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          child: Image.asset(
-                            'assets/image/website.png',
-                            height: 40,
-                            fit: BoxFit.contain,
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              DesignTokens.primary.withOpacity(0.05),
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                            ],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 24,
+                              offset: const Offset(0, 40),
+                            ),
+                          ],
                         ),
-                        
-                        if (isSuccess) ...[
-                          animatedSuccessView(context),
-                        ] else ...[
-                          refreshPasswordHeadText(context),
-                          const SizedBox(height: 28),
-                          
-                          // Sadece E-Posta Gösterimi veya Girişi
-                          emailAdressContainer(
-                            width,
-                            context,
-                            controller: emailController,
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // OTP Giriş Alanı
-                          otpInputBoxes(
-                            code: code,
-                            context: context,
-                            onChanged: (val) {
-                              setState(() {
-                                code = val.replaceAll(RegExp(r'\D'), '');
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Yeni Şifre
-                          passwordContainer(
-                            width,
-                            context,
-                            containerText: 'YENİ ŞİFRE',
-                            hintText: '••••••••',
-                            textFieldController: newPasswordController,
-                            obscureText: !showPassword,
-                            showSuffixIcon: true,
-                            onTap: () {
-                              setState(() {
-                                showPassword = !showPassword;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Yeni Şifre Tekrar
-                          passwordContainer(
-                            width,
-                            context,
-                            containerText: 'YENİ ŞİFRE (TEKRAR)',
-                            hintText: '••••••••',
-                            textFieldController: confirmPasswordController,
-                            obscureText: !showConfirmPassword,
-                            showSuffixIcon: true,
-                            onTap: () {
-                              setState(() {
-                                showConfirmPassword = !showConfirmPassword;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // Hata banner
-                          if (errorMessage != null)
-                            Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: DesignTokens.error.withOpacity(0.06),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: DesignTokens.error.withOpacity(0.15),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.cancel_rounded,
-                                      size: 20, color: DesignTokens.error),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      errorMessage!,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: DesignTokens.error,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Logo
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 24),
+                              child: Image.asset(
+                                'assets/image/website.png',
+                                height: 40,
+                                fit: BoxFit.contain,
                               ),
                             ),
-                          
-                          NextButton(
-                            context,
-                            'ŞİFREYİ GÜNCELLE',
-                            true,
-                            onPressed: _handleSubmit,
-                          ),
-                          const SizedBox(height: 24),
-                          
-                          // Hızlı Destek Butonu / Tekrar Gönder
-                          Column(
-                            children: [
-                         
-                              GestureDetector(
-                                onTap: () {
-                                  // Kod talebini yenile diyerek bir önceki sayfaya dönebilir
-                                  Navigator.pop(context);
+                            
+                            if (isSuccess) ...[
+                              animatedSuccessView(context),
+                            ] else ...[
+                              refreshPasswordHeadText(context),
+                              const SizedBox(height: 28),
+                              
+                              // Sadece E-Posta Gösterimi veya Girişi
+                              emailAdressContainer(
+                                width,
+                                context,
+                                controller: emailController,
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // OTP Giriş Alanı
+                              otpInputBoxes(
+                                code: code,
+                                context: context,
+                                onChanged: (val) {
+                                  setState(() {
+                                    code = val.replaceAll(RegExp(r'\D'), '');
+                                  });
                                 },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.arrow_back_rounded, size: 16, color: DesignTokens.textTertiary),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'KOD TALEBİNİ YENİLE',
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Yeni Şifre
+                              passwordContainer(
+                                width,
+                                context,
+                                containerText: 'YENİ ŞİFRE',
+                                hintText: '••••••••',
+                                textFieldController: newPasswordController,
+                                obscureText: !showPassword,
+                                showSuffixIcon: true,
+                                onTap: () {
+                                  setState(() {
+                                    showPassword = !showPassword;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Yeni Şifre Tekrar
+                              passwordContainer(
+                                width,
+                                context,
+                                containerText: 'YENİ ŞİFRE (TEKRAR)',
+                                hintText: '••••••••',
+                                textFieldController: confirmPasswordController,
+                                obscureText: !showConfirmPassword,
+                                showSuffixIcon: true,
+                                onTap: () {
+                                  setState(() {
+                                    showConfirmPassword = !showConfirmPassword;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // Hata banner
+                              if (errorMessage != null)
+                                Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: DesignTokens.error.withOpacity(0.06),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: DesignTokens.error.withOpacity(0.15),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.cancel_rounded,
+                                          size: 20, color: DesignTokens.error),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          errorMessage!,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            color: DesignTokens.error,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              
+                              NextButton(
+                                context,
+                                'ŞİFREYİ GÜNCELLE',
+                                true,
+                                onPressed: _handleSubmit,
+                              ),
+                              const SizedBox(height: 24),
+                              
+                              // Hızlı Destek Butonu / Tekrar Gönder
+                              Column(
+                                children: [
+                             
+                                  GestureDetector(
+                                    onTap: () {
+                                      // Kod talebini yenile diyerek bir önceki sayfaya dönebilir
+                                      Navigator.pop(context);
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.arrow_back_rounded, size: 16, color: DesignTokens.textTertiary),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'KOD TALEBİNİ YENİLE',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w900,
+                                            color: DesignTokens.textTertiary,
+                                            letterSpacing: 2.0,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/profil/support');
+                                    },
+                                    child: Text(
+                                      'DESTEK HATTINA BAĞLAN',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w900,
                                         color: DesignTokens.textTertiary,
                                         letterSpacing: 2.0,
+                                        decoration: TextDecoration.underline,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/profil/support');
-                                },
-                                child: Text(
-                                  'DESTEK HATTINA BAĞLAN',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                    color: DesignTokens.textTertiary,
-                                    letterSpacing: 2.0,
-                                    decoration: TextDecoration.underline,
                                   ),
-                                ),
+                                ],
                               ),
                             ],
-                          ),
-                        ],
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 );

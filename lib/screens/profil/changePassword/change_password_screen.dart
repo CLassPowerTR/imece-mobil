@@ -68,7 +68,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = double.infinity;
     return Scaffold(
       appBar: SignInAppBar(context),
       body: SafeArea(
@@ -82,79 +82,108 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          child: Image.asset(
-                            'assets/image/website.png',
-                            height: 40,
-                            fit: BoxFit.contain,
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              DesignTokens.primary.withOpacity(0.05),
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                              DesignTokens.surfaceLight,
+                            ],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 24,
+                              offset: const Offset(0, 40),
+                            ),
+                          ],
                         ),
-                        
-                        if (isSuccess) ...[
-                          successView(context),
-                        ] else ...[
-                          forgotPasswordHeadText(context),
-                          const SizedBox(height: 28),
-                          
-                          emailAdressContainer(
-                            width,
-                            context,
-                            controller: emailController,
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // Hata banner
-                          if (errorMessage != null)
-                            Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: DesignTokens.error.withOpacity(0.06),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: DesignTokens.error.withOpacity(0.15),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.cancel_rounded,
-                                      size: 20, color: DesignTokens.error),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      errorMessage!,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: DesignTokens.error,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Logo
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 24),
+                              child: Image.asset(
+                                'assets/image/website.png',
+                                height: 40,
+                                fit: BoxFit.contain,
                               ),
                             ),
-                          
-                          NextButton(
-                            context,
-                            'Sıfırlama Kodu Gönder',  
-                            true,
-                            onPressed: _handleSubmit,
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          backToLoginButton(context, () {
-                            Navigator.pop(context);
-                          }),
-                        ],
-                      ],
+                            
+                            if (isSuccess) ...[
+                              successView(context),
+                            ] else ...[
+                              forgotPasswordHeadText(context),
+                              const SizedBox(height: 28),
+                              
+                              emailAdressContainer(
+                                width,
+                                context,
+                                controller: emailController,
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // Hata banner
+                              if (errorMessage != null)
+                                Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: DesignTokens.error.withOpacity(0.06),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: DesignTokens.error.withOpacity(0.15),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.cancel_rounded,
+                                          size: 20, color: DesignTokens.error),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          errorMessage!,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            color: DesignTokens.error,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              
+                              NextButton(
+                                context,
+                                'Sıfırlama Kodu Gönder',  
+                                true,
+                                onPressed: _handleSubmit,
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              backToLoginButton(context, () {
+                                Navigator.pop(context);
+                              }),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 );
