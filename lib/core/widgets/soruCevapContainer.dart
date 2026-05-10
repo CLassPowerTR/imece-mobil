@@ -1,10 +1,15 @@
+import 'package:imecehub/core/constants/app_textSizes.dart';
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
-SizedBox soruCevapContainer(BuildContext context, HomeStyle themeData,
+
+SizedBox soruCevapContainer(BuildContext context,
     double width, Map<dynamic, dynamic> soruCevap) {
   double profileSize = 25;
   return SizedBox(
@@ -34,7 +39,7 @@ SizedBox soruCevapContainer(BuildContext context, HomeStyle themeData,
                       CircleAvatar(),
                       customText(soruCevap['soruProfilAdi'], context,
                           weight: FontWeight.w600,
-                          size: themeData.bodyMedium.fontSize),
+                          size: AppTextSizes.bodyMedium(context)),
                     ],
                   ),
                 ),
@@ -44,11 +49,11 @@ SizedBox soruCevapContainer(BuildContext context, HomeStyle themeData,
                 maxLines: 10,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.start,
-                size: themeData.bodyMedium.fontSize,
-                color: themeData.primary),
+                size: AppTextSizes.bodyMedium(context),
+                color: AppColors.primary(context)),
             Expanded(
               child: container(context,
-                  color: themeData.surfaceContainer,
+                  color: AppColors.surfaceContainer(context),
                   padding: EdgeInsets.all(8),
                   borderRadius: BorderRadius.circular(8),
                   child: Column(
@@ -69,11 +74,11 @@ SizedBox soruCevapContainer(BuildContext context, HomeStyle themeData,
                           ),
                           customText(soruCevap['cevapVeren'], context,
                               weight: FontWeight.w500,
-                              size: themeData.bodySmall.fontSize),
+                              size: AppTextSizes.bodySmall(context)),
                         ],
                       ),
                       customText(soruCevap['cevap'], context,
-                          size: themeData.bodySmall.fontSize,
+                          size: AppTextSizes.bodySmall(context),
                           maxLines: 10,
                           weight: FontWeight.w400)
                     ],

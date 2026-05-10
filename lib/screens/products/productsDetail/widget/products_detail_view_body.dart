@@ -1,3 +1,4 @@
+
 part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBody extends ConsumerStatefulWidget {
@@ -89,7 +90,6 @@ class _ProductsDetailViewBodyState
       data: (product) {
         double width = MediaQuery.of(context).size.width;
         final isSmallScreen = width < 360;
-        final themeData = HomeStyle(context: context);
         final currentUser = ref.watch(userProvider);
         final isLoggedIn = currentUser != null;
 
@@ -100,24 +100,23 @@ class _ProductsDetailViewBodyState
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _urunFoto(width, themeData, isLoggedIn, currentUser, product),
+              _urunFoto(width, isLoggedIn, currentUser, product),
               SizedBox(height: isSmallScreen ? 10 : 15),
-              _urunBilgi(themeData, product, isSmallScreen),
+              _urunBilgi(product, isSmallScreen),
               SizedBox(height: isSmallScreen ? 10 : 15),
-              _urunStokBilgi(width, themeData, product, isSmallScreen),
+              _urunStokBilgi(width, product, isSmallScreen),
               SizedBox(height: isSmallScreen ? 10 : 15),
-              _urunSoruVeCevaplar(context, themeData, isSmallScreen),
+              _urunSoruVeCevaplar(context, isSmallScreen),
               Divider(),
-              _urunSaticiBilgli(themeData, width, product, isSmallScreen),
+              _urunSaticiBilgli(width, product, isSmallScreen),
               _urunAciklama(
                 context,
-                themeData,
                 width,
                 product.aciklama ?? '',
                 isSmallScreen,
               ),
-              _urunYorumlari(context, width, themeData, isSmallScreen),
-              _urunSoruCevap(context, themeData, width, isSmallScreen),
+              _urunYorumlari(context, width, isSmallScreen),
+              _urunSoruCevap(context, width, isSmallScreen),
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isSmallScreen ? 12 : 15,
@@ -144,7 +143,6 @@ class _ProductsDetailViewBodyState
 
   Container _urunSoruCevap(
     BuildContext context,
-    HomeStyle themeData,
     double width,
     bool isSmallScreen,
   ) {
@@ -154,7 +152,7 @@ class _ProductsDetailViewBodyState
         left: isSmallScreen ? 12 : 20,
         top: isSmallScreen ? 8 : 10,
       ),
-      color: themeData.surfaceContainer,
+      color: AppColors.surface(context),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,8 +163,8 @@ class _ProductsDetailViewBodyState
             padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 10),
             context,
             size: isSmallScreen
-                ? themeData.bodyMedium.fontSize
-                : themeData.bodyLarge.fontSize,
+                ? AppTextStyle.bodyMedium(context).fontSize
+                : AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w800,
           ),
           Divider(),
@@ -176,7 +174,7 @@ class _ProductsDetailViewBodyState
               scrollDirection: Axis.horizontal,
               itemCount: 4,
               itemBuilder: (context, index) {
-                return soruCevapContainer(context, themeData, width, {
+                return soruCevapContainer(context, width, {
                   'soru': 'Soru ${index + 1}',
                   'cevap': 'Cevap ${index + 1}',
                   'cevapVeren': 'Cevap Veren Profil Adı',
@@ -193,7 +191,6 @@ class _ProductsDetailViewBodyState
   Widget _urunYorumlari(
     BuildContext context,
     double width,
-    HomeStyle themeData,
     bool isSmallScreen,
   ) {
     return FutureBuilder<UrunYorumlarResponse>(
@@ -236,7 +233,7 @@ class _ProductsDetailViewBodyState
         return container(
           context,
           width: width,
-          color: themeData.surfaceContainer,
+          color: AppColors.surface(context),
           padding: EdgeInsets.only(
             left: isSmallScreen ? 12 : 20,
             top: isSmallScreen ? 8 : 10,
@@ -251,8 +248,8 @@ class _ProductsDetailViewBodyState
                 context,
                 padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 10),
                 size: isSmallScreen
-                    ? themeData.bodyMedium.fontSize
-                    : themeData.bodyLarge.fontSize,
+                    ? AppTextStyle.bodyMedium(context).fontSize
+                    : AppTextStyle.bodyLarge(context).fontSize,
                 weight: FontWeight.w800,
               ),
               Divider(),
@@ -277,7 +274,7 @@ class _ProductsDetailViewBodyState
                       'resimler': yorum.resimler,
                       'yorum': yorum.yorum,
                     };
-                    return yorumContainer(context, themeData, width, yorumMap);
+                    return yorumContainer(context, width, yorumMap);
                   },
                 ),
               ),
@@ -290,7 +287,6 @@ class _ProductsDetailViewBodyState
 
   AnimatedContainer _urunAciklama(
     BuildContext context,
-    HomeStyle themeData,
     double width,
     String aciklama,
     bool isSmallScreen,
@@ -303,20 +299,20 @@ class _ProductsDetailViewBodyState
         horizontal: isSmallScreen ? 12 : 15,
         vertical: isSmallScreen ? 8 : 10,
       ),
-      color: themeData.surfaceContainer,
+      color: AppColors.surface(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           richText(
             fontWeight: FontWeight.w300,
             fontSize: isSmallScreen
-                ? themeData.bodySmall.fontSize
-                : themeData.bodyMedium.fontSize,
+                ? AppTextStyle.bodySmall(context).fontSize
+                : AppTextStyle.bodyMedium(context).fontSize,
             textAlign: TextAlign.left,
             context,
             maxLines: biggerContainer == false ? 4 : 999,
             overflow: TextOverflow.ellipsis,
-            color: themeData.primary,
+            color: AppColors.primary(context),
             children: [
               TextSpan(
                 text: 'Açıklama\n\n',
@@ -340,7 +336,7 @@ class _ProductsDetailViewBodyState
                   child: customText(
                     biggerContainer == false ? 'Tüm Açıklamayı oku' : 'Kısalt',
                     context,
-                    color: themeData.secondary,
+                    color: AppColors.secondary(context),
                     weight: FontWeight.bold,
                     size: isSmallScreen ? 13 : null,
                   ),
@@ -353,7 +349,6 @@ class _ProductsDetailViewBodyState
   }
 
   FutureBuilder<User> _urunSaticiBilgli(
-    HomeStyle themeData,
     double width,
     Product product,
     bool isSmallScreen,
@@ -402,7 +397,7 @@ class _ProductsDetailViewBodyState
                           customText(
                             'Satıcı:',
                             context,
-                            color: themeData.primary.withOpacity(0.3),
+                            color: AppColors.primary(context).withOpacity(0.3),
                             size: isSmallScreen
                                 ? 12
                                 : AppTextSizes.bodySmall(context)?.toDouble(),
@@ -430,7 +425,7 @@ class _ProductsDetailViewBodyState
                             ),
                             alignment: Alignment.center,
                             borderRadius: BorderRadius.circular(4),
-                            color: themeData.secondary,
+                            color: AppColors.secondary(context),
                             width: isSmallScreen ? 30 : 35,
                             height: isSmallScreen ? 18 : 20,
                             isBoxShadow: false,
@@ -439,7 +434,7 @@ class _ProductsDetailViewBodyState
                                       .toString() ??
                                   '0.0',
                               context,
-                              color: themeData.onSecondary,
+                              color: AppColors.onSecondary(context),
                               weight: FontWeight.bold,
                               size: isSmallScreen ? 10 : null,
                             ),
@@ -539,13 +534,13 @@ class _ProductsDetailViewBodyState
                             ? 'Favorilere ekle'
                             : 'Satıcıyı favorilere ekle',
                         textAlignment: Alignment.center,
-                        buttonColor: themeData.onSecondary,
-                        titleColor: themeData.primary,
+                        buttonColor: AppColors.secondary(context),
+                        titleColor: AppColors.primary(context),
                         elevation: 0,
                         border: true,
                         fontSize: isSmallScreen
                             ? 11
-                            : themeData.bodyMedium.fontSize,
+                            : AppTextStyle.bodyMedium(context).fontSize,
                         icon: Image.network(
                           fit: BoxFit.cover,
                           width: isSmallScreen ? 12 : 15,
@@ -571,7 +566,6 @@ class _ProductsDetailViewBodyState
 
   GestureDetector _urunSoruVeCevaplar(
     BuildContext context,
-    HomeStyle themeData,
     bool isSmallScreen,
   ) {
     return GestureDetector(
@@ -589,7 +583,7 @@ class _ProductsDetailViewBodyState
           children: [
             Icon(
               Icons.message,
-              color: themeData.secondary,
+              color: AppColors.secondary(context),
               size: isSmallScreen ? 18 : 24,
             ),
             SizedBox(width: isSmallScreen ? 4 : 8),
@@ -609,7 +603,6 @@ class _ProductsDetailViewBodyState
 
   Widget _urunStokBilgi(
     double width,
-    HomeStyle themeData,
     Product product,
     bool isSmallScreen,
   ) {
@@ -631,8 +624,8 @@ class _ProductsDetailViewBodyState
             child: RichText(
               text: TextSpan(
                 style: TextStyle(
-                  color: themeData.primary,
-                  fontSize: isSmallScreen ? 11 : themeData.bodyMedium.fontSize,
+                  color: AppColors.primary(context),
+                  fontSize: isSmallScreen ? 11 : AppTextStyle.bodyMedium(context).fontSize,
                 ),
                 children: [
                   TextSpan(
@@ -655,7 +648,7 @@ class _ProductsDetailViewBodyState
     );
   }
 
-  Padding _urunBilgi(HomeStyle themeData, Product product, bool isSmallScreen) {
+  Padding _urunBilgi(Product product, bool isSmallScreen) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 15),
       child: RichText(
@@ -663,10 +656,10 @@ class _ProductsDetailViewBodyState
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           style: TextStyle(
-            color: themeData.primary,
+            color: AppColors.primary(context),
             fontSize: isSmallScreen
-                ? themeData.bodyMedium.fontSize
-                : themeData.bodyLarge.fontSize,
+                ? AppTextStyle.bodyMedium(context).fontSize
+                : AppTextStyle.bodyLarge(context).fontSize,
             fontWeight: FontWeight.bold,
           ),
           children: [
@@ -684,7 +677,6 @@ class _ProductsDetailViewBodyState
 
   Stack _urunFoto(
     double width,
-    HomeStyle themeData,
     bool isLoggedIn,
     User? currentUser,
     Product product,
@@ -700,7 +692,7 @@ class _ProductsDetailViewBodyState
             height: imageHeight,
             width: width,
             decoration: BoxDecoration(
-              border: Border.all(color: themeData.outline.withOpacity(0.5)),
+              border: Border.all(color: AppColors.outline(context).withOpacity(0.5)),
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image: NetworkImage(
@@ -753,7 +745,7 @@ class _ProductsDetailViewBodyState
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: themeData.surfaceContainer,
+                        color: AppColors.surfaceContainer(context),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: favoriIconButton(context, () async {

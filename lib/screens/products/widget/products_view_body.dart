@@ -1,3 +1,4 @@
+
 part of '../products_screen.dart';
 
 class ProductsScreenBodyView extends ConsumerStatefulWidget {
@@ -176,7 +177,6 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       await favoritesFuture;
     });
 
-    final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final productsAsync = ref.watch(productsProvider(widget.categoryId));
@@ -184,7 +184,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       future: _futureFavorites,
       builder: (context, snapshot) {
         return RefreshIndicator(
-          color: themeData.secondary,
+          color: AppColors.secondary(context),
           backgroundColor: Colors.white,
           onRefresh: _refreshProducts,
           child: SingleChildScrollView(
@@ -406,7 +406,7 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
       alignment: Alignment.topCenter,
       transformAlignment: Alignment.topCenter,
       decoration: BoxDecoration(
-        color: HomeStyle(context: context).surface,
+        color: AppColors.surface(context),
         boxShadow: [boxShadow(context)],
       ),
       height: height * 0.07,

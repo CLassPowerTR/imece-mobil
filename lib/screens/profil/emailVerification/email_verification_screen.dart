@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+
 import 'package:imecehub/core/widgets/loading_overlay.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/providers/auth_provider.dart';
@@ -140,8 +141,8 @@ class _EmailVerificationScreenState
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: DesignTokens.textSecondary),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -150,13 +151,13 @@ class _EmailVerificationScreenState
           children: [
             SingleChildScrollView(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 28, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // ── Logo ──
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 28),
+                    padding: EdgeInsets.only(bottom: 28),
                     child: Image.asset(
                       'assets/image/website.png',
                       height: 40,
@@ -169,56 +170,56 @@ class _EmailVerificationScreenState
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: DesignTokens.primary.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(28),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.verified_user_rounded,
                       size: 40,
-                      color: DesignTokens.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // ── Başlık ──
                   RichText(
                     textAlign: TextAlign.center,
-                    text: const TextSpan(
+                    text: TextSpan(
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: DesignTokens.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: -0.3,
                       ),
                       children: [
                         TextSpan(text: 'E-POSTA '),
                         TextSpan(
                           text: 'DOĞRULAMA',
-                          style: TextStyle(color: DesignTokens.primary),
+                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
 
                   // ── Açıklama ──
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       widget.email.isNotEmpty
                           ? '${widget.email} adresine gönderilen 6 haneli kodu girin.'
                           : 'Lütfen e-postanıza gönderilen 6 haneli kodu girin.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: DesignTokens.textTertiary,
+                        color: Theme.of(context).colorScheme.outline,
                         letterSpacing: 1.5,
                         height: 1.6,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   // ── Kod Girişi ──
                   Container(
@@ -228,9 +229,9 @@ class _EmailVerificationScreenState
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
                         color: errorMessage != null
-                            ? DesignTokens.error
+                            ? Theme.of(context).colorScheme.error
                             : isSuccess
-                                ? DesignTokens.success
+                                ? const Color(0xFF10B981)
                                 : const Color(0xFFF1F5F9),
                         width: 2,
                       ),
@@ -251,10 +252,10 @@ class _EmailVerificationScreenState
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: DesignTokens.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: 16,
                       ),
                       decoration: InputDecoration(
@@ -263,42 +264,42 @@ class _EmailVerificationScreenState
                         hintStyle: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: DesignTokens.textTertiary.withOpacity(0.2),
+                          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                           letterSpacing: 16,
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                             horizontal: 24, vertical: 18),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // ── Hata Banner ──
                   if (errorMessage != null)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: DesignTokens.error.withOpacity(0.06),
+                        color: Theme.of(context).colorScheme.error.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: DesignTokens.error.withOpacity(0.15),
+                          color: Theme.of(context).colorScheme.error.withOpacity(0.15),
                         ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.cancel_rounded,
-                              size: 20, color: DesignTokens.error),
-                          const SizedBox(width: 12),
+                          Icon(Icons.cancel_rounded,
+                              size: 20, color: Theme.of(context).colorScheme.error),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               errorMessage!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: DesignTokens.error,
+                                color: Theme.of(context).colorScheme.error,
                                 letterSpacing: 0.8,
                               ),
                               textAlign: TextAlign.center,
@@ -312,19 +313,19 @@ class _EmailVerificationScreenState
                   if (isSuccess)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: DesignTokens.success.withOpacity(0.06),
+                        color: const Color(0xFF10B981).withOpacity(0.06),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: DesignTokens.success.withOpacity(0.15),
+                          color: const Color(0xFF10B981).withOpacity(0.15),
                         ),
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.check_circle_rounded,
-                              size: 20, color: DesignTokens.success),
+                              size: 20, color: const Color(0xFF10B981)),
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -332,7 +333,7 @@ class _EmailVerificationScreenState
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: DesignTokens.success,
+                                color: const Color(0xFF10B981),
                                 letterSpacing: 0.8,
                               ),
                               textAlign: TextAlign.center,
@@ -341,7 +342,7 @@ class _EmailVerificationScreenState
                         ],
                       ),
                     ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // ── Doğrula Butonu ──
                   SizedBox(
@@ -349,15 +350,15 @@ class _EmailVerificationScreenState
                     height: 60,
                     child: Material(
                       color: (!isSuccess && _codeController.text.length == 6)
-                          ? DesignTokens.textPrimary
-                          : DesignTokens.textTertiary.withOpacity(0.3),
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context).colorScheme.outline.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(16),
                       elevation: (!isSuccess &&
                               _codeController.text.length == 6)
                           ? 8
                           : 0,
                       shadowColor:
-                          DesignTokens.textPrimary.withOpacity(0.25),
+                          Theme.of(context).colorScheme.onSurface.withOpacity(0.25),
                       child: InkWell(
                         onTap: (isLoading ||
                                 isSuccess ||
@@ -373,7 +374,7 @@ class _EmailVerificationScreenState
                                 isLoading
                                     ? 'KONTROL EDİLİYOR...'
                                     : 'HESABI DOĞRULA',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
@@ -381,8 +382,8 @@ class _EmailVerificationScreenState
                                 ),
                               ),
                               if (!isLoading && !isSuccess && isButtonEnabled) ...[
-                                const SizedBox(width: 12),
-                                const Icon(Icons.arrow_forward_rounded,
+                                SizedBox(width: 12),
+                                Icon(Icons.arrow_forward_rounded,
                                     color: Colors.white, size: 20),
                               ],
                             ],
@@ -391,7 +392,7 @@ class _EmailVerificationScreenState
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // ── Kodu Tekrar Gönder ──
                   GestureDetector(
@@ -403,40 +404,40 @@ class _EmailVerificationScreenState
                           Icons.refresh_rounded,
                           size: 14,
                           color: isLoading
-                              ? DesignTokens.textTertiary.withOpacity(0.5)
-                              : DesignTokens.textTertiary,
+                              ? Theme.of(context).colorScheme.outline.withOpacity(0.5)
+                              : Theme.of(context).colorScheme.outline,
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(
                           'KODU TEKRAR GÖNDER',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w900,
                             color: isLoading
-                                ? DesignTokens.textTertiary.withOpacity(0.5)
-                                : DesignTokens.textTertiary,
+                                ? Theme.of(context).colorScheme.outline.withOpacity(0.5)
+                                : Theme.of(context).colorScheme.outline,
                             letterSpacing: 1.5,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 36),
+                  SizedBox(height: 36),
 
                   // ── Alt bağlantı ──
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                       Text(
                         'Farklı bir hesapla mı giriş yapacaksınız?',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
-                          color: DesignTokens.textTertiary,
+                          color: AppColors.outline(context),
                           letterSpacing: 1.0,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       GestureDetector(
                         onTap: () {
                           Navigator.pushNamedAndRemoveUntil(
@@ -446,20 +447,20 @@ class _EmailVerificationScreenState
                           );
                         },
                         child: Container(
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: DesignTokens.primary,
+                                color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'GERİ DÖN',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
-                              color: DesignTokens.primary,
+                              color: AppColors.primary(context),
                               letterSpacing: 1.5,
                             ),
                           ),
@@ -467,7 +468,7 @@ class _EmailVerificationScreenState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
             ),

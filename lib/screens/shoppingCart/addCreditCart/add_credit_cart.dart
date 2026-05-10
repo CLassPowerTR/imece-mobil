@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/creditCart.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/credit_card_model.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 part 'widget/add_credit_cart_view_body.dart';
 part 'widget/add_credit_cart_view_header.dart';

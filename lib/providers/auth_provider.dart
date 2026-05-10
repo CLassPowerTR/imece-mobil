@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/cart_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
@@ -111,6 +112,59 @@ class UserNotifier extends Notifier<User?> {
     await fetchUserMe();
 
     // Login sonrası online yap
+    await _setOnlineAfterAuth();
+  }
+
+  static bool _googleInitialized = false;
+
+  /// Google ile giriş
+  Future<void> googleLogin() async {
+    try {
+      // Google Sign-In'i başlat — tam olarak 1 kez çağrılmalı (v7.x kuralı)
+      if (!_googleInitialized) {
+        await GoogleSignIn.instance.initialize();
+        _googleInitialized = true;
+      }
+
+      // Önceki oturumu temizle (hesap seçimi her zaman gösterilsin)
+      await GoogleSignIn.instance.signOut();
+
+      // Kimlik doğrulama (v7.x — authenticate hata fırlatır, null dönmez)
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      // idToken, account.authentication üzerinden alınır (v7.x API)
+      final idToken = googleUser.authentication.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception('Google kimlik doğrulama başarısız. Token alınamadı.');
+      }
+
+      // Backend'e idToken gönder
+      await ApiService.fetchGoogleLogin(idToken);
+
+      // Kullanıcı bilgilerini çek
+      await fetchUserMe();
+
+      // Login sonrası online yap
+      await _setOnlineAfterAuth();
+
+      debugPrint('Auth: Google ile giriş başarılı (${googleUser.email})');
+    } on GoogleSignInException catch (e) {
+      // Kullanıcı iptal ettiyse sessizce geç
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        throw Exception('Google ile giriş iptal edildi.');
+      }
+      debugPrint('Auth: Google Sign-In hatası: ${e.code} — ${e.description}');
+      throw Exception('Google ile giriş başarısız: ${e.description ?? e.code.name}');
+    } catch (e) {
+      debugPrint('Auth: Google ile giriş hatası: $e');
+      rethrow;
+    }
+  }
+
+  /// Login/Google login sonrası kullanıcıyı online yapar
+  Future<void> _setOnlineAfterAuth() async {
     if (state != null) {
       try {
         final isSeller = state?.rol == 'satici';

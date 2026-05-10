@@ -5,6 +5,7 @@ import 'package:imecehub/product/init/theme/custom_light_theme.dart';
 import 'package:imecehub/product/navigation/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imecehub/services/api_logger.dart';
 import 'dotenvLoader.dart';
 import 'EthernetController.dart';
 
@@ -33,6 +34,9 @@ void main() {
 
   // SSL Certificate Pinning'i etkinleştir
   HttpOverrides.global = MyHttpOverrides();
+
+  // API Logger'ı başlat
+  ApiLogger.initialize();
 
   runApp(
     const ProviderScope(child: DotenvLoaderApp(child: EthernetController())),

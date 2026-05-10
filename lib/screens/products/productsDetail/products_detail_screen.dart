@@ -1,3 +1,5 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
@@ -18,7 +20,7 @@ import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/screens/profil/sellerProfil/seller_profil_screen_library.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/models/urunYorum.dart';

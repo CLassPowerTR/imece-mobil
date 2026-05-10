@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class FollowScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _FollowScreenState extends State<FollowScreen> {
         shadowColor: Colors.grey[300],
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         title: customText('Takip Ettiklerim', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600),
         leading: TurnBackTextIcon(),
       ),

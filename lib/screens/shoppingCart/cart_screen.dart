@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/cards/adressCard.dart';
 import 'package:imecehub/core/widgets/container.dart';
@@ -17,7 +18,6 @@ import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:u_credit_card/u_credit_card.dart';
@@ -127,14 +127,14 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 'Sepetim',
                 context,
                 textAlign: TextAlign.center,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
+                size: AppTextSizes.bodyLarge(context),
                 weight: FontWeight.bold,
               ),
               customText(
                 'Sepetinizi görüntüleyebilmek için lütfen giriş yapınız.',
                 context,
                 textAlign: TextAlign.center,
-                size: HomeStyle(context: context).bodySmall.fontSize,
+                size: AppTextSizes.bodySmall(context),
               ),
               textButton(
                 context,
@@ -142,20 +142,16 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 onPressed: () {
                   Navigator.pushNamed(context, '/profil/signUp');
                 },
-                shadowColor: HomeStyle(
-                  context: context,
-                ).secondary.withOpacity(0.5),
+                shadowColor: AppColors.secondary(context).withOpacity(0.5),
               ),
               textButton(
                 context,
                 'Giriş Yap',
-                buttonColor: HomeStyle(
-                  context: context,
-                ).secondary.withOpacity(0.2),
-                titleColor: HomeStyle(context: context).tertiary,
-                shadowColor: HomeStyle(
-                  context: context,
-                ).secondary.withOpacity(0.5),
+                buttonColor: AppColors.secondary(context).withOpacity(0.2),
+                titleColor: AppColors.tertiary(context),
+                shadowColor: AppColors.secondary(
+                  context,
+                ).withOpacity(0.5),
                 onPressed: () {
                   Navigator.pushNamed(context, '/profil/signIn');
                 },

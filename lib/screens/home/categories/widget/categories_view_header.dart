@@ -1,3 +1,4 @@
+
 part of '../categories_screen.dart';
 
 class CategoriesViewHeader extends StatelessWidget
@@ -17,7 +18,7 @@ class CategoriesViewHeader extends StatelessWidget
             icon: Icon(
               Icons.arrow_back_ios,
               size: 30,
-              color: HomeStyle(context: context).secondary,
+              color: AppColors.secondary(context),
             )),
       ),
       leadingWidth: 50,

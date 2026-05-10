@@ -1,3 +1,4 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
 import 'dart:convert';
 import 'dart:ui';
 import 'dart:math';
@@ -27,7 +28,7 @@ import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/providers/groups_provider.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

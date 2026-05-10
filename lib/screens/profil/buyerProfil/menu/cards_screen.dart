@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class CardsScreen extends StatefulWidget {
@@ -148,10 +149,9 @@ class _CardsScreenState extends State<CardsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
 
     return Scaffold(
-      backgroundColor: themeData.scaffoldBackgroundColor,
+      backgroundColor: AppColors.scaffoldBackgroundColor(context),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
@@ -162,14 +162,14 @@ class _CardsScreenState extends State<CardsScreen> {
         title: customText(
           'Kartlarım',
           context,
-          size: themeData.bodyLarge.fontSize,
+          size: AppTextSizes.bodyLarge(context),
           weight: FontWeight.w600,
         ),
         leading: TurnBackTextIcon(),
         actions: [
           if (cards.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.add_card, color: themeData.primary),
+              icon: Icon(Icons.add_card, color: AppColors.primary(context)),
               onPressed: _addNewCard,
               tooltip: 'Yeni Kart Ekle',
             ),
@@ -178,12 +178,12 @@ class _CardsScreenState extends State<CardsScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : cards.isEmpty
-              ? _buildEmptyState(themeData)
-              : _buildCardsList(themeData),
+              ? _buildEmptyState(context)
+              : _buildCardsList(context),
     );
   }
 
-  Widget _buildEmptyState(HomeStyle themeData) {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -193,13 +193,13 @@ class _CardsScreenState extends State<CardsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: themeData.primary.withOpacity(0.1),
+                color: AppColors.primary(context).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.credit_card_off_outlined,
                 size: 64,
-                color: themeData.primary.withOpacity(0.6),
+                color: AppColors.primary(context).withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -208,7 +208,7 @@ class _CardsScreenState extends State<CardsScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: themeData.onSurface,
+                color: AppColors.onSurface(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -217,14 +217,14 @@ class _CardsScreenState extends State<CardsScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: themeData.onSurface.withOpacity(0.6),
+                color: AppColors.onSurface(context).withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: _addNewCard,
               style: ElevatedButton.styleFrom(
-                backgroundColor: themeData.primary,
+                backgroundColor: AppColors.primary(context),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -243,7 +243,7 @@ class _CardsScreenState extends State<CardsScreen> {
     );
   }
 
-  Widget _buildCardsList(HomeStyle themeData) {
+  Widget _buildCardsList(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: cards.length,
@@ -264,7 +264,7 @@ class _CardsScreenState extends State<CardsScreen> {
                     Icon(
                       Icons.credit_card,
                       size: 16,
-                      color: themeData.onSurface.withOpacity(0.5),
+                      color: AppColors.onSurface(context).withOpacity(0.5),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -273,7 +273,7 @@ class _CardsScreenState extends State<CardsScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: themeData.onSurface.withOpacity(0.7),
+                          color: AppColors.onSurface(context).withOpacity(0.7),
                         ),
                       ),
                     ),

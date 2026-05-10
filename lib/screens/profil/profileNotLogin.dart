@@ -60,7 +60,7 @@ class _profileNotLoginState extends State<ProfileNotLogin> with RouteAware {
               customText(
                 'Profilim',
                 context,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
+                size: AppTextSizes.bodyLarge(context),
                 weight: FontWeight.bold,
               ),
               customText(
@@ -79,10 +79,8 @@ class _profileNotLoginState extends State<ProfileNotLogin> with RouteAware {
               textButton(
                 context,
                 'Giriş Yap',
-                buttonColor: HomeStyle(
-                  context: context,
-                ).secondary.withOpacity(0.2),
-                titleColor: HomeStyle(context: context).tertiary,
+                buttonColor: AppColors.primary(context),
+                titleColor: AppColors.onPrimary(context),
 
                 onPressed: () {
                   Navigator.pushNamed(context, '/profil/signIn');

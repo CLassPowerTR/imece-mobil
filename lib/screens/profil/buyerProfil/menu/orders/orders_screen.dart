@@ -1,3 +1,4 @@
+
 part of '../../buyer_profil_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         shadowColor: Colors.grey[300],
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         title: customText('Siparişlerim', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600),
         leading: TurnBackTextIcon(),
         actions: [
@@ -63,14 +64,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
               },
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
           Container(
-            color: HomeStyle(context: context).surface,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+            color: AppColors.surface(context),
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -78,7 +79,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ...List.generate(orderTabs.length, (index) {
                     final isSelected = selectedTab == index;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 4),
                       child: ChoiceChip(
                         label: Text(
                           orderTabs[index],

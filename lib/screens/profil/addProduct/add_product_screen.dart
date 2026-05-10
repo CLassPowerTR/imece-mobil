@@ -1,3 +1,7 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/models/products.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:http/http.dart' as http;

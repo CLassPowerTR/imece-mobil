@@ -1,19 +1,22 @@
+import 'package:imecehub/core/constants/app_textSizes.dart';
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
-Container yorumContainer(BuildContext context, HomeStyle themeData,
+
+Container yorumContainer(BuildContext context, 
     double width, Map<dynamic, dynamic> yorum) {
   double containerWidth = width * 0.7;
   return container(
     margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
     context,
     borderRadius: BorderRadius.circular(8),
-    color: themeData.surfaceContainer,
+    color: AppColors.surfaceContainer(context),
     width: containerWidth,
     padding: EdgeInsets.all(10),
     child: Column(
@@ -34,7 +37,7 @@ Container yorumContainer(BuildContext context, HomeStyle themeData,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         weight: FontWeight.w400,
-                        size: themeData.bodyMedium.fontSize),
+                        size: AppTextSizes.bodyMedium(context)),
                   ),
                 ],
               ),
@@ -46,7 +49,7 @@ Container yorumContainer(BuildContext context, HomeStyle themeData,
                 padding: AppPaddings.all6,
                 isBoxShadow: true,
                 borderRadius: AppRadius.r8,
-                color: themeData.surfaceContainer,
+                color: AppColors.surfaceContainer(context),
                 child:
                     Row(spacing: 5, mainAxisSize: MainAxisSize.min, children: [
                   customText(yorum['rating'].toString(), context),
@@ -61,8 +64,8 @@ Container yorumContainer(BuildContext context, HomeStyle themeData,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.start,
-                size: themeData.bodySmall.fontSize,
-                color: themeData.primary.withOpacity(0.6))),
+                size: AppTextSizes.bodySmall(context),
+                color: AppColors.primary(context).withOpacity(0.6))),
         Builder(builder: (context) {
           final List<dynamic> imagesDyn = (yorum['resimler'] as List?) ?? [];
           final List<String> images = imagesDyn
@@ -89,10 +92,10 @@ Container yorumContainer(BuildContext context, HomeStyle themeData,
                     errorBuilder: (context, error, stackTrace) => Container(
                       width: thumb,
                       height: thumb,
-                      color: themeData.outline.withOpacity(0.1),
+                      color: AppColors.outline(context).withOpacity(0.1),
                       alignment: Alignment.center,
                       child: Icon(Icons.broken_image,
-                          size: 20, color: themeData.outline),
+                          size: 20, color: AppColors.outline(context)),
                     ),
                   ),
                 );

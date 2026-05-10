@@ -1,3 +1,4 @@
+
 part of '../home_screen.dart';
 
 class _HomeViewBody extends ConsumerStatefulWidget {
@@ -75,7 +76,6 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final themeData = HomeStyle(context: context);
     final isOnline = ref.watch(isOnlineProvider);
 
     return Scaffold(
@@ -92,12 +92,12 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             ),
           Expanded(
             child: RefreshIndicator(
-              color: themeData.secondary,
+              color: AppColors.secondary(context),
               backgroundColor: Colors.white,
               onRefresh: _refreshFutures,
               child: SafeArea(
                 child: Padding(
-                  padding: HomeStyle(context: context).bodyPadding,
+                  padding: AppPaddings.h10,
                   child: SingleChildScrollView(
                     child: Column(
                       spacing: 12,
@@ -108,7 +108,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                         //_saticilarList(height, context, width),
                         //SizedBox(height: 16),
                         StoryCampaingsCard(height: height, width: width),
-                        _futureSellersView(height, width, themeData),
+                        _futureSellersView(height, width),
                         //_alimTipiContainer(height, context),
                         //_populerUrunCards(width, height),
                         
@@ -139,7 +139,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     );
   }
 
-  Widget _futureSellersView(double height, double width, themeData) {
+  Widget _futureSellersView(double height, double width) {
     return FutureBuilder<List<Company>>(
       future: _futureSellers,
       builder: (context, snapshot) {
@@ -150,7 +150,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             height: height * 0.14,
             child: container(
               context,
-              color: themeData.surfaceContainer,
+              color: AppColors.surfaceContainer(context),
               borderRadius: BorderRadius.circular(8),
               isBoxShadow: true,
               margin: EdgeInsets.only(bottom: 15),
@@ -158,7 +158,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
               child: customText(
                 "Hata oluştu: ${snapshot.error}",
                 context,
-                color: themeData.secondary,
+                color: AppColors.secondary(context),
               ),
             ),
           );
@@ -209,7 +209,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: HomeStyle(context: context).secondary,
+                  backgroundColor: AppColors.secondary(context),
                   child: SvgPicture.network(
                     errorBuilder: (context, error, stackTrace) {
                       return Icon(Icons.person_outline_sharp);
@@ -240,7 +240,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CategoriesShimmer(
-            padding: HomeStyle(context: context).bodyPadding,
+            padding: AppPaddings.h10,
             crossAxisCount: 4,
             childAspectRatio: 1,
             crossAxisSpacing: 12,
@@ -324,9 +324,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
       height: height * 0.15,
       decoration: BoxDecoration(
         boxShadow: [boxShadow(context)],
-        borderRadius: HomeStyle(
-          context: context,
-        ).bodyCategoryContainerBorderRadius,
+        borderRadius: AppRadius.r8,
         image: const DecorationImage(
           image: AssetImage('assets/image/grupalim.jpg'),
           fit: BoxFit.cover,
@@ -343,33 +341,25 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             overflow: TextOverflow.ellipsis,
             text: TextSpan(
               style: TextStyle(
-                fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                fontSize: AppTextStyle.bodyLarge(context).fontSize,
                 fontWeight: FontWeight.bold,
-                color: HomeStyle(context: context).secondary,
+                color: AppColors.secondary(context),
               ),
               children: [
                 TextSpan(
                   text: title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: HomeStyle(
-                      context: context,
-                    ).headlineSmall.fontSize,
-                    color: HomeStyle(
-                      context: context,
-                    ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
+                    fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+                    color: AppColors.secondary(context), // "Alıcı" kelimesinin istediğiniz rengi
                   ),
                 ),
                 TextSpan(
                   text: title2,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: HomeStyle(
-                      context: context,
-                    ).headlineSmall.fontSize,
-                    color: HomeStyle(
-                      context: context,
-                    ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                    fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+                    color: AppColors.surface(context), // "Alıcı" kelimesinin istediğiniz rengi
                   ),
                 ),
               ],
@@ -380,9 +370,9 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             child: customText(
               'Tıkla...',
               context,
-              size: HomeStyle(context: context).bodyLarge.fontSize,
+              size: AppTextStyle.bodyLarge(context).fontSize,
               weight: FontWeight.bold,
-              color: HomeStyle(context: context).secondary,
+              color: AppColors.secondary(context),
             ),
           ),
         ],
@@ -419,9 +409,9 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
       child: customText(
         'Popüler ürünler',
         context,
-        size: HomeStyle(context: context).bodyLarge.fontSize,
+        size: AppTextStyle.bodyLarge(context).fontSize,
         weight: FontWeight.bold,
-        color: HomeStyle(context: context).primary,
+        color: AppColors.primary(context),
       ),
     );
   }
@@ -436,9 +426,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             height: height * 0.15,
             decoration: BoxDecoration(
               boxShadow: [boxShadow(context)],
-              borderRadius: HomeStyle(
-                context: context,
-              ).bodyCategoryContainerBorderRadius,
+              borderRadius: AppRadius.r8,
               image: const DecorationImage(
                 image: AssetImage('assets/image/saticiOl.png'),
                 fit: BoxFit.cover,
@@ -454,23 +442,21 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     style: TextStyle(
-                      fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                      fontSize: AppTextStyle.bodyLarge(context).fontSize,
                       fontWeight: FontWeight.bold,
-                      color: HomeStyle(context: context).secondary,
+                      color: AppColors.secondary(context),
                     ),
                     children: [
                       TextSpan(
                         text: 'Grup alım için',
                         style: TextStyle(
-                          color: HomeStyle(
-                            context: context,
-                          ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                          color: AppColors.surface(context), // "Alıcı" kelimesinin istediğiniz rengi
                         ),
                       ),
                       TextSpan(
                         text: ' tıkla',
                         style: TextStyle(
-                          color: HomeStyle(context: context).secondary,
+                          color: AppColors.secondary(context),
                         ),
                       ),
                     ],
@@ -486,9 +472,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             height: height * 0.15,
             decoration: BoxDecoration(
               boxShadow: [boxShadow(context)],
-              borderRadius: HomeStyle(
-                context: context,
-              ).bodyCategoryContainerBorderRadius,
+              borderRadius: AppRadius.r8,
               image: const DecorationImage(
                 image: AssetImage('assets/image/saticiOl.png'),
                 fit: BoxFit.cover,
@@ -504,23 +488,21 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     style: TextStyle(
-                      fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                      fontSize: AppTextStyle.bodyLarge(context).fontSize,
                       fontWeight: FontWeight.bold,
-                      color: HomeStyle(context: context).secondary,
+                      color: AppColors.secondary(context),
                     ),
                     children: [
                       TextSpan(
                         text: 'Tekil alım için',
                         style: TextStyle(
-                          color: HomeStyle(
-                            context: context,
-                          ).surface, // "Alıcı" kelimesinin istediğiniz rengi
+                          color: AppColors.surface(context), // "Alıcı" kelimesinin istediğiniz rengi
                         ),
                       ),
                       TextSpan(
                         text: ' tıkla',
                         style: TextStyle(
-                          color: HomeStyle(context: context).secondary,
+                          color: AppColors.secondary(context),
                         ),
                       ),
                     ],
@@ -560,9 +542,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             child: Container(
               decoration: BoxDecoration(
                 boxShadow: [boxShadow(context)],
-                borderRadius: HomeStyle(
-                  context: context,
-                ).bodyCategoryContainerBorderRadius,
+                borderRadius: AppRadius.r8,
                 image: const DecorationImage(
                   image: AssetImage('assets/image/saticiOl.png'),
                   fit: BoxFit.cover,
@@ -578,25 +558,21 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
                       style: TextStyle(
-                        fontSize: HomeStyle(
-                          context: context,
-                        ).headlineSmall.fontSize,
+                        fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
                         fontWeight: FontWeight.bold,
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                       children: [
                         TextSpan(
                           text: 'Satıcı',
                           style: TextStyle(
-                            color: HomeStyle(
-                              context: context,
-                            ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
+                            color: AppColors.secondary(context), // "Alıcı" kelimesinin istediğiniz rengi
                           ),
                         ),
                         TextSpan(
                           text: ' olarak kayıt ol',
                           style: TextStyle(
-                            color: HomeStyle(context: context).surface,
+                            color: AppColors.surface(context),
                           ),
                         ),
                       ],
@@ -611,9 +587,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             child: Container(
               decoration: BoxDecoration(
                 boxShadow: [boxShadow(context)],
-                borderRadius: HomeStyle(
-                  context: context,
-                ).bodyCategoryContainerBorderRadius,
+                borderRadius: AppRadius.r8,
                 image: const DecorationImage(
                   image: AssetImage('assets/image/aliciOl.png'),
                   fit: BoxFit.cover,
@@ -628,25 +602,21 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: TextStyle(
-                        fontSize: HomeStyle(
-                          context: context,
-                        ).headlineSmall.fontSize,
+                        fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
                         fontWeight: FontWeight.bold,
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                       children: [
                         TextSpan(
                           text: 'Alıcı',
                           style: TextStyle(
-                            color: HomeStyle(
-                              context: context,
-                            ).secondary, // "Alıcı" kelimesinin istediğiniz rengi
+                            color: AppColors.secondary(context), // "Alıcı" kelimesinin istediğiniz rengi
                           ),
                         ),
                         TextSpan(
                           text: ' olarak kayıt ol',
                           style: TextStyle(
-                            color: HomeStyle(context: context).surface,
+                            color: AppColors.surface(context),
                           ),
                         ),
                       ],

@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class FavoriteScreen extends ConsumerStatefulWidget {
@@ -82,7 +83,7 @@ class _FavoriteScreenState extends ConsumerState<FavoriteScreen> {
           title: customText(
             'Favorilerim',
             context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600,
           ),
           leading: TurnBackTextIcon(),
@@ -210,12 +211,8 @@ class _FavoriteScreenState extends ConsumerState<FavoriteScreen> {
                                       context,
                                       '+ Favori ekle',
                                       elevation: 0,
-                                      shadowColor: HomeStyle(
-                                        context: context,
-                                      ).secondary,
-                                      fontSize: HomeStyle(
-                                        context: context,
-                                      ).bodyLarge.fontSize,
+                                      shadowColor: AppColors.secondary(context),
+                                      fontSize: AppTextStyle.bodyLarge(context).fontSize,
                                       weight: FontWeight.bold,
                                       onPressed: () {
                                         ref

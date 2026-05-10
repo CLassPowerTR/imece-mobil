@@ -6,7 +6,7 @@ Container customContainer(BuildContext context, bool isMe, dynamic message) {
     margin: isMe
         ? EdgeInsets.only(left: 50, right: 20)
         : EdgeInsets.only(right: 60),
-    padding: const EdgeInsets.all(10),
+    padding: EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: isMe
           ? Theme.of(context).colorScheme.secondary
@@ -23,7 +23,7 @@ Container customContainer(BuildContext context, bool isMe, dynamic message) {
           size: Theme.of(context).textTheme.bodySmall!.fontSize,
           color: Theme.of(context).colorScheme.onPrimary,
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         customText(message['message'], context,
             color: Theme.of(context).colorScheme.onPrimary,
             size: Theme.of(context).textTheme.bodyLarge!.fontSize),

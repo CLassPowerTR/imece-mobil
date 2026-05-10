@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 
 IconButton AppCloseButton(
   BuildContext context, {
@@ -10,7 +10,6 @@ IconButton AppCloseButton(
   EdgeInsetsGeometry? padding,
   BoxConstraints? constraints,
 }) {
-  final theme = HomeStyle(context: context);
   return IconButton(
     onPressed: onPressed ?? () => Navigator.maybePop(context),
     tooltip: tooltip ?? 'Kapat',
@@ -21,7 +20,7 @@ IconButton AppCloseButton(
     icon: Icon(
       Icons.close_outlined,
       size: size,
-      color: color ?? theme.primary,
+      color: color ?? AppColors.primary(context),
     ),
   );
 }

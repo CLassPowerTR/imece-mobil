@@ -1,3 +1,4 @@
+
 part of '../add_post_screen.dart';
 
 const List<String> _postTypes = ['Kampanya Hikayesi', 'Hikaye'];
@@ -18,7 +19,7 @@ SingleChildScrollView _AddPostViewBody(
 ) {
   double width = MediaQuery.of(context).size.width;
   double height = MediaQuery.of(context).size.height;
-  final themeData = HomeStyle(context: context);
+
 
   return SingleChildScrollView(
     child: Padding(
@@ -33,7 +34,6 @@ SingleChildScrollView _AddPostViewBody(
             context,
             width,
             height,
-            themeData,
             selectedImageBytes,
             onPickImage,
           ),
@@ -57,7 +57,6 @@ SingleChildScrollView _AddPostViewBody(
           _textFieldAciklama(
             height,
             context,
-            themeData,
             controllerAciklama,
             width,
           ),
@@ -65,7 +64,6 @@ SingleChildScrollView _AddPostViewBody(
             context,
             isShareButton,
             isSubmitting,
-            themeData,
             width,
             onShare,
             validationMessage,
@@ -81,7 +79,6 @@ Align _shareButton(
   BuildContext context,
   bool isShareButton,
   bool isSubmitting,
-  HomeStyle themeData,
   double width,
   VoidCallback onShare,
   String? validationMessage,
@@ -95,18 +92,18 @@ Align _shareButton(
         if (validationMessage != null && !isShareButton && !isSubmitting)
           Text(
             validationMessage,
-            style: TextStyle(color: themeData.error, fontSize: 12),
+            style: TextStyle(color: AppColors.error(context), fontSize: 12),
           ),
         textButton(
           context,
           isSubmitting ? 'Paylaşılıyor...' : 'Paylaş',
           elevation: isShareButton ? 6 : 0,
           buttonColor: isShareButton
-              ? themeData.secondary
-              : themeData.primary.withOpacity(0.3),
-          shadowColor: themeData.secondary,
+              ? AppColors.secondary(context)
+              : AppColors.primary(context).withOpacity(0.3),
+          shadowColor: AppColors.secondary(context),
           minSizeWidth: width * 0.4,
-          fontSize: themeData.bodyLarge.fontSize,
+          fontSize: AppTextStyle.bodyLarge(context).fontSize,
           weight: FontWeight.w600,
           onPressed: isShareButton && !isSubmitting ? onShare : null,
           icon: isSubmitting
@@ -117,7 +114,7 @@ Align _shareButton(
                     width: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: themeData.onSecondary,
+                      color: AppColors.onSecondary(context),
                     ),
                   ),
                 )
@@ -131,7 +128,6 @@ Align _shareButton(
 SizedBox _textFieldAciklama(
   double height,
   BuildContext context,
-  themeData,
   TextEditingController controllerAciklama,
   double width,
 ) {
@@ -165,7 +161,6 @@ Widget _updateImage(
   BuildContext context,
   double width,
   double height,
-  HomeStyle themeData,
   Uint8List? previewBytes,
   VoidCallback onPickImage,
 ) {
@@ -177,7 +172,7 @@ Widget _updateImage(
     borderRadius: BorderRadius.circular(12),
     padding: const EdgeInsets.all(16),
     margin: const EdgeInsets.only(bottom: 10),
-    color: themeData.surfaceContainer,
+    color: AppColors.surfaceContainer(context),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 16,
@@ -185,7 +180,7 @@ Widget _updateImage(
         customText(
           'Gönderi Görseli',
           context,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
+          size: AppTextStyle.bodyLarge(context).fontSize,
           weight: FontWeight.bold,
         ),
         GestureDetector(

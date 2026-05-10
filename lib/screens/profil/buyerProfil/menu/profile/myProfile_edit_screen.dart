@@ -1,3 +1,4 @@
+
 part of '../../buyer_profil_screen.dart';
 
 class MyProfileEditScreen extends StatefulWidget {
@@ -38,7 +39,7 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         leading: TurnBackTextIcon(),
         title: customText('Bilgi Düzenle', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600),
         actions: [
           TextButton(
@@ -48,7 +49,7 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
                   context, {'field': _field, 'value': _controller.text});
             },
             child: customText('Kaydet', context,
-                color: HomeStyle(context: context).secondary,
+                color: AppColors.secondary(context),
                 weight: FontWeight.w600,
                 size: 16),
           ),

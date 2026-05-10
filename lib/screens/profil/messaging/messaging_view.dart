@@ -1,6 +1,10 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/screens/profil/messaging/messaging_view_mixin.dart';
 import 'package:imecehub/screens/profil/messaging/widget/messaging_view_list-view.dart';
 import 'package:imecehub/screens/profil/messaging/widget/messaging_view_textButton.dart';

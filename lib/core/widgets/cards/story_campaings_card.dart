@@ -12,7 +12,6 @@ import 'package:imecehub/core/widgets/shimmer/campaigns_stories_shimmer.dart'
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/stories.dart';
 import 'package:imecehub/providers/stories_campaings_provider.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class StoryCampaingsCard extends ConsumerStatefulWidget {
   final double width;
@@ -78,7 +77,6 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
 
   @override
   Widget build(BuildContext context) {
-    final theme = HomeStyle(context: context);
     final dataAsync = widget.sellerId == null
         ? ref.watch(storiesCampaignsProvider)
         : ref.watch(storiesCampaignsBySellerProvider(widget.sellerId!));
@@ -114,15 +112,15 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildTabs(theme),
+              _buildTabs(context),
               const SizedBox(height: 12),
               SizedBox(
                 height: widget.height * 0.18,
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildCampaigns(theme, campaignsItems),
-                    _buildStories(theme, storiesItems),
+                    _buildCampaigns(context, campaignsItems),
+                    _buildStories(context, storiesItems),
                   ],
                 ),
               ),
@@ -133,7 +131,7 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     );
   }
 
-  Widget _buildTabs(HomeStyle theme) {
+  Widget _buildTabs(BuildContext context) {
     return container(
       context,
       color: const Color(0xFFF3F4F6),
@@ -181,35 +179,35 @@ class _StoryCampaingsCardState extends ConsumerState<StoryCampaingsCard>
     );
   }
 
-  Widget _buildCampaigns(HomeStyle theme, List<Story> items) {
+  Widget _buildCampaigns(BuildContext context, List<Story> items) {
     if (items.isEmpty) {
       return Center(
-        child: customText('Kampanya bulunamadı', context, color: theme.outline),
+        child: customText('Kampanya bulunamadı', context, color: AppColors.outline(context)),
       );
     }
-    return _storiesList(theme, items);
+    return _storiesList(context, items);
   }
 
-  Widget _buildStories(HomeStyle theme, List<Story> items) {
+  Widget _buildStories(BuildContext context, List<Story> items) {
     if (items.isEmpty) {
       return Center(
-        child: customText('Hikaye bulunamadı', context, color: theme.outline),
+        child: customText('Hikaye bulunamadı', context, color: AppColors.outline(context)),
       );
     }
-    return _storiesList(theme, items);
+    return _storiesList(context, items);
   }
 
-  Widget _storiesList(HomeStyle theme, List<Story> items) {
+  Widget _storiesList(BuildContext context, List<Story> items) {
     return ListView.separated(
       padding: EdgeInsets.zero, // Fazlalık paddingler kaldırıldı
       scrollDirection: Axis.horizontal,
       itemCount: items.length,
       separatorBuilder: (context, _) => const SizedBox(width: 12),
-      itemBuilder: (context, index) => _storyItem(theme, items, index),
+      itemBuilder: (context, index) => _storyItem(context, items, index),
     );
   }
 
-  Widget _storyItem(HomeStyle theme, List<Story> stories, int index) {
+  Widget _storyItem(BuildContext context, List<Story> stories, int index) {
     final story = stories[index];
     final viewedStories = ref.watch(viewedStoriesProvider);
     final isViewed = viewedStories.contains(story.id);

@@ -60,7 +60,7 @@ class OrderDetailScreen extends ConsumerWidget {
                 children: [
                   // Üst blok
                   Container(
-                    margin: const EdgeInsets.all(12),
+                    margin: EdgeInsets.all(12),
                     padding: AppPaddings.all12,
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
@@ -77,7 +77,7 @@ class OrderDetailScreen extends ConsumerWidget {
                                 color: AppColors.primary(context),
                                 size: AppTextSizes.bodyLarge(context),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +88,7 @@ class OrderDetailScreen extends ConsumerWidget {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: 4),
                                     Text(
                                       siparisTarihi,
                                       style: AppTextStyle.bodySmallMuted(
@@ -103,7 +103,7 @@ class OrderDetailScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Container(
                           padding: AppPaddings.all8,
                           decoration: BoxDecoration(
@@ -124,7 +124,7 @@ class OrderDetailScreen extends ConsumerWidget {
 
                   // Alt blok
                   Container(
-                    margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    margin: EdgeInsets.fromLTRB(12, 0, 12, 12),
                     padding: AppPaddings.all12,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -230,7 +230,7 @@ class OrderDetailScreen extends ConsumerWidget {
     return container(
       context,
       padding: AppPaddings.all12,
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: EdgeInsets.symmetric(vertical: 6),
       borderRadius: AppRadius.r8,
       color: AppColors.cardColor(context),
       blurRadius: 2,
@@ -415,7 +415,7 @@ class _MetricTile extends StatelessWidget {
           style: valueStyle ?? AppTextStyle.bodyLargeBold(context),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           label,
           style: AppTextStyle.bodySmallMuted(context),

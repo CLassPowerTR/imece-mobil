@@ -3,9 +3,9 @@ import 'package:imecehub/api/api_config.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/campaigns.dart';
 
@@ -37,10 +37,8 @@ class CampaingsCard extends StatelessWidget {
 
           fit: BoxFit.cover,
         ),
-        borderRadius: HomeStyle(
-          context: context,
-        ).bodyCategoryContainerBorderRadius,
-      ),
+        borderRadius: AppRadius.r12,
+      ),  
       child: SingleChildScrollView(
         child: Column(
           spacing: 5,
@@ -52,33 +50,33 @@ class CampaingsCard extends StatelessWidget {
               padding: AppPaddings.all8,
               decoration: BoxDecoration(
                 borderRadius: AppRadius.r24,
-                color: HomeStyle(context: context).primary.withOpacity(0.3),
+                color: AppColors.primary(context).withOpacity(0.3),
                 border: BoxBorder.all(
-                  color: HomeStyle(context: context).onPrimary.withOpacity(0.3),
+                  color: AppColors.onPrimary(context).withOpacity(0.3),
                 ),
               ),
               child: customText(
                 "Kampanya",
                 context,
-                color: HomeStyle(context: context).onPrimary,
+                color: AppColors.onPrimary(context),
                 weight: FontWeight.bold,
-                size: HomeStyle(context: context).bodySmall.fontSize,
+                size: AppTextSizes.bodySmall(context),
               ),
             ),
             customText(
               title,
               context,
-              color: HomeStyle(context: context).secondary,
+              color: AppColors.secondary(context),
               weight: FontWeight.bold,
-              size: HomeStyle(context: context).headlineSmall.fontSize,
+              size: AppTextSizes.headlineSmall(context),
               maxLines: 1,
             ),
             customText(
               item.subtitle,
               context,
-              color: HomeStyle(context: context).onPrimary,
+              color: AppColors.onPrimary(context),
               weight: FontWeight.bold,
-              size: HomeStyle(context: context).bodyMedium.fontSize,
+              size: AppTextSizes.bodyMedium(context),
               maxLines: 1,
             ),
             customText(
@@ -86,23 +84,23 @@ class CampaingsCard extends StatelessWidget {
               context,
               color: Colors.grey[400],
               weight: FontWeight.bold,
-              size: HomeStyle(context: context).bodySmall.fontSize,
+              size: AppTextSizes.bodySmall(context),
               maxLines: 1,
             ),
             Container(
               padding: AppPaddings.all8,
               decoration: BoxDecoration(
                 borderRadius: AppRadius.r12,
-                color: HomeStyle(context: context).primary.withOpacity(0.7),
+                color: AppColors.primary(context).withOpacity(0.7),
                 border: BoxBorder.all(
-                  color: HomeStyle(context: context).onPrimary.withOpacity(0.7),
+                  color: AppColors.onPrimary(context).withOpacity(0.7),
                 ),
               ),
               child: customText(
                 item.campaignType,
                 context,
-                color: HomeStyle(context: context).onPrimary,
-                size: HomeStyle(context: context).labelSmall.fontSize,
+                color: AppColors.onPrimary(context),
+                size: AppTextSizes.labelSmall(context),
                 maxLines: 1,
               ),
             ),
@@ -130,7 +128,7 @@ class CampaingsCard extends StatelessWidget {
                 "Detayları Gör",
                 context,
                 color: AppColors.onPrimary(context),
-                size: HomeStyle(context: context).labelSmall.fontSize,
+                size: AppTextSizes.labelSmall(context),
                 maxLines: 1,
               ),
             ),

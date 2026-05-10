@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/buttons/groupBuy_button.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
@@ -6,7 +8,6 @@ import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class productsCard extends ConsumerStatefulWidget {
@@ -49,7 +50,7 @@ class _productsCardState extends ConsumerState<productsCard> {
 
     return productAsync.when(
       loading: () => Card(
-        color: HomeStyle(context: context).surfaceContainer,
+        color: AppColors.surfaceContainer(context),
         child: Padding(
           padding: EdgeInsets.all(10),
           child: Column(
@@ -78,7 +79,7 @@ class _productsCardState extends ConsumerState<productsCard> {
         ),
       ),
       error: (error, stackTrace) => Card(
-        color: HomeStyle(context: context).surfaceContainer,
+        color: AppColors.surfaceContainer(context),
         child: Padding(
           padding: EdgeInsets.all(10),
           child: Center(
@@ -95,7 +96,7 @@ class _productsCardState extends ConsumerState<productsCard> {
           );
         },
         child: Card(
-          color: HomeStyle(context: context).surfaceContainer,
+          color: AppColors.surfaceContainer(context),
           child: Padding(
             padding: EdgeInsets.all(10),
             child: Column(
@@ -143,9 +144,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                                             width: 25,
                                             height: 25,
                                             decoration: BoxDecoration(
-                                              color: HomeStyle(
-                                                context: context,
-                                              ).outline,
+                                              color: AppColors.outline(context),
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                             ),
@@ -185,9 +184,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                                         width: 25,
                                         height: 25,
                                         decoration: BoxDecoration(
-                                          color: HomeStyle(
-                                            context: context,
-                                          ).outline,
+                                          color: AppColors.outline(context),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -232,7 +229,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                   product.urunAdi ?? '',
                   context,
                   weight: FontWeight.bold,
-                  size: HomeStyle(context: context).bodyLarge.fontSize,
+                  size: AppTextSizes.bodyLarge(context),
                 ),
                 buildRatingStars(product.degerlendirmePuani ?? 0.0),
                 customText(
@@ -244,8 +241,8 @@ class _productsCardState extends ConsumerState<productsCard> {
                 customText(
                   "KG: ${product.urunParakendeFiyat} TL",
                   context,
-                  size: HomeStyle(context: context).bodyLarge.fontSize,
-                  color: HomeStyle(context: context).secondary,
+                  size: AppTextSizes.bodyLarge(context),
+                  color: AppColors.secondary(context),
                 ),
 
                 if (ref.watch(userProvider)?.rol != 'satici')
@@ -276,9 +273,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                                       color: Colors.white,
                                       weight: FontWeight.bold,
                                       textAlign: TextAlign.center,
-                                      size: HomeStyle(
-                                        context: context,
-                                      ).bodySmall.fontSize,
+                                      size: AppTextSizes.bodySmall(context),
                                     ),
                                   );
                                 } else {
@@ -286,9 +281,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                                     style: TextButton.styleFrom(
                                       backgroundColor: widget.isSepet
                                           ? Colors.orangeAccent[200]
-                                          : HomeStyle(
-                                              context: context,
-                                            ).secondary,
+                                          : AppColors.secondary(context),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -306,9 +299,7 @@ class _productsCardState extends ConsumerState<productsCard> {
                                       context,
                                       color: Colors.white,
                                       weight: FontWeight.bold,
-                                      size: HomeStyle(
-                                        context: context,
-                                      ).bodySmall.fontSize,
+                                      size:   AppTextSizes.bodySmall(context),
                                     ),
                                   );
                                 }

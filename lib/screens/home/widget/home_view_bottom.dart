@@ -1,3 +1,4 @@
+
 part of '../home_screen.dart';
 
 class _HomeBottomNavigationBarTest extends ConsumerStatefulWidget {
@@ -35,20 +36,18 @@ class _HomeBottomNavigationBarTestState
     }
 
     return Padding(
-      padding: HomeStyle(context: context).bottomNavigationBarPadding,
+      padding: AppPaddings.h10v10,
       child: ClipRRect(
-        borderRadius: HomeStyle(
-          context: context,
-        ).bottomNavigationBarBorderRadius,
+        borderRadius: AppRadius.r16,
         child: BottomNavigationBar(
-          backgroundColor: HomeStyle(context: context).surfaceContainer,
-          selectedItemColor: HomeStyle(context: context).secondary,
-          unselectedItemColor: HomeStyle(context: context).primary,
+          backgroundColor: AppColors.surface(context),
+          selectedItemColor: AppColors.secondary(context),
+          unselectedItemColor: AppColors.primary(context),
           selectedLabelStyle: TextStyle(
-            color: HomeStyle(context: context).secondary,
+            color: AppColors.secondary(context),
           ),
           unselectedLabelStyle: TextStyle(
-            color: HomeStyle(context: context).primary,
+            color: AppColors.primary(context),
           ),
           currentIndex: safeIndex,
           items: [
@@ -73,8 +72,8 @@ class _HomeBottomNavigationBarTestState
     String label,
     String iconPath,
   ) {
-    final primary = HomeStyle(context: context).primary;
-    final secondary = HomeStyle(context: context).secondary;
+    final primary = AppColors.primary(context);
+    final secondary = AppColors.secondary(context);
     return BottomNavigationBarItem(
       icon: SvgPicture.asset(
         iconPath,

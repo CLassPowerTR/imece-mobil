@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 Container gonderiContainer(
   BuildContext context,
-  HomeStyle themeData,
   String gonderiBaslik,
   String gonderiAciklama,
   List gonderiImages,
@@ -14,11 +14,11 @@ Container gonderiContainer(
 ) {
   return container(context,
       border: Border.all(
-          color: HomeStyle(context: context).outline.withOpacity(0.2)),
+          color: AppColors.outline(context).withOpacity(0.2)),
       isBoxShadow: false,
       borderRadius: BorderRadius.circular(8),
       padding: EdgeInsets.all(5),
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       margin: EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,16 +26,16 @@ Container gonderiContainer(
         mainAxisSize: MainAxisSize.min,
         spacing: 10,
         children: [
-          _profilResimveAdi(context, themeData, profilImage, profilName),
+          _profilResimveAdi(context, profilImage, profilName),
           _gonderiResmi(gonderiImages),
           customText(gonderiBaslik, context,
-              size: themeData.bodyMedium.fontSize, weight: FontWeight.w700),
+              size: AppTextSizes.bodyMedium(context), weight: FontWeight.w700),
           customText(gonderiAciklama, context)
         ],
       ));
 }
 
-Row _profilResimveAdi(BuildContext context, HomeStyle themeData,
+Row _profilResimveAdi(BuildContext context,
     String profilImage, String profilName) {
   return Row(
     spacing: 10,
@@ -44,7 +44,7 @@ Row _profilResimveAdi(BuildContext context, HomeStyle themeData,
         backgroundImage: NetworkImage(profilImage),
       ),
       customText('${profilName}', context,
-          weight: FontWeight.w400, size: themeData.bodyMedium.fontSize)
+          weight: FontWeight.w400, size:  AppTextSizes.bodyMedium(context))
     ],
   );
 }
@@ -79,7 +79,7 @@ SizedBox _gonderiResmi(List gonderiImages) {
                   width: 25,
                   height: 25,
                   decoration: BoxDecoration(
-                    color: HomeStyle(context: context).outline,
+                    color: AppColors.outline(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

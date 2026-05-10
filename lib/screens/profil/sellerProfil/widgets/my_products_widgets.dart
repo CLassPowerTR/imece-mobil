@@ -1,3 +1,4 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
@@ -10,7 +11,7 @@ import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/sellerProducts.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/products_provider.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 
 class MyProductsGrid extends ConsumerWidget {
   final User seller;
@@ -27,7 +28,6 @@ class MyProductsGrid extends ConsumerWidget {
     final asyncProducts = ref.watch(
       sellerProductsProvider(seller.saticiProfili?.kullanici ?? 0),
     );
-    final theme = HomeStyle(context: context);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -39,7 +39,7 @@ class MyProductsGrid extends ConsumerWidget {
           title,
           context,
           weight: FontWeight.w700,
-          size: theme.bodyLarge.fontSize,
+          size: AppTextStyle.bodyLarge(context).fontSize,
         ),
       ),
       body: SafeArea(
@@ -61,7 +61,7 @@ class MyProductsGrid extends ConsumerWidget {
                   child: customText(
                     'Henüz ürün eklenmemiş.',
                     context,
-                    color: theme.outline,
+                    color: AppColors.outline(context),
                   ),
                 );
               }

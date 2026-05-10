@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/models/users.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 Widget FollowsCard(
     BuildContext context, User user, int saticiId, VoidCallback onTapProfile) {
   return Card(
-    color: HomeStyle(context: context).surface,
+    color: AppColors.surface(context),
     elevation: 2,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
@@ -55,7 +56,7 @@ Widget FollowsCard(
                     child: customText(
                         user.saticiProfili!.degerlendirmePuani.toString(),
                         context,
-                        color: HomeStyle(context: context).onSecondary),
+                        color: AppColors.onSecondary(context)),
                   );
                 } else {
                   return SizedBox();

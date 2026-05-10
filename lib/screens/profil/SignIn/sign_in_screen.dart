@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/core/widgets/loading_overlay.dart';
-// import 'package:imecehub/providers/auth_provider.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/screens/profil/profile_screen.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 part 'sign_in_view_header.dart';
@@ -67,7 +65,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
@@ -78,7 +76,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
 
           width: double.infinity,
 
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(32),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40),
                           gradient: LinearGradient(
@@ -86,11 +84,11 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                           
                             end: Alignment.bottomRight,
                             colors: [
-                              DesignTokens.primary.withOpacity(0.05),
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
+                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
 
                             ],
                           ),
@@ -110,7 +108,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                           children: [
                             // Logo
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
+                              padding: EdgeInsets.only(bottom: 24),
                               child: Image.asset(
                                 'assets/image/website.png',
                                 height: 40,
@@ -118,7 +116,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                               ),
                             ),
                             headText(context),
-                            const SizedBox(height: 28),
+                            SizedBox(height: 28),
                             emailAdressContainer(
                               width,
                               context,
@@ -131,7 +129,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                             : fieldErrors?['email'].toString())
                                       : null),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             passwordContainer(
                               width,
                               context,
@@ -153,37 +151,37 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                 Navigator.pushNamed(context, '/profil/changePassword');
                               },
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             checkContract(width, context, isCheckedContract, (value) {
                               setState(() {
                                 isCheckedContract = value!;
                               });
                             }),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             // Hata banner — React tarzı
                             if (errorMessage != null)
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.all(14),
+                                padding: EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: DesignTokens.error.withOpacity(0.06),
+                                  color: Theme.of(context).colorScheme.error.withOpacity(0.06),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: DesignTokens.error.withOpacity(0.15),
+                                    color: Theme.of(context).colorScheme.error.withOpacity(0.15),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.cancel_rounded,
-                                        size: 20, color: DesignTokens.error),
-                                    const SizedBox(width: 12),
+                                    Icon(Icons.cancel_rounded,
+                                        size: 20, color: Theme.of(context).colorScheme.error),
+                                    SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         errorMessage!,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w800,
-                                          color: DesignTokens.error,
+                                          color: Theme.of(context).colorScheme.error,
                                           letterSpacing: 0.8,
                                         ),
                                       ),
@@ -191,7 +189,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                   ],
                                 ),
                               ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6),
                             NextButton(
                               context,
                               'Giriş Yap',
@@ -301,11 +299,42 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                 }
                               },
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: 20),
                             orLine(width, context),
-                            const SizedBox(height: 20),
-                            signInWithGoogle(context, width),
-                            const SizedBox(height: 28),
+                            SizedBox(height: 20),
+                            signInWithGoogle(context, width, onTap: () async {
+                              setState(() => isLoading = true);
+                              try {
+                                await ref.read(userProvider.notifier).googleLogin();
+                                setState(() => isLoading = false);
+                                if (mounted) {
+                                  showTemporarySnackBar(
+                                    context,
+                                    'Google ile giriş başarılı!',
+                                    type: SnackBarType.success,
+                                  );
+                                  ref.read(bottomNavIndexProvider.notifier).setIndex(3);
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    '/home',
+                                    (route) => false,
+                                    arguments: {'refresh': true},
+                                  );
+                                }
+                              } catch (e) {
+                                setState(() => isLoading = false);
+                                final msg = e.toString().replaceAll('Exception: ', '');
+                                if (msg.contains('iptal')) return; // Kullanıcı iptal etti
+                                if (mounted) {
+                                  showTemporarySnackBar(
+                                    context,
+                                    msg,
+                                    type: SnackBarType.error,
+                                  );
+                                }
+                              }
+                            }),
+                            SizedBox(height: 28),
                             signUpText(context, () {
                               Navigator.pushNamed(context, '/profil/signUp');
                             }),

@@ -14,27 +14,27 @@ Widget headText(BuildContext context) {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w900,
-            color: DesignTokens.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
           children: [
-            const TextSpan(text: 'HESABINIZA '),
+            TextSpan(text: 'HESABINIZA '),
             TextSpan(
               text: 'GİRİŞ YAPIN',
               style: TextStyle(
-                color: DesignTokens.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       Text(
         'Hoş geldiniz, maceraya devam edin',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w800,
-          color: DesignTokens.textTertiary,
+          color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
           letterSpacing: 2.0,
         ),
         textAlign: TextAlign.center,
@@ -62,13 +62,13 @@ Widget emailAdressContainer(
       children: [
         // Label
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
             'E-POSTA ADRESİ',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: DesignTokens.textTertiary,
+              color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
               letterSpacing: 2.5,
             ),
           ),
@@ -81,7 +81,7 @@ Widget emailAdressContainer(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: errorText != null
-                  ? DesignTokens.error
+                  ? Theme.of(context).colorScheme.error
                   : const Color(0xFFF1F5F9),
               width: 2,
             ),
@@ -96,47 +96,47 @@ Widget emailAdressContainer(
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.emailAddress,
-            style: const TextStyle(
-              color: DesignTokens.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
             decoration: InputDecoration(
-              prefixIcon: const Padding(
+              prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 16, right: 12),
                 child: Icon(Icons.mail_outline_rounded,
-                    color: DesignTokens.textTertiary, size: 22),
+                    color: Theme.of(context).colorScheme.outline, size: 22),
               ),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               hintText: 'name@email.com',
               hintStyle: TextStyle(
-                color: DesignTokens.textTertiary.withOpacity(0.5),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
               border: InputBorder.none,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             ),
           ),
         ),
         // Hata metni
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(left: 4, top: 6),
+            padding: EdgeInsets.only(left: 4, top: 6),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded,
-                    size: 14, color: DesignTokens.error),
-                const SizedBox(width: 4),
+                Icon(Icons.error_outline_rounded,
+                    size: 14, color: Theme.of(context).colorScheme.error),
+                SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     errorText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: DesignTokens.error,
+                      color: Theme.of(context).colorScheme.error,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -174,7 +174,7 @@ Widget passwordContainer(
       children: [
         // Label satırı
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8, right: 4),
+          padding: EdgeInsets.only(left: 4, bottom: 8, right: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -183,19 +183,19 @@ Widget passwordContainer(
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
-                  color: DesignTokens.textTertiary,
+                  color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
                   letterSpacing: 2.5,
                 ),
               ),
               if (onForgotPassword != null)
                 GestureDetector(
                   onTap: onForgotPassword,
-                  child: const Text(
+                  child: Text(
                     'ŞİFREMİ UNUTTUM',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
-                      color: DesignTokens.primary,
+                      color: AppColors.primary(context),
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -211,7 +211,7 @@ Widget passwordContainer(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: errorText != null
-                  ? DesignTokens.error
+                  ? Theme.of(context).colorScheme.error
                   : const Color(0xFFF1F5F9),
               width: 2,
             ),
@@ -226,16 +226,16 @@ Widget passwordContainer(
           child: TextField(
             controller: textFieldController,
             obscureText: obscureText,
-            style: const TextStyle(
-              color: DesignTokens.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
             decoration: InputDecoration(
-              prefixIcon: const Padding(
+              prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 16, right: 12),
                 child: Icon(Icons.lock_outline_rounded,
-                    color: DesignTokens.textTertiary, size: 22),
+                    color: Theme.of(context).colorScheme.outline, size: 22),
               ),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 0, minHeight: 0),
@@ -243,12 +243,12 @@ Widget passwordContainer(
                   ? GestureDetector(
                       onTap: onTap,
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 16),
+                        padding: EdgeInsets.only(right: 16),
                         child: Icon(
                           obscureText
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: DesignTokens.textTertiary,
+                          color: Theme.of(context).colorScheme.outline,
                           size: 22,
                         ),
                       ),
@@ -258,32 +258,32 @@ Widget passwordContainer(
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               hintText: hintText,
               hintStyle: TextStyle(
-                color: DesignTokens.textTertiary.withOpacity(0.5),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
               border: InputBorder.none,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             ),
           ),
         ),
         // Hata metni
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(left: 4, top: 6),
+            padding: EdgeInsets.only(left: 4, top: 6),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded,
-                    size: 14, color: DesignTokens.error),
-                const SizedBox(width: 4),
+                Icon(Icons.error_outline_rounded,
+                    size: 14, color: Theme.of(context).colorScheme.error),
+                SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     errorText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: DesignTokens.error,
+                      color: Theme.of(context).colorScheme.error,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -315,13 +315,13 @@ Widget usernameContainer(
       children: [
         // Label
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
             'KULLANICI ADI',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: DesignTokens.textTertiary,
+              color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
               letterSpacing: 2.5,
             ),
           ),
@@ -334,7 +334,7 @@ Widget usernameContainer(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: errorText != null
-                  ? DesignTokens.error
+                  ? Theme.of(context).colorScheme.error
                   : const Color(0xFFF1F5F9),
               width: 2,
             ),
@@ -349,47 +349,47 @@ Widget usernameContainer(
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.text,
-            style: const TextStyle(
-              color: DesignTokens.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
             decoration: InputDecoration(
-              prefixIcon: const Padding(
+              prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 16, right: 12),
                 child: Icon(Icons.person_outline_rounded,
-                    color: DesignTokens.textTertiary, size: 22),
+                    color: Theme.of(context).colorScheme.outline, size: 22),
               ),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               hintText: 'Kullanıcı adınızı girin',
               hintStyle: TextStyle(
-                color: DesignTokens.textTertiary.withOpacity(0.5),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
               border: InputBorder.none,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             ),
           ),
         ),
         // Hata metni
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(left: 4, top: 6),
+            padding: EdgeInsets.only(left: 4, top: 6),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded,
-                    size: 14, color: DesignTokens.error),
-                const SizedBox(width: 4),
+                Icon(Icons.error_outline_rounded,
+                    size: 14, color: Theme.of(context).colorScheme.error),
+                SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     errorText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: DesignTokens.error,
+                      color: Theme.of(context).colorScheme.error,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -424,22 +424,22 @@ SizedBox checkContract(
             height: 22,
             decoration: BoxDecoration(
               color: isCheckedContract
-                  ? DesignTokens.primary
+                  ? Theme.of(context).colorScheme.primary
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isCheckedContract
-                    ? DesignTokens.primary
-                    : DesignTokens.textTertiary.withOpacity(0.4),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.4),
                 width: 2,
               ),
             ),
             child: isCheckedContract
-                ? const Icon(Icons.check_rounded,
+                ? Icon(Icons.check_rounded,
                     size: 16, color: Colors.white)
                 : null,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           // Metin
           Expanded(
             child: Text.rich(
@@ -447,20 +447,20 @@ SizedBox checkContract(
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: DesignTokens.textSecondary,
+                  color: AppColors.primary(context),
                   letterSpacing: 0.8,
                   height: 1.4,
                 ),
-                children: const [
+                children: [
                   TextSpan(text: 'Hizmet Şartlarını '),
                   TextSpan(
                     text: 've ',
-                    style: TextStyle(color: DesignTokens.textTertiary),
+                    style: TextStyle(color: AppColors.secondary(context)),
                   ),
                   TextSpan(text: 'Gizlilik Politikasını '),
                   TextSpan(
                     text: 'okudum ve kabul ediyorum.',
-                    style: TextStyle(color: DesignTokens.textTertiary),
+                    style: TextStyle(color: AppColors.secondary(context)),
                   ),
                 ],
               ),
@@ -490,12 +490,12 @@ SizedBox NextButton(
     height: minSizeHeight ?? 56,
     child: Material(
       color: isEnabled
-          ? DesignTokens.primary
-          : DesignTokens.textTertiary.withOpacity(0.3),
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.3),
       borderRadius: BorderRadius.circular(16),
       elevation: isEnabled ? 8 : 0,
       shadowColor: isEnabled
-          ? DesignTokens.primary.withOpacity(0.25)
+          ? Theme.of(context).colorScheme.primary.withOpacity(0.25)
           : Colors.transparent,
       child: InkWell(
         onTap: isEnabled ? onPressed : null,
@@ -514,8 +514,8 @@ SizedBox NextButton(
                 ),
               ),
               if (isEnabled) ...[
-                const SizedBox(width: 12),
-                const Icon(Icons.login_rounded,
+                SizedBox(width: 12),
+                Icon(Icons.login_rounded,
                     color: Colors.white, size: 20),
               ],
             ],
@@ -544,13 +544,13 @@ SizedBox orLine(double width, BuildContext context,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'VEYA',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: DesignTokens.textTertiary.withOpacity(0.5),
+              color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
               letterSpacing: 3.0,
             ),
           ),
@@ -573,6 +573,7 @@ Widget signInWithGoogle(
   BuildContext context,
   double width, {
   double? containerHeight,
+  VoidCallback? onTap,
 }) {
   return SizedBox(
     width: width,
@@ -581,7 +582,7 @@ Widget signInWithGoogle(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: () {
+        onTap: onTap ?? () {
           showTemporarySnackBar(context, 'Bu özellik yakında eklenecek...');
         },
         borderRadius: BorderRadius.circular(16),
@@ -596,7 +597,7 @@ Widget signInWithGoogle(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Google ikonu — SVG yerine basit "G" harfi kullanılır
+              // Google ikonu
               Container(
                 width: 22,
                 height: 22,
@@ -610,13 +611,13 @@ Widget signInWithGoogle(
                   fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Text(
                 'GOOGLE İLE DEVAM ET',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
-                  color: DesignTokens.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 1.5,
                 ),
               ),
@@ -638,7 +639,7 @@ Widget signUpText(
   String textFirst = 'Hesabınız yok mu?',
 }) {
   return Padding(
-    padding: const EdgeInsets.only(top: 8),
+    padding: EdgeInsets.only(top: 8),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -647,28 +648,28 @@ Widget signUpText(
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w900,
-            color: DesignTokens.textTertiary,
+            color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
             letterSpacing: 1.5,
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: 6),
         GestureDetector(
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: DesignTokens.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   width: 2,
                 ),
               ),
             ),
             child: Text(
               textSecond.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w900,
-                color: DesignTokens.primary,
+                color: Theme.of(context).colorScheme.primary,
                 letterSpacing: 1.5,
               ),
             ),

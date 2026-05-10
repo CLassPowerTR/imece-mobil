@@ -1,3 +1,4 @@
+
 part of '../seller_profil_screen.dart';
 
 class SellerProfileSettingsScreen extends ConsumerStatefulWidget {
@@ -366,7 +367,7 @@ class _SellerProfileSettingsScreenState
                   : Text(
                       'Kaydet',
                       style: TextStyle(
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -484,26 +485,22 @@ class _SellerProfileSettingsScreenState
                     FilteringTextInputFormatter.digitsOnly,
                     IbanInputFormatter(),
                   ],
-                  style: TextStyle(color: HomeStyle(context: context).primary),
+                  style: TextStyle(color: AppColors.primary(context)),
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     isDense: true,
                     labelStyle: TextStyle(
-                      color: HomeStyle(
-                        context: context,
-                      ).outline.withOpacity(0.5),
+                      color: AppColors.outline(context).withOpacity(0.5),
                     ),
                     labelText: 'IBAN',
                     prefixText: 'TR ',
                     prefixStyle: TextStyle(
-                      color: HomeStyle(context: context).primary,
+                      color: AppColors.primary(context),
                       fontWeight: FontWeight.w600,
                     ),
                     hintText: '98 7654 3210 9876 5432 1098 76',
                     hintStyle: TextStyle(
-                      color: HomeStyle(
-                        context: context,
-                      ).outline.withOpacity(0.5),
+                      color: AppColors.outline(context).withOpacity(0.5),
                     ),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,
@@ -511,20 +508,20 @@ class _SellerProfileSettingsScreenState
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide(
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                     ),
                   ),

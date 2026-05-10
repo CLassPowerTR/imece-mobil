@@ -1,3 +1,4 @@
+
 part of 'buyer_profil_screen.dart';
 
 class _topProfile extends StatelessWidget {
@@ -12,7 +13,6 @@ class _topProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = HomeStyle(context: context);
     final isSmallScreen = width < 360;
 
     final String profileImageUrl =
@@ -36,9 +36,9 @@ class _topProfile extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.primary.withOpacity(0.8),
-            theme.secondary.withOpacity(0.9),
-            theme.secondary,
+            AppColors.primary(context).withOpacity(0.8),
+            AppColors.secondary(context).withOpacity(0.9),
+            AppColors.secondary(context),
           ],
         ),
       ),
@@ -80,7 +80,7 @@ class _topProfile extends StatelessWidget {
                                 width: isSmallScreen ? 50 : 60,
                                 height: isSmallScreen ? 50 : 60,
                                 colorFilter: ColorFilter.mode(
-                                  theme.primary,
+                                  AppColors.primary(context),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -172,7 +172,6 @@ class _userMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = HomeStyle(context: context);
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
 
     final menuItems = [
@@ -308,12 +307,12 @@ class _userMenu extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
+                        color: AppColors.primary(context).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         item.icon,
-                        color: theme.primary,
+                        color: AppColors.primary(context),
                         size: isSmallScreen ? 20 : 22,
                       ),
                     ),

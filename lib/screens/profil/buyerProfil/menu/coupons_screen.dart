@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class CouponsScreen extends StatefulWidget {
@@ -25,13 +26,13 @@ class _CouponsScreenState extends State<CouponsScreen> {
         leading: TurnBackTextIcon(),
         centerTitle: true,
         title: customText('Kuponlarım', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600),
         actions: [
           TextButton(
               onPressed: () {},
               child: customText('Kupon Ekle', context,
-                  color: HomeStyle(context: context).secondary,
+                  color: AppColors.secondary(context),
                   weight: FontWeight.w600,
                   size: 16)),
         ],

@@ -18,7 +18,7 @@ class __MessagingViewBodyState extends State<_MessagingViewBody> {
         right: true,
         top: true,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+          padding: EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
               Container(
@@ -45,7 +45,7 @@ class __MessagingViewBodyState extends State<_MessagingViewBody> {
                   children: [
                     MessagingViewTextfield(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                           vertical: 5, horizontal: 10),
                       child: Row(
                         spacing: 25,
@@ -80,7 +80,7 @@ class __MessagingViewBodyState extends State<_MessagingViewBody> {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: EdgeInsets.only(top: 20),
                   child: MessagingViewListView(
                     isSelected: isSelected,
                   ),

@@ -1,3 +1,4 @@
+
 part of '../products_screen.dart';
 
 class ProductsCategoryButtons extends StatefulWidget {
@@ -18,21 +19,21 @@ class _ProductsCategoryButtonsState extends State<ProductsCategoryButtons> {
   @override
   Widget build(BuildContext context) {
     Color filterButtonOnColor =
-        HomeStyle(context: context).secondary.withOpacity(0.15);
+        AppColors.secondary(context).withOpacity(0.15);
     return TextButton.icon(
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith<Color?>(
             (states) => _isSelected
                 ? filterButtonOnColor
-                : HomeStyle(context: context).surface,
+                : AppColors.surface(context),
           ),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20), // Kenar yumuşaklığı
               side: BorderSide(
                 color: _isSelected
-                    ? HomeStyle(context: context).secondary
-                    : HomeStyle(context: context).outline, // Çizgi rengi
+                    ? AppColors.secondary(context)
+                    : AppColors.outline(context), // Çizgi rengi
                 width: 1, // Çizgi kalınlığı
               ),
             ),
@@ -40,11 +41,11 @@ class _ProductsCategoryButtonsState extends State<ProductsCategoryButtons> {
           iconSize: WidgetStateProperty.all(25),
           textStyle: WidgetStateProperty.all<TextStyle>(
             TextStyle(
-                fontSize: HomeStyle(context: context).bodyLarge.fontSize,
-                color: HomeStyle(context: context).primary),
+                fontSize: AppTextStyle.bodyLarge(context).fontSize,
+                color: AppColors.primary(context)),
           ),
           iconColor: WidgetStateProperty.all<Color>(
-              HomeStyle(context: context).secondary)),
+              AppColors.secondary(context))),
       icon: widget.items['icon'],
       label: Text(widget.items['name']),
       onPressed: () {

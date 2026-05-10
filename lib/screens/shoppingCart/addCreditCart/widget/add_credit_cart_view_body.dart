@@ -108,7 +108,6 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    final themeData = HomeStyle(context: context);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -125,7 +124,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
               spacing: 5,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _headerText(context, themeData, 'Kart Numarası'),
+                _headerText(context, 'Kart Numarası'),
                 textField(context,
                     hintText: "0000 0000 0000 0000",
                     keyboardType: TextInputType.datetime,
@@ -142,7 +141,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  _headerText(context, themeData, 'Son Kullanma Tarihi'),
+                  _headerText(context,  'Son Kullanma Tarihi'),
                   SizedBox(
                     child: textField(context,
                         hintText: '00/00',
@@ -161,7 +160,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 5,
                   children: [
-                    _headerText(context, themeData, 'CVV'),
+                    _headerText(context, 'CVV'),
                     SizedBox(
                       child: textField(context,
                           hintText: '000',
@@ -180,7 +179,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 5,
               children: [
-                _headerText(context, themeData, 'Kart Sahibi Adı'),
+                _headerText(context, 'Kart Sahibi Adı'),
                 textField(context,
                     hintText: 'Kart sahibinin adı',
                     keyboardType: TextInputType.name,
@@ -190,7 +189,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
             CheckboxListTile(
               title: customText('Kartı daha sonrası için kaydet', context),
               value: _isChecked,
-              activeColor: themeData.primary,
+              activeColor: AppColors.primary(context),
               onChanged: (bool? newValue) {
                 setState(() {
                   _isChecked = newValue ?? false;
@@ -202,7 +201,7 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
             CheckboxListTile(
               title: customText('Varsayılan kart olarak ayarla', context),
               value: _isDefault,
-              activeColor: themeData.primary,
+              activeColor: AppColors.primary(context),
               onChanged: (bool? newValue) {
                 setState(() {
                   _isDefault = newValue ?? false;
@@ -215,13 +214,13 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
               'Kaydet',
               elevation: 6,
               weight: FontWeight.w600,
-              fontSize: themeData.bodyLarge.fontSize,
+              fontSize: AppTextSizes.bodyLarge(context),
               buttonColor: _isSaveButton
-                  ? themeData.secondary
-                  : themeData.primary.withOpacity(0.3),
+                  ? AppColors.secondary(context)
+                  : AppColors.primary(context).withOpacity(0.3),
               shadowColor: _isSaveButton
-                  ? themeData.secondary
-                  : themeData.primary.withOpacity(0.3),
+                  ? AppColors.secondary(context)
+                  : AppColors.primary(context).withOpacity(0.3),
               onPressed: _isSaveButton
                   ? () async {
                       try {
@@ -292,9 +291,9 @@ class _AddCreditCartViewBodyState extends State<AddCreditCartViewBody> {
     );
   }
 
-  Padding _headerText(BuildContext context, HomeStyle themeData, String text) {
+  Padding _headerText(BuildContext context, String text) {
     return customText(text, context,
-        size: themeData.bodyLarge.fontSize, weight: FontWeight.w600);
+        size: AppTextSizes.bodyLarge(context), weight: FontWeight.w600);
   }
 }
 

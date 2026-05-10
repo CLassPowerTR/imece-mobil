@@ -1,3 +1,4 @@
+
 part of '../../buyer_profil_screen.dart';
 
 class MyProfileScreen extends ConsumerStatefulWidget {
@@ -420,7 +421,6 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   }
 
   Widget _buildProfilePhotoSection(User user, bool isSmallScreen) {
-    final theme = HomeStyle(context: context);
     final String profileImageUrl =
         (user.profilFotograf == null || (user.profilFotograf?.isEmpty ?? true))
             ? NotFound.defaultProfileImageUrl
@@ -464,7 +464,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
                               width: isSmallScreen ? 60 : 70,
                               height: isSmallScreen ? 60 : 70,
                               colorFilter: ColorFilter.mode(
-                                theme.primary,
+                                AppColors.primary(context),
                                 BlendMode.srcIn,
                               ),
                             ),

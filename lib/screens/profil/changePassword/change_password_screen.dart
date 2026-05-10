@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+
 import 'package:imecehub/core/widgets/loading_overlay.dart';
 import 'package:imecehub/screens/profil/SignIn/sign_in_screen.dart'; // import to use emailAdressContainer, NextButton, SignInAppBar
 import 'package:imecehub/services/api_service.dart';
@@ -77,7 +77,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
@@ -86,18 +86,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              DesignTokens.primary.withOpacity(0.05),
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
+                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
                             ],
                           ),
                           boxShadow: [
@@ -115,7 +115,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           children: [
                             // Logo
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
+                              padding: EdgeInsets.only(bottom: 24),
                               child: Image.asset(
                                 'assets/image/website.png',
                                 height: 40,
@@ -127,40 +127,40 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               successView(context),
                             ] else ...[
                               forgotPasswordHeadText(context),
-                              const SizedBox(height: 28),
+                              SizedBox(height: 28),
                               
                               emailAdressContainer(
                                 width,
                                 context,
                                 controller: emailController,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               
                               // Hata banner
                               if (errorMessage != null)
                                 Container(
                                   width: double.infinity,
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  padding: const EdgeInsets.all(14),
+                                  margin: EdgeInsets.only(bottom: 16),
+                                  padding: EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: DesignTokens.error.withOpacity(0.06),
+                                    color: Theme.of(context).colorScheme.error.withOpacity(0.06),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: DesignTokens.error.withOpacity(0.15),
+                                      color: Theme.of(context).colorScheme.error.withOpacity(0.15),
                                     ),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.cancel_rounded,
-                                          size: 20, color: DesignTokens.error),
-                                      const SizedBox(width: 12),
+                                      Icon(Icons.cancel_rounded,
+                                          size: 20, color: Theme.of(context).colorScheme.error),
+                                      SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
                                           errorMessage!,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
-                                            color: DesignTokens.error,
+                                            color: Theme.of(context).colorScheme.error,
                                             letterSpacing: 0.8,
                                           ),
                                         ),
@@ -175,7 +175,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 true,
                                 onPressed: _handleSubmit,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               
                               backToLoginButton(context, () {
                                 Navigator.pop(context);

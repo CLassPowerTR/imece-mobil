@@ -1,3 +1,4 @@
+
 part of '../home_screen.dart';
 
 class HomeHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -6,10 +7,10 @@ class HomeHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: HomeStyle(context: context).surface,
+      backgroundColor: AppColors.surface(context),
       leading: Builder(
         builder: (context) => IconButton(
-          icon: Icon(Icons.menu, color: HomeStyle(context: context).primary),
+          icon: Icon(Icons.menu, color: AppColors.primary(context)),
           onPressed: () {
             Scaffold.of(context).openDrawer();
           },
@@ -17,19 +18,19 @@ class HomeHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       titleSpacing: 0,
       title: Padding(
-        padding: const EdgeInsets.only(top: 5),
+        padding: EdgeInsets.only(top: 5),
         child: homeTextFieldBar(context),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.mail_outline, color: DesignTokens.textSecondary),
+          icon: Icon(Icons.mail_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.notifications_none, color: DesignTokens.textSecondary),
+          icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurfaceVariant),
           onPressed: () {},
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
       ],
     );
   }

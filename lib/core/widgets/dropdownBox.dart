@@ -49,7 +49,7 @@ class DropdownBox extends StatelessWidget {
             borderSide: BorderSide(color: secondary, width: 1),
           ),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         items: items
             .map((tip) => DropdownMenuItem(
@@ -67,7 +67,7 @@ class DropdownBox extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(4),
                               )
                             : null,
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         child: Text(
                           label,

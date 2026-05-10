@@ -1,3 +1,4 @@
+
 part of '../products_detail_screen.dart';
 
 class ProductsDetailViewBottom extends ConsumerStatefulWidget {
@@ -38,7 +39,7 @@ class _ProductsDetailViewBottomState
           horizontal: isSmallScreen ? 8 : 10,
           vertical: isSmallScreen ? 6 : 8,
         ),
-        color: HomeStyle(context: context).surfaceContainer,
+        color: AppColors.surface(context),
         width: double.infinity,
         height: isSmallScreen ? 60 : 70,
         child: Center(child: buildLoadingBar(context)),
@@ -49,7 +50,7 @@ class _ProductsDetailViewBottomState
           horizontal: isSmallScreen ? 8 : 10,
           vertical: isSmallScreen ? 6 : 8,
         ),
-        color: HomeStyle(context: context).surfaceContainer,
+        color: AppColors.surface(context),
         width: double.infinity,
         height: isSmallScreen ? 60 : 70,
         child: Center(
@@ -60,7 +61,6 @@ class _ProductsDetailViewBottomState
         ),
       ),
       data: (product) {
-        final themeData = HomeStyle(context: context);
         final currentUser = ref.watch(userProvider);
         final isSeller = currentUser?.rol == 'satici';
         return container(
@@ -69,12 +69,12 @@ class _ProductsDetailViewBottomState
             horizontal: isSmallScreen ? 8 : 10,
             vertical: isSmallScreen ? 6 : 8,
           ),
-          color: themeData.surfaceContainer,
+          color: AppColors.surface(context),
           width: double.infinity,
           height: isSmallScreen ? 60 : 70,
           child: Row(
             children: [
-              _fiyatStokText(themeData, product, isSmallScreen),
+              _fiyatStokText(product, isSmallScreen),
               SizedBox(width: isSmallScreen ? 6 : 10),
 
               if (product.satis_turu == 2) ...[
@@ -127,7 +127,7 @@ class _ProductsDetailViewBottomState
                 color: AppColors.onPrimary(context),
                 size: isSmallScreen
                     ? 11
-                    : HomeStyle(context: context).bodySmall.fontSize,
+                    : AppTextStyle.bodySmall(context).fontSize,
               ),
             ),
           );
@@ -148,7 +148,6 @@ class _ProductsDetailViewBottomState
   }
 
   Expanded _fiyatStokText(
-    HomeStyle themeData,
     Product product,
     bool isSmallScreen,
   ) {
@@ -158,15 +157,17 @@ class _ProductsDetailViewBottomState
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           style: TextStyle(
-            fontSize: isSmallScreen ? 11 : themeData.bodyMedium.fontSize,
-            color: themeData.primary,
+            fontSize: isSmallScreen
+                ? 11
+                : AppTextStyle.bodyMedium(context).fontSize,
+            color: AppColors.primary(context),
             fontWeight: FontWeight.bold,
           ),
           children: [
             TextSpan(text: 'KG:'),
             TextSpan(
               text: ' ${product.urunParakendeFiyat} TL',
-              style: TextStyle(color: themeData.secondary),
+              style: TextStyle(color: AppColors.secondary(context)),
             ),
             TextSpan(text: '\nKalan:'),
             TextSpan(

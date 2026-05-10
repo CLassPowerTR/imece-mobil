@@ -1,3 +1,4 @@
+
 part of '../home_screen.dart';
 
 class HomeDrawer extends ConsumerStatefulWidget {
@@ -19,10 +20,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
-    final themeData = HomeStyle(context: context);
 
     return Drawer(
-      backgroundColor: themeData.surface,
+      backgroundColor: AppColors.surface(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -34,7 +34,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               left: 20,
               right: 20,
             ),
-            color: themeData.primary,
+            color: AppColors.primary(context),
             child: user == null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,21 +45,21 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                           CircleAvatar(
                             backgroundColor: Colors.white70,
                             radius: 24,
-                            child: Icon(Icons.person, color: themeData.primary, size: 24),
+                            child: Icon(Icons.person, color: AppColors.primary(context), size: 24),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: RichText(
                               text: TextSpan(
                                 text: "Giriş yap",
-                                style: themeData.titleSmall.copyWith(
+                                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 children: [
                                   TextSpan(
                                     text: "\nHesabım & Siparişlerim",
-                                    style: themeData.bodySmall.copyWith(
+                                    style: AppTextStyle.bodySmall(context).copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -81,13 +81,13 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                           CircleAvatar(
                             backgroundColor: Colors.white,
                             radius: 24,
-                            child: Icon(Icons.person, color: themeData.primary, size: 30),
+                            child: Icon(Icons.person, color: AppColors.primary(context), size: 30),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "${user.firstName} ${user.lastName}",
-                              style: themeData.titleMedium.copyWith(
+                              style: Theme.of(context).textTheme.titleMedium!.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -95,10 +95,10 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text(
                         "Hesabım & Siparişlerim",
-                        style: themeData.bodyMedium.copyWith(
+                        style: AppTextStyle.bodyMedium(context).copyWith(
                           color: Colors.white,
                         ),
                       ),
@@ -111,12 +111,12 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               padding: EdgeInsets.zero,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                   child: Text(
                     "Kategoriler",
-                    style: themeData.titleMedium.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: DesignTokens.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -132,7 +132,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                       );
                     } else if (snapshot.hasError) {
                       return Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(20.0),
                         child: Text("Hata: ${snapshot.error}"),
                       );
                     } else if (snapshot.hasData) {
@@ -140,11 +140,11 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                       return Column(
                         children: categories.map((category) {
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 20),
                             title: Text(
                               category.altKategoriAdi.toString(),
-                              style: themeData.bodyMedium.copyWith(
-                                color: DesignTokens.textSecondary,
+                              style: AppTextStyle.bodyMedium(context).copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

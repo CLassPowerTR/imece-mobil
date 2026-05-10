@@ -58,7 +58,7 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = _mapOrderStatus(durum, context);
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.surface(context),
         borderRadius: AppRadius.r10,
@@ -74,7 +74,7 @@ class OrderCard extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               color: AppColors.secondary(context),
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(10),
                 topRight: Radius.circular(10),
               ),
@@ -130,7 +130,7 @@ class OrderCard extends StatelessWidget {
                     )
                   ],
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 _OrderInfoTile(
                   label: 'Fatura Adresi',
                   value: faturaAdresText,
@@ -140,7 +140,7 @@ class OrderCard extends StatelessWidget {
                     fontSize: AppTextSizes.bodyMedium(context),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
@@ -199,7 +199,7 @@ class _OrderInfoTile extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           value,
           maxLines: maxLines ?? 3,

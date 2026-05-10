@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'dart:async';
-import 'package:imecehub/core/theme/design_tokens.dart';
+
 import 'package:imecehub/core/widgets/loading_overlay.dart';
 import 'package:imecehub/screens/profil/SignIn/sign_in_screen.dart'; // import NextButton, SignInAppBar, vb.
 import 'package:imecehub/services/api_service.dart';
@@ -150,7 +151,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
@@ -159,18 +160,18 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              DesignTokens.primary.withOpacity(0.05),
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
+                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
                             ],
                           ),
                           boxShadow: [
@@ -188,7 +189,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                           children: [
                             // Logo
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
+                              padding: EdgeInsets.only(bottom: 24),
                               child: Image.asset(
                                 'assets/image/website.png',
                                 height: 40,
@@ -200,7 +201,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                               animatedSuccessView(context),
                             ] else ...[
                               refreshPasswordHeadText(context),
-                              const SizedBox(height: 28),
+                              SizedBox(height: 28),
                               
                               // Sadece E-Posta Gösterimi veya Girişi
                               emailAdressContainer(
@@ -208,7 +209,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                 context,
                                 controller: emailController,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               
                               // OTP Giriş Alanı
                               otpInputBoxes(
@@ -220,7 +221,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                   });
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
 
                               // Yeni Şifre
                               passwordContainer(
@@ -237,7 +238,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                   });
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
 
                               // Yeni Şifre Tekrar
                               passwordContainer(
@@ -254,33 +255,33 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                   });
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               
                               // Hata banner
                               if (errorMessage != null)
                                 Container(
                                   width: double.infinity,
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  padding: const EdgeInsets.all(14),
+                                  margin: EdgeInsets.only(bottom: 16),
+                                  padding: EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: DesignTokens.error.withOpacity(0.06),
+                                    color: Theme.of(context).colorScheme.error.withOpacity(0.06),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: DesignTokens.error.withOpacity(0.15),
+                                      color: Theme.of(context).colorScheme.error.withOpacity(0.15),
                                     ),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.cancel_rounded,
-                                          size: 20, color: DesignTokens.error),
-                                      const SizedBox(width: 12),
+                                      Icon(Icons.cancel_rounded,
+                                          size: 20, color: Theme.of(context).colorScheme.error),
+                                      SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
                                           errorMessage!,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
-                                            color: DesignTokens.error,
+                                            color: Theme.of(context).colorScheme.error,
                                             letterSpacing: 0.8,
                                           ),
                                         ),
@@ -295,7 +296,7 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                 true,
                                 onPressed: _handleSubmit,
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24),
                               
                               // Hızlı Destek Butonu / Tekrar Gönder
                               Column(
@@ -309,36 +310,21 @@ class _RefreshPasswordScreenState extends State<RefreshPasswordScreen> {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.arrow_back_rounded, size: 16, color: DesignTokens.textTertiary),
-                                        const SizedBox(width: 6),
+                                        Icon(Icons.arrow_back_rounded, size: 16, color: Theme.of(context).colorScheme.outline),
+                                        SizedBox(width: 6),
                                         Text(
                                           'KOD TALEBİNİ YENİLE',
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w900,
-                                            color: DesignTokens.textTertiary,
+                                            color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
                                             letterSpacing: 2.0,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(context, '/profil/support');
-                                    },
-                                    child: Text(
-                                      'DESTEK HATTINA BAĞLAN',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900,
-                                        color: DesignTokens.textTertiary,
-                                        letterSpacing: 2.0,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
+                                  
                                 ],
                               ),
                             ],

@@ -47,7 +47,7 @@ class _SellerCommentsScreenState extends State<SellerCommentsScreen> {
               itemBuilder: (context, index) {
                 final item = yorumlar[index];
                 return ListTile(
-                  leading: const Icon(Icons.store),
+                  leading: Icon(Icons.store),
                   title: Text(item['yorum']?.toString() ?? 'Yorum'),
                   subtitle: Text('Puan: ${item['puan'] ?? '-'}'),
                 );

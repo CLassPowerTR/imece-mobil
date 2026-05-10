@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -60,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, color: HomeStyle(context: context).secondary),
+              Icon(icon, color: AppColors.secondary(context)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -70,7 +71,7 @@ class SettingsScreen extends StatelessWidget {
                     Text(title,
                         style: TextStyle(
                           fontSize: 16,
-                          color: HomeStyle(context: context).primary,
+                          color: AppColors.primary(context),
                           fontWeight: FontWeight.w600,
                         )),
                     Text(subtitle,

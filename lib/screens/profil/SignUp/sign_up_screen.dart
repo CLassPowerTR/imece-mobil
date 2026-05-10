@@ -63,7 +63,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 40,
@@ -72,18 +72,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              DesignTokens.primary.withOpacity(0.05),
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
-                              DesignTokens.surfaceLight,
+                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(context).colorScheme.surface,
                             ],
                           ),
                           boxShadow: [
@@ -101,7 +101,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           children: [
                             // ── Logo ──
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 20),
+                              padding: EdgeInsets.only(bottom: 20),
                               child: Image.asset(
                                 'assets/image/website.png',
                                 height: 36,
@@ -111,7 +111,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                             // ── Başlık ──
                             _buildHeader(),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
 
                             // ── Kullanıcı Adı ──
                             usernameContainer(
@@ -124,7 +124,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       : errorMessage?['username'].toString())
                                   : null,
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: 14),
 
                             // ── E-posta ──
                             emailAdressContainer(
@@ -138,7 +138,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                           : errorMessage?['email'].toString())
                                       : null),
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: 14),
 
                             // ── Şifre & Tekrar (yan yana) ──
                             Row(
@@ -160,7 +160,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                         : null,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: 12),
                                 // Tekrar
                                 Expanded(
                                   child: _buildCompactPasswordField(
@@ -174,12 +174,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
 
                             // ── Şifre Kuralları ──
                             if (passwordController.text.isNotEmpty)
                               _buildPasswordRules(),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
 
                             // ── Sözleşme ──
                             checkContract(width, context, isCheckedContract, (value) {
@@ -187,7 +187,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 isCheckedContract = value!;
                               });
                             }),
-                            const SizedBox(height: 10),
+                            SizedBox(height: 10),
 
                             // ── Hata Banner ──
                             if (errorMessage != null &&
@@ -199,19 +199,50 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                         v is List ? v.join(', ') : v.toString())
                                     .join('\n'),
                               ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
 
                             // ── Kayıt Ol Butonu ──
                             _buildRegisterButton(context),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
 
                             // ── Veya ──
                             orLine(width, context, containerHeight: 24),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
 
                             // ── Google ile Kayıt ──
-                            signInWithGoogle(context, width, containerHeight: 50),
-                            const SizedBox(height: 24),
+                            signInWithGoogle(context, width, containerHeight: 50, onTap: () async {
+                              setState(() => isLoading = true);
+                              try {
+                                await ref.read(userProvider.notifier).googleLogin();
+                                setState(() => isLoading = false);
+                                if (mounted) {
+                                  showTemporarySnackBar(
+                                    context,
+                                    'Google ile giriş başarılı!',
+                                    type: SnackBarType.success,
+                                  );
+                                  ref.read(bottomNavIndexProvider.notifier).setIndex(3);
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    '/home',
+                                    (route) => false,
+                                    arguments: {'refresh': true},
+                                  );
+                                }
+                              } catch (e) {
+                                setState(() => isLoading = false);
+                                final msg = e.toString().replaceAll('Exception: ', '');
+                                if (msg.contains('iptal')) return;
+                                if (mounted) {
+                                  showTemporarySnackBar(
+                                    context,
+                                    msg,
+                                    type: SnackBarType.error,
+                                  );
+                                }
+                              }
+                            }),
+                            SizedBox(height: 24),
 
                             // ── Alt bağlantılar ──
                             signUpText(
@@ -220,7 +251,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               textFirst: 'Zaten bir hesabınız var mı?',
                               textSecond: 'Giriş Yapın',
                             ),
-                            const SizedBox(height: 10),
+                            SizedBox(height: 10),
                           ],
                         ),
                       ),
@@ -251,29 +282,29 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           maxLines: 2,
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          text: const TextSpan(
+          text: TextSpan(
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
-              color: DesignTokens.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.3,
             ),
             children: [
               TextSpan(
                 text: 'İMECEHUB\'YE ',
-                style: TextStyle(color: DesignTokens.primary),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
               TextSpan(text: 'HOŞ GELDİN'),
             ],
           ),
         ),
-        const SizedBox(height: 6),
-        const Text(
+        SizedBox(height: 6),
+         Text(
           'Hemen ücretsiz hesabınızı oluşturun',
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w800,
-            color: DesignTokens.textTertiary,
+            color: AppColors.secondary(context),
             letterSpacing: 2.0,
           ),
           textAlign: TextAlign.center,
@@ -298,13 +329,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       children: [
         // Label
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          padding: EdgeInsets.only(left: 4, bottom: 6),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w900,
-              color: DesignTokens.textTertiary,
+              color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
               letterSpacing: 2.0,
             ),
           ),
@@ -317,7 +348,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: errorText != null
-                  ? DesignTokens.error
+                  ? Theme.of(context).colorScheme.error
                   : const Color(0xFFF1F5F9),
               width: 2,
             ),
@@ -325,28 +356,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           child: TextField(
             controller: controller,
             obscureText: obscure,
-            style: const TextStyle(
-              color: DesignTokens.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
             decoration: InputDecoration(
-              prefixIcon: const Padding(
+              prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 12, right: 8),
                 child: Icon(Icons.lock_outline_rounded,
-                    color: DesignTokens.textTertiary, size: 18),
+                    color: Theme.of(context).colorScheme.outline, size: 18),
               ),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               suffixIcon: GestureDetector(
                 onTap: onToggle,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 10),
+                  padding: EdgeInsets.only(right: 10),
                   child: Icon(
                     obscure
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: DesignTokens.textTertiary,
+                    color: Theme.of(context).colorScheme.outline,
                     size: 18,
                   ),
                 ),
@@ -355,26 +386,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               hintText: '••••••••',
               hintStyle: TextStyle(
-                color: DesignTokens.textTertiary.withOpacity(0.5),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
               ),
               border: InputBorder.none,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
           ),
         ),
         // Hata
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(left: 4, top: 4),
+            padding: EdgeInsets.only(left: 4, top: 4),
             child: Text(
               errorText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: DesignTokens.error,
+                color: Theme.of(context).colorScheme.error,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -397,7 +428,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
@@ -414,18 +445,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 rule.met ? Icons.check_rounded : Icons.close_rounded,
                 size: 14,
                 color: rule.met
-                    ? DesignTokens.success
-                    : DesignTokens.textTertiary.withOpacity(0.4),
+                    ? const Color(0xFF10B981)
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.4),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Text(
                 rule.label.toUpperCase(),
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w900,
                   color: rule.met
-                      ? DesignTokens.success
-                      : DesignTokens.textTertiary,
+                      ? const Color(0xFF10B981)
+                      : Theme.of(context).colorScheme.outline,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -442,24 +473,24 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   Widget _buildErrorBanner(String message) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: DesignTokens.error.withOpacity(0.06),
+        color: Theme.of(context).colorScheme.error.withOpacity(0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: DesignTokens.error.withOpacity(0.15)),
+        border: Border.all(color: Theme.of(context).colorScheme.error.withOpacity(0.15)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.cancel_rounded,
-              size: 16, color: DesignTokens.error),
-          const SizedBox(width: 10),
+          Icon(Icons.cancel_rounded,
+              size: 16, color: Theme.of(context).colorScheme.error),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
-                color: DesignTokens.error,
+                color: Theme.of(context).colorScheme.error,
                 letterSpacing: 0.5,
               ),
             ),
@@ -484,12 +515,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       height: 50,
       child: Material(
         color: isFormValid
-            ? DesignTokens.textPrimary
-            : DesignTokens.textTertiary.withOpacity(0.3),
+            ? Theme.of(context).colorScheme.onSurface
+            : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(14),
         elevation: isFormValid ? 6 : 0,
         shadowColor: isFormValid
-            ? DesignTokens.textPrimary.withOpacity(0.25)
+            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.25)
             : Colors.transparent,
         child: InkWell(
           onTap: isFormValid ? _handleRegister : null,
@@ -502,7 +533,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   isLoading
                       ? 'İŞLEMİNİZ YAPILIYOR...'
                       : 'KAYIT OL VE İLERLE',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -510,8 +541,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   ),
                 ),
                 if (!isLoading) ...[
-                  const SizedBox(width: 10),
-                  const Icon(Icons.person_add_alt_1_rounded,
+                  SizedBox(width: 10),
+                  Icon(Icons.person_add_alt_1_rounded,
                       color: Colors.white, size: 16),
                 ],
               ],

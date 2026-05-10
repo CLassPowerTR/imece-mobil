@@ -4,14 +4,14 @@ AppBar _SignUpAppBar(BuildContext context) {
   return AppBar(
     leadingWidth: 30,
     title: customText('Geri', context,
-        color: HomeStyle(context: context).secondary,
-        size: HomeStyle(context: context).headlineSmall.fontSize,
+        color: AppColors.secondary(context),
+        size: 20,
         weight: FontWeight.bold),
     iconTheme: IconThemeData(
-        applyTextScaling: true,
-        size: 30,
-        color: HomeStyle(context: context)
-            .secondary), // Geri butonunun rengi kırmız
+      applyTextScaling: true,
+      size: 30,
+      color: AppColors.secondary(context), // Geri butonunun rengi kırmız
+    ),
     backgroundColor: Colors.transparent,
   );
 }

@@ -1,3 +1,4 @@
+
 part of '../messaging_view.dart';
 
 class _MessagingViewHeaderAppBar extends StatelessWidget
@@ -21,11 +22,11 @@ class _MessagingViewHeaderAppBar extends StatelessWidget
               Navigator.pop(context);
             },
             label: customText('Profile Geri Dön', context,
-                color: HomeStyle(context: context).secondary,
-                size: HomeStyle(context: context).bodyLarge.fontSize),
+                color: AppColors.secondary(context),
+                size: AppTextStyle.bodyLarge(context).fontSize),
             icon: Icon(
               Icons.keyboard_backspace,
-              color: HomeStyle(context: context).secondary,
+              color: AppColors.secondary(context),
               size: 25,
             ),
           ),

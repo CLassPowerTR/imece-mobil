@@ -12,7 +12,7 @@ Expanded groupBuyButton(
 }) {
   final width = MediaQuery.of(context).size.width;
   final isSmallScreen = width < 360;
-  final theme = HomeStyle(context: context);
+
   return Expanded(
     child: textButton(
       context,
@@ -22,7 +22,7 @@ Expanded groupBuyButton(
       elevation: elevation ?? 4,
       onPressed: onPressed,
       weight: FontWeight.bold,
-      fontSize: HomeStyle(context: context).bodySmall.fontSize,
+      fontSize: AppTextSizes.bodySmall(context),
     ),
   );
 }

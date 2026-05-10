@@ -12,10 +12,11 @@ import 'package:imecehub/models/campaigns.dart';
 import 'package:imecehub/models/stories.dart';
 import '../models/users.dart';
 import '../models/productCategories.dart';
-import '../api/api_config.dart'; // Add this line to import ApiConfig
+import '../api/api_config.dart';
 import '../models/urunYorum.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/deps.dart';
+import 'api_logger.dart';
 
 class ApiService {
   static final config = ApiConfig();
@@ -36,16 +37,93 @@ class ApiService {
     return _deps.tokenStorage.getRefreshToken();
   }
 
+  /// Tüm API yanıtlarını loglar
+  /// [method] — HTTP metodu (GET, POST, PUT, DELETE)
+  /// [url] — API endpoint URL
+  /// [statusCode] — HTTP durum kodu
+  /// [responseBody] — API yanıt gövdesi
+  /// [requestBody] — İstek gövdesi (opsiyonel)
+  /// [durationMs] — İstek süresi (ms)
+  /// [errorMessage] — Hata mesajı (opsiyonel)
+  static Future<void> _logApiResponse({
+    required String method,
+    required String url,
+    required int statusCode,
+    String? responseBody,
+    String? requestBody,
+    int? durationMs,
+    String? errorMessage,
+  }) async {
+    if (statusCode >= 200 && statusCode < 300) {
+      await ApiLogger.logSuccess(
+        method: method,
+        url: url,
+        statusCode: statusCode,
+        responseBody: responseBody,
+        durationMs: durationMs,
+      );
+    } else if (statusCode >= 400 && statusCode < 500) {
+      await ApiLogger.logWarning(
+        method: method,
+        url: url,
+        statusCode: statusCode,
+        message: errorMessage,
+        requestBody: requestBody,
+        responseBody: responseBody,
+        durationMs: durationMs,
+      );
+    } else {
+      await ApiLogger.logError(
+        method: method,
+        url: url,
+        statusCode: statusCode,
+        message: errorMessage,
+        requestBody: requestBody,
+        responseBody: responseBody,
+        durationMs: durationMs,
+      );
+    }
+  }
+
+  /// Exception'ları loglar (ağ hataları, timeout vb.)
+  static Future<void> _logApiException({
+    required String method,
+    required String url,
+    required dynamic error,
+    String? requestBody,
+    int? durationMs,
+  }) async {
+    await ApiLogger.logError(
+      method: method,
+      url: url,
+      message: error.toString(),
+      requestBody: requestBody,
+      durationMs: durationMs,
+    );
+  }
+
   /// API'den User verisini çekmek için metot.
   static Future<List<Company>> fetchSellers() async {
+    final url = config.companiesApiUrl;
+    final stopwatch = Stopwatch()..start();
     final response = await _deps.httpClient.get(
-      Uri.parse(config.companiesApiUrl),
+      Uri.parse(url),
       headers: {
         'X-API-Key': config.apiKey,
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8',
         'Allow': 'Get',
       },
+    );
+    stopwatch.stop();
+
+    await _logApiResponse(
+      method: 'GET',
+      url: url,
+      statusCode: response.statusCode,
+      responseBody: response.body,
+      durationMs: stopwatch.elapsedMilliseconds,
+      errorMessage: response.statusCode != 200 ? 'User verisi alınamadı' : null,
     );
 
     if (response.statusCode == 200) {
@@ -333,16 +411,20 @@ class ApiService {
     String userName,
     String password,
   ) async {
+    final url = config.userRqRegisterApiUrl;
+    final body = json.encode({
+      'email': email,
+      'username': userName,
+      'password': password,
+      'rol': 'alici',
+    });
+    final stopwatch = Stopwatch()..start();
+
     http.Response response;
     try {
       response = await _deps.httpClient.post(
-        Uri.parse(config.userRqRegisterApiUrl),
-        body: json.encode({
-          'email': email,
-          'username': userName,
-          'password': password,
-          'rol': 'alici',
-        }),
+        Uri.parse(url),
+        body: body,
         headers: {
           'X-API-Key': config.apiKey,
           'Content-Type': 'application/json',
@@ -350,9 +432,18 @@ class ApiService {
         },
       );
     } catch (e) {
+      stopwatch.stop();
       debugPrint('fetchUserRegister isteği başarısız: $e');
+      await _logApiException(
+        method: 'POST',
+        url: url,
+        error: e,
+        requestBody: body,
+        durationMs: stopwatch.elapsedMilliseconds,
+      );
       rethrow;
     }
+    stopwatch.stop();
 
     final bodyText = utf8.decode(response.bodyBytes);
     Map<String, dynamic>? jsonData;
@@ -366,6 +457,16 @@ class ApiService {
         debugPrint('fetchUserRegister JSON parse hatası: $e');
       }
     }
+
+    await _logApiResponse(
+      method: 'POST',
+      url: url,
+      statusCode: response.statusCode,
+      responseBody: bodyText,
+      requestBody: body,
+      durationMs: stopwatch.elapsedMilliseconds,
+      errorMessage: response.statusCode >= 300 ? (jsonData?['message']?.toString() ?? 'Kayıt başarısız') : null,
+    );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       // Kayıt başarılı — token kaydetme, e-posta doğrulaması sonrası yapılacak
@@ -577,36 +678,168 @@ class ApiService {
   }
 
   static Future fetchUserLogin(String email, String password) async {
-    final response = await _deps.httpClient.post(
-      Uri.parse(config.userRqLoginApiUrl),
-      body: json.encode({'email': email, 'password': password}),
-      headers: {
-        'X-API-Key': config.apiKey,
-        'Content-Type': 'application/json',
-        'Allow': 'Post',
-      },
-    );
-    final jsonData = json.decode(utf8.decode(response.bodyBytes));
-    if (response.statusCode == 200 && jsonData != null) {
-      if (jsonData['tokens'] != null) {
-        final accessToken = jsonData['tokens']['access'] ?? '';
-        final refreshToken = jsonData['tokens']['refresh'] ?? '';
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accesToken', accessToken);
-        await prefs.setString('refreshToken', refreshToken);
+    final url = config.userRqLoginApiUrl;
+    final body = json.encode({'email': email, 'password': password});
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      final response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: body,
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+          'Allow': 'Post',
+        },
+      );
+      stopwatch.stop();
+      final responseBody = utf8.decode(response.bodyBytes);
+      final jsonData = json.decode(responseBody);
+
+      if (response.statusCode == 200 && jsonData != null) {
+        if (jsonData['tokens'] != null) {
+          final accessToken = jsonData['tokens']['access'] ?? '';
+          final refreshToken = jsonData['tokens']['refresh'] ?? '';
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accesToken', accessToken);
+          await prefs.setString('refreshToken', refreshToken);
+        }
+        await ApiLogger.logSuccess(
+          method: 'POST',
+          url: url,
+          statusCode: response.statusCode,
+          responseBody: responseBody,
+          durationMs: stopwatch.elapsedMilliseconds,
+        );
+      } else {
+        final errorMessage = jsonData != null
+            ? (jsonData['message'] ?? 'Kullanıcı kaydı başarısız.')
+            : response.body;
+
+        if (response.statusCode >= 400 && response.statusCode < 500) {
+          await ApiLogger.logWarning(
+            method: 'POST',
+            url: url,
+            statusCode: response.statusCode,
+            message: errorMessage.toString(),
+            requestBody: body,
+            responseBody: responseBody,
+            durationMs: stopwatch.elapsedMilliseconds,
+          );
+        } else {
+          await ApiLogger.logError(
+            method: 'POST',
+            url: url,
+            statusCode: response.statusCode,
+            message: errorMessage.toString(),
+            requestBody: body,
+            responseBody: responseBody,
+            durationMs: stopwatch.elapsedMilliseconds,
+          );
+        }
+        throw Exception('$errorMessage');
       }
-    } else {
-      final errorMessage = jsonData != null
-          ? (jsonData['message'] ?? 'Kullanıcı kaydı başarısız.')
-          : response.body;
-      throw Exception('$errorMessage');
+    } catch (e) {
+      stopwatch.stop();
+      if (e is! Exception || (!e.toString().contains('başarısız') && !e.toString().contains('Invalid'))) {
+        await ApiLogger.logError(
+          method: 'POST',
+          url: url,
+          message: e.toString(),
+          requestBody: body,
+          durationMs: stopwatch.elapsedMilliseconds,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  /// Google ile giriş — idToken backend'e gönderilir, access/refresh token döner
+  static Future fetchGoogleLogin(String idToken) async {
+    final url = config.googleLoginApiUrl;
+    final body = json.encode({'id_token': idToken});
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      final response = await _deps.httpClient.post(
+        Uri.parse(url),
+        body: body,
+        headers: {
+          'X-API-Key': config.apiKey,
+          'Content-Type': 'application/json',
+          'Allow': 'Post',
+        },
+      );
+      stopwatch.stop();
+      final responseBody = utf8.decode(response.bodyBytes);
+      final jsonData = json.decode(responseBody);
+
+      if (response.statusCode == 200 && jsonData != null) {
+        if (jsonData['tokens'] != null) {
+          final accessToken = jsonData['tokens']['access'] ?? '';
+          final refreshToken = jsonData['tokens']['refresh'] ?? '';
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accesToken', accessToken);
+          await prefs.setString('refreshToken', refreshToken);
+        }
+
+        await ApiLogger.logSuccess(
+          method: 'POST',
+          url: url,
+          statusCode: response.statusCode,
+          responseBody: responseBody,
+          durationMs: stopwatch.elapsedMilliseconds,
+        );
+      } else {
+        final errorMessage = jsonData != null
+            ? (jsonData['message'] ?? 'Google ile giriş başarısız.')
+            : response.body;
+
+        if (response.statusCode >= 400 && response.statusCode < 500) {
+          await ApiLogger.logWarning(
+            method: 'POST',
+            url: url,
+            statusCode: response.statusCode,
+            message: errorMessage.toString(),
+            requestBody: body,
+            responseBody: responseBody,
+            durationMs: stopwatch.elapsedMilliseconds,
+          );
+        } else {
+          await ApiLogger.logError(
+            method: 'POST',
+            url: url,
+            statusCode: response.statusCode,
+            message: errorMessage.toString(),
+            requestBody: body,
+            responseBody: responseBody,
+            durationMs: stopwatch.elapsedMilliseconds,
+          );
+        }
+
+        throw Exception('$errorMessage');
+      }
+    } catch (e) {
+      stopwatch.stop();
+      if (e is! Exception || !e.toString().contains('Google ile giriş')) {
+        await ApiLogger.logError(
+          method: 'POST',
+          url: url,
+          message: e.toString(),
+          requestBody: body,
+          durationMs: stopwatch.elapsedMilliseconds,
+        );
+      }
+      rethrow;
     }
   }
 
   static Future<User> fetchUserMe() async {
+    final url = config.userMeApiUrl;
+    final stopwatch = Stopwatch()..start();
     final accessToken = await getAccessToken();
     final response = await _deps.httpClient.get(
-      Uri.parse(config.userMeApiUrl),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'X-API-Key': config.apiKey,
@@ -614,8 +847,30 @@ class ApiService {
         'Allow': 'Get',
       },
     );
+    stopwatch.stop();
+    final responseBody = utf8.decode(response.bodyBytes);
+
+    await _logApiResponse(
+      method: 'GET',
+      url: url,
+      statusCode: response.statusCode,
+      responseBody: responseBody,
+      durationMs: stopwatch.elapsedMilliseconds,
+      errorMessage: response.statusCode != 200 ? 'Kullanıcı me bilgisi alınamadı' : null,
+    );
+
     if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final jsonData = json.decode(utf8.decode(response.bodyBytes));
+      final jsonData = json.decode(responseBody);
+      // Kullanıcı bilgilerini SharedPreferences'a kaydet (loglama için)
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        if (jsonData['id'] != null) {
+          await prefs.setInt('currentUserId', jsonData['id']);
+        }
+        if (jsonData['email'] != null) {
+          await prefs.setString('currentUserEmail', jsonData['email']);
+        }
+      } catch (_) {}
       return User.fromJson(jsonData);
     } else {
       throw Exception(

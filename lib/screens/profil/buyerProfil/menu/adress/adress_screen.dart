@@ -1,3 +1,4 @@
+
 part of '../../buyer_profil_screen.dart';
 
 class AdressScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _AdressScreenState extends State<AdressScreen> {
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         leading: TurnBackTextIcon(),
         title: customText('Adreslerim', context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             weight: FontWeight.w600),
         actions: [
           TextButton(
@@ -46,9 +47,9 @@ class _AdressScreenState extends State<AdressScreen> {
               });
             },
             child: customText('Adres Ekle', context,
-                size: HomeStyle(context: context).bodyLarge.fontSize,
+                size: AppTextStyle.bodyLarge(context).fontSize,
                 weight: FontWeight.w600,
-                color: HomeStyle(context: context).secondary),
+                color: AppColors.secondary(context)),
             ),
           
         ],

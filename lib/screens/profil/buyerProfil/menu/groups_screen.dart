@@ -1,3 +1,4 @@
+
 part of '../buyer_profil_screen.dart';
 
 class GroupsScreen extends ConsumerStatefulWidget {
@@ -19,7 +20,6 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
   @override
   Widget build(BuildContext context) {
     final groupsState = ref.watch(groupsProvider);
-    final themeData = HomeStyle(context: context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -41,7 +41,6 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
-            fontFamily: themeData.bodyLarge.fontFamily,
           ),
         ),
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:imecehub/core/variables/url.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:shimmer/shimmer.dart';
@@ -36,7 +35,6 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
   Widget build(BuildContext context) {
     final product = widget.product;
     final item = widget.item;
-    final themeData = HomeStyle(context: context);
     final totalPrice =
         (double.tryParse(item['miktar'].toString()) ?? 0) *
         (double.tryParse(product.urunParakendeFiyat.toString()) ?? 0);
@@ -82,7 +80,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                           // Sol: Ürün Görseli
                           _buildProductImage(
                             product,
-                            themeData,
+                            context,
                             isSmallScreen: isSmallScreen,
                           ),
                           SizedBox(width: isSmallScreen ? 8 : 12),
@@ -128,7 +126,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
                           Flexible(
                             child: _buildQuantitySelector(
                               item,
-                              themeData,
+                              context,
                               isSmallScreen: isSmallScreen,
                             ),
                           ),
@@ -148,7 +146,7 @@ class _SepetProductsCardState extends State<SepetProductsCard> {
           ),
 
           // Sağ Üst: Silme İkonu
-          Positioned(top: 8, right: 8, child: _buildDeleteButton(themeData)),
+          Positioned(top: 8, right: 8, child: _buildDeleteButton(context)),
         ],
       ),
     );

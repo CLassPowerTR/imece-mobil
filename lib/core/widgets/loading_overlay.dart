@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+
 
 /// Ana loading overlay widget'ı.
 ///
@@ -35,14 +36,14 @@ class LoadingOverlay extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Dönen halka — DesignTokens.primary rengi
+                  // Dönen halka — Theme.of(context).colorScheme.primary rengi
                   SizedBox(
                     width: 120,
                     height: 120,
                     child: CircularProgressIndicator(
                       strokeWidth: 3.5,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        DesignTokens.primary,
+                      valueColor:  AlwaysStoppedAnimation<Color>(
+                        AppColors.primary(context),
                       ),
                     ),
                   ),
@@ -59,25 +60,25 @@ class LoadingOverlay extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Durum mesajı — headlineSmall
             Text(
               message,
               style: textTheme.headlineSmall?.copyWith(
-                color: DesignTokens.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
             // Sabit "LÜTFEN BEKLEYİNİZ" — bodyMedium, tertiary renk
             Text(
               'LÜTFEN BEKLEYİNİZ',
               style: textTheme.bodyMedium?.copyWith(
-                color: DesignTokens.textTertiary,
+                color: Theme.of(context).colorScheme.outline,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.2,
               ),

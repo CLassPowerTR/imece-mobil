@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
 
 Padding customText(
   String text,
@@ -12,7 +13,7 @@ Padding customText(
       true, // metnin otomatik olarak satır sonlarında sarmalanıp sarmalanmayacağı
   TextAlign textAlign = TextAlign.start, // yazıyı ortalar
   TextOverflow overflow = TextOverflow.ellipsis, // taşarsa ... olarak gösterir
-  EdgeInsetsGeometry padding = const EdgeInsets.all(0),
+  EdgeInsetsGeometry padding = AppPaddings.zero,
   TextStyle? style,
 }) {
   final effectiveColor = color ?? Theme.of(context).colorScheme.primary;

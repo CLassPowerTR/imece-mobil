@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/richText.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 SizedBox textButton(
   BuildContext context,
@@ -24,17 +25,17 @@ SizedBox textButton(
   AlignmentGeometry? textAlignment,
 }) {
   final effectiveButtonColor =
-      buttonColor ?? Theme.of(context).colorScheme.secondary;
+      buttonColor ?? AppColors.secondary(context);
   final effectiveTextColor =
-      titleColor ?? Theme.of(context).colorScheme.onSecondary;
+      titleColor ?? AppColors.onSecondary(context);
   final effectiveMinSizeWidth =
       minSizeWidth ?? MediaQuery.of(context).size.width;
   final effectiveMinSizeHeight = minSizeHeight ?? 50;
   final effectiveFontSize =
-      fontSize ?? HomeStyle(context: context).bodyLarge.fontSize;
+      fontSize ??   AppTextSizes.bodyLarge(context);
   BorderSide? test = border == true
       ? BorderSide(
-          color: borderColor ?? HomeStyle(context: context).outline,
+          color: borderColor ?? AppColors.outline(context),
           width: borderWidth ?? 0,
         )
       : null;
@@ -45,9 +46,7 @@ SizedBox textButton(
       elevation: elevation ?? 2, // Gölgeleme seviyesi
       shadowColor:
           shadowColor ??
-          HomeStyle(
-            context: context,
-          ).shadow.withOpacity(0.5), // Gölgenin rengi ve opaklığı
+          AppColors.shadow(context).withOpacity(0.5), // Gölgenin rengi ve opaklığı
       borderRadius: borderRadius ?? BorderRadius.circular(8.0),
       child: TextButton(
         onPressed: onPressed,

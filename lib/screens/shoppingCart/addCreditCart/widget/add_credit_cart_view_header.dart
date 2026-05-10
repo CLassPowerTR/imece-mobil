@@ -14,12 +14,12 @@ AppBar _AddCreditCartAppBar(BuildContext context) {
             icon: Icon(
               Icons.arrow_back,
               size: 30,
-              color: HomeStyle(context: context).secondary,
+              color: AppColors.secondary(context),
             ),
             label: customText('Geri Dön', context,
                 weight: FontWeight.w600,
                 size: 18,
-                color: HomeStyle(context: context).secondary)),
+                color: AppColors.secondary(context))),
       ),
     ),
   );

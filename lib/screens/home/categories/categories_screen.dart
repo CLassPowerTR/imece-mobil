@@ -1,6 +1,10 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/textField.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/screens/products/products_screen.dart';
 
 part 'widget/categories_view_body.dart';

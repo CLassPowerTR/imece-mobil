@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
+
 import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/raitingStars.dart';
 import 'package:imecehub/core/widgets/richText.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/models/products.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class productsCard2 extends StatefulWidget {
   final Product product;
@@ -39,23 +40,23 @@ class _productsCardState extends State<productsCard2> {
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.warning_rounded,
                 color: Colors.red,
                 size: 24,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Ürünü Sil',
                 style: TextStyle(
-                  fontSize: HomeStyle(context: ctx).titleLarge.fontSize,
+                  fontSize: AppTextSizes.titleLarge(context),
                   fontWeight: FontWeight.bold,
                   color: Theme.of(ctx).colorScheme.onSurface,
                 ),
@@ -70,13 +71,13 @@ class _productsCardState extends State<productsCard2> {
             Text(
               'Bu ürünü silmek istediğinize emin misiniz?',
               style: TextStyle(
-                fontSize: HomeStyle(context: ctx).bodyLarge.fontSize,
+                fontSize: AppTextSizes.bodyLarge(context),
                 color: Theme.of(ctx).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
@@ -86,14 +87,14 @@ class _productsCardState extends State<productsCard2> {
                   Icon(
                     Icons.info_outline,
                     size: 18,
-                    color: HomeStyle(context: ctx).primary,
+                    color: AppColors.primary(ctx),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       widget.product.urunAdi ?? 'Ürün',
                       style: TextStyle(
-                        fontSize: HomeStyle(context: ctx).bodyMedium.fontSize,
+                        fontSize: AppTextSizes.bodyMedium(context),
                         fontWeight: FontWeight.w600,
                         color: Theme.of(ctx).colorScheme.onSurface,
                       ),
@@ -104,11 +105,11 @@ class _productsCardState extends State<productsCard2> {
                 ],
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               'Bu işlem geri alınamaz.',
               style: TextStyle(
-                fontSize: HomeStyle(context: ctx).bodySmall.fontSize,
+                fontSize: AppTextSizes.bodySmall(context),
                 color: Colors.red.withOpacity(0.8),
                 fontStyle: FontStyle.italic,
               ),
@@ -119,7 +120,7 @@ class _productsCardState extends State<productsCard2> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: Text(
               'İptal',
@@ -129,13 +130,13 @@ class _productsCardState extends State<productsCard2> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -203,8 +204,8 @@ class _productsCardState extends State<productsCard2> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
                 Expanded(child: Text('Ürün silinirken bir hata oluştu: $e')),
               ],
             ),
@@ -228,7 +229,7 @@ class _productsCardState extends State<productsCard2> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: HomeStyle(context: context).surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Column(
@@ -273,14 +274,12 @@ class _productsCardState extends State<productsCard2> {
                                       width: 25,
                                       height: 25,
                                       decoration: BoxDecoration(
-                                        color: HomeStyle(
-                                          context: context,
-                                        ).outline,
+                                        color: AppColors.outline(context),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         "${imgIndex + 1}/${widget.product.kapakGorseli!.length}",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -314,12 +313,12 @@ class _productsCardState extends State<productsCard2> {
                                   width: 25,
                                   height: 25,
                                   decoration: BoxDecoration(
-                                    color: HomeStyle(context: context).outline,
+                                    color: AppColors.outline(context),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
                                     "1/1",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -345,17 +344,17 @@ class _productsCardState extends State<productsCard2> {
                 }
               },
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             richText(
-              color: DesignTokens.textSecondary,
-              fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: AppTextSizes.bodyLarge(context),
               textAlign: TextAlign.start,
               context,
               maxLines: 10,
               children: [
                 TextSpan(
                   text: widget.product.urunAdi ?? '',
-                  style: TextStyle(color: HomeStyle(context: context).primary),
+                  style: TextStyle(color: AppColors.primary(context)),
                 ),
                 TextSpan(text: '\n', style: TextStyle(fontSize: 11)),
                 WidgetSpan(
@@ -397,13 +396,9 @@ class _productsCardState extends State<productsCard2> {
                           minSizeHeight: 38,
                           elevation: 0,
                           weight: FontWeight.bold,
-                          fontSize: HomeStyle(
-                            context: context,
-                          ).bodyLarge.fontSize,
-                          buttonColor: HomeStyle(
-                            context: context,
-                          ).surfaceContainer,
-                          titleColor: HomeStyle(context: context).secondary,
+                          fontSize: AppTextSizes.bodyLarge(context),
+                          buttonColor: AppColors.surfaceContainer(context),
+                          titleColor: AppColors.secondary(context),
                           border: true,
                           borderWidth: 1,
                           onPressed: _isDeleting
@@ -420,7 +415,7 @@ class _productsCardState extends State<productsCard2> {
                                 },
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Container(
                         width: 38,
                         height: 38,
@@ -437,7 +432,7 @@ class _productsCardState extends State<productsCard2> {
                           ),
                         ),
                         child: _isDeleting
-                            ? const Padding(
+                            ? Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: SizedBox(
                                   width: 20,
@@ -452,7 +447,7 @@ class _productsCardState extends State<productsCard2> {
                               )
                             : IconButton(
                                 padding: EdgeInsets.zero,
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.close_rounded,
                                   color: Colors.red,
                                   size: 20,
@@ -469,9 +464,9 @@ class _productsCardState extends State<productsCard2> {
                     minSizeHeight: 38,
                     elevation: 0,
                     weight: FontWeight.bold,
-                    fontSize: HomeStyle(context: context).bodyLarge.fontSize,
-                    buttonColor: HomeStyle(context: context).surfaceContainer,
-                    titleColor: DesignTokens.primary,
+                    fontSize: AppTextSizes.bodyLarge(context),
+                    buttonColor: AppColors.surfaceContainer(context),
+                    titleColor: Theme.of(context).colorScheme.primary,
                     border: true,
                     borderWidth: 1,
                     onPressed: () {

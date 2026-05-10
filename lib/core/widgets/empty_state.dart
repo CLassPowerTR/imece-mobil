@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 /// Boş durum gösterimini sağlayan yeniden kullanılabilir widget
 class EmptyState extends StatelessWidget {
@@ -39,8 +40,8 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
-    final effectiveIconColor = iconColor ?? themeData.primary.withOpacity(0.3);
+    
+    final effectiveIconColor = iconColor ?? AppColors.primary(context).withOpacity(0.3);
 
     return Center(
       child: Padding(
@@ -54,7 +55,7 @@ class EmptyState extends StatelessWidget {
             customText(
               title,
               context,
-              size: themeData.bodyLarge.fontSize,
+              size: AppTextSizes.bodyLarge(context),
               weight: FontWeight.bold,
               textAlign: TextAlign.center,
             ),
@@ -62,8 +63,8 @@ class EmptyState extends StatelessWidget {
             customText(
               message,
               context,
-              size: themeData.bodyMedium.fontSize,
-              color: themeData.primary.withOpacity(0.6),
+              size:AppTextSizes.bodyMedium(context),
+              color: AppColors.primary(context).withOpacity(0.6),
               textAlign: TextAlign.center,
               maxLines: 3,
             ),
@@ -73,7 +74,7 @@ class EmptyState extends StatelessWidget {
                 context,
                 actionText!,
                 onPressed: onAction,
-                buttonColor: themeData.secondary,
+                buttonColor: AppColors.secondary(context),
                 titleColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

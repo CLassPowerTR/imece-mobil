@@ -1,3 +1,5 @@
+
+
 part of '../seller_profil_screen.dart';
 
 class ShortcutCenter extends StatefulWidget {
@@ -64,7 +66,7 @@ class _ShortcutCenterState extends State<ShortcutCenter> {
             children: [
               icon,
               customText(text, context,
-                  size: HomeStyle(context: context).bodySmall.fontSize,
+                  size: AppTextStyle.bodySmall(context).fontSize,
                   weight: FontWeight.w300),
             ],
           ),
@@ -75,7 +77,6 @@ class _ShortcutCenterState extends State<ShortcutCenter> {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final double containerWidth =
@@ -113,7 +114,7 @@ class _ShortcutCenterState extends State<ShortcutCenter> {
                 context,
                 height: containerHeight,
                 width: containerWidth,
-                color: themeData.surfaceContainer.withOpacity(0.7),
+                color: AppColors.surfaceContainer(context).withOpacity(0.7),
                 isBoxShadow: false,
                 borderRadius: BorderRadius.circular(8),
                 child: SingleChildScrollView(

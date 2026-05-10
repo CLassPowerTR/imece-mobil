@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Başlık Metni — "ŞİFRE YENİLEME" stilinde
@@ -15,27 +16,27 @@ Widget refreshPasswordHeadText(BuildContext context) {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w900,
-            color: DesignTokens.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
           children: [
-            const TextSpan(text: 'ŞİFRE '),
+            TextSpan(text: 'ŞİFRE '),
             TextSpan(
               text: 'YENİLEME',
               style: TextStyle(
-                color: DesignTokens.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
         ),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       Text(
         'E-posta kodunu ve yeni şifrenizi girin',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w800,
-          color: DesignTokens.textTertiary,
+          color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
           letterSpacing: 2.0,
         ),
         textAlign: TextAlign.center,
@@ -71,24 +72,24 @@ Widget animatedSuccessView(BuildContext context) {
                   child: Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 48),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Text(
                 'ŞİFRE DEĞİŞTİRİLDİ!',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: DesignTokens.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: 1.0,
                   fontStyle: FontStyle.italic,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Şifreniz başarıyla güncellendi. Giriş sayfasına yönlendiriliyorsunuz...',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: DesignTokens.textTertiary,
+                  color: Theme.of(context).colorScheme.outline,
                   letterSpacing: 1.5,
                   height: 1.5,
                 ),
@@ -114,13 +115,13 @@ Widget otpInputBoxes({
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
-        padding: const EdgeInsets.only(left: 4, bottom: 8),
+        padding: EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           '6 HANELİ KOD',
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w900,
-            color: DesignTokens.textTertiary,
+            color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
             letterSpacing: 2.5,
           ),
         ),
@@ -140,14 +141,14 @@ Widget otpInputBoxes({
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isActive
-                        ? DesignTokens.primary
-                        : (isFilled ? DesignTokens.primary.withOpacity(0.5) : const Color(0xFFF1F5F9)),
+                        ? Theme.of(context).colorScheme.primary
+                        : (isFilled ? Theme.of(context).colorScheme.primary.withOpacity(0.5) : const Color(0xFFF1F5F9)),
                     width: 2,
                   ),
                   boxShadow: isFilled || isActive
                       ? [
                           BoxShadow(
-                            color: DesignTokens.primary.withOpacity(0.1),
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           )
@@ -157,10 +158,10 @@ Widget otpInputBoxes({
                 alignment: Alignment.center,
                 child: Text(
                   isFilled ? code[index] : '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
-                    color: DesignTokens.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               );
@@ -174,7 +175,7 @@ Widget otpInputBoxes({
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 onChanged: onChanged,
-                style: const TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24),
                 decoration: const InputDecoration(
                   counterText: "",
                   border: InputBorder.none,

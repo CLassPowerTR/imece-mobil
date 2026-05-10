@@ -1,3 +1,4 @@
+
 part of 'buyer_profil_screen.dart';
 
 class BuyerProfilViewBody extends ConsumerStatefulWidget {
@@ -36,8 +37,8 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
         _scrollController.hasClients &&
         _scrollController.offset > (expandedHeight - kToolbarHeight);
     final titleColor = isCollapsed
-        ? HomeStyle(context: context).primary
-        : HomeStyle(context: context).onSecondary;
+        ? AppColors.primary(context)
+        : AppColors.onSecondary(context);
 
     return CustomScrollView(
       controller: _scrollController,
@@ -52,7 +53,7 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
           title: customText(
             'Hesabım',
             context,
-            size: HomeStyle(context: context).bodyLarge.fontSize,
+            size: AppTextStyle.bodyLarge(context).fontSize,
             color: titleColor,
             weight: FontWeight.w600,
           ),

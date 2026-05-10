@@ -1,3 +1,4 @@
+
 part of '../seller_profil_screen.dart';
 
 class SellerProfilBody extends ConsumerStatefulWidget {
@@ -165,12 +166,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final themeData = HomeStyle(context: context);
     final sellerProductsAsync = ref.watch(
       sellerProductsProvider(_currentSellerProfil.id),
     );
     return Scaffold(
-      backgroundColor: themeData.surface,
+      backgroundColor: AppColors.surfaceContainer(context),
       body: Stack(
         children: [
           RefreshIndicator(
@@ -182,12 +182,12 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 //spacing: 20,
                 children: [
                   _profilGiris(width, context),
-                  _profilHakkinda(themeData, width, context),
-                  _profilIstatikler(width, themeData, sellerProductsAsync),
+                  _profilHakkinda(width, context),
+                  _profilIstatikler(width, sellerProductsAsync),
                   _profilStories(context, width),
-                  _profilDetailCards(width, themeData),
+                  _profilDetailCards(width),
                   //_profilGonderiler(context, themeData, width),
-                  _profilSonUrunler(context, width, themeData),
+                  _profilSonUrunler(context, width),
                   //_BenzerUrunlerText(context, themeData),
                   //_populerUrunlerCards(height, width) //Backend yapımından dolayı deployed
                   SizedBox(height: MediaQuery.of(context).size.height * 0.2),
@@ -200,7 +200,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     );
   }
 
-  Builder _profilDetailCards(double width, HomeStyle themeData) {
+  Builder _profilDetailCards(double width) {
     final List<dynamic> detailCards = [
       {
         'title': 'Yeni Ürün Ekle',
@@ -228,21 +228,21 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         'title': 'Finansal Dashboard',
         'subtitle': 'Satış Raporlarınızı ve finansal durumunuzu takip edin',
         'icon': Icons.stacked_line_chart,
-        'iconColor': AppColors.purple(context),
+        'iconColor': Colors.purple,
         'router': '/profil/wallet',
       },
       {
         'title': 'Profil Ayarları',
         'subtitle': 'Profil bilgilerinizi düzenleyin ve güncelleyin',
         'icon': Icons.person_2_outlined,
-        'iconColor': AppColors.orange(context),
+        'iconColor': Colors.orange,
         'router': '/profil/settings/seller',
       },
       {
         'title': 'Destek',
         'subtitle': 'Sorunuz varsa buraya yazabilirsiniz',
         'icon': Icons.support_agent_outlined,
-        'iconColor': AppColors.iosBlue(context),
+        'iconColor': Colors.lightBlue,
         'router': '/profil/support',
       }
     ];
@@ -519,19 +519,19 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     );
   }
 
-  Padding _BenzerUrunlerText(BuildContext context, HomeStyle themeData) {
+  Padding _BenzerUrunlerText(BuildContext context) {
     return customText(
       'Benzer Ürünler',
       context,
       padding: EdgeInsets.only(left: 10),
       textAlign: TextAlign.left,
-      size: themeData.bodyLarge.fontSize,
+      size: AppTextStyle.bodyLargeBold(context).fontSize,
       weight: FontWeight.w800,
     );
   }
 
   /// Son Ürünler bölümü - Horizontal scroll
-  Widget _profilSonUrunler(BuildContext context, double width, HomeStyle themeData) {
+  Widget _profilSonUrunler(BuildContext context, double width) {
     final asyncProducts = ref.watch(
       sellerProductsProvider(_currentSellerProfil.saticiProfili?.kullanici ?? 0),
     );
@@ -539,7 +539,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
     return asyncProducts.when(
       loading: () => container(
         context,
-        color: themeData.surfaceContainer,
+        color: AppColors.surfaceContainer(context),
         padding: AppPaddings.all16,
         borderRadius: AppRadius.r16,
         width: width,
@@ -551,7 +551,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
       ),
       error: (error, _) => container(
         context,
-        color: themeData.surfaceContainer,
+        color: AppColors.surfaceContainer(context),
         padding: AppPaddings.all16,
         borderRadius: AppRadius.r16,
         width: width,
@@ -583,7 +583,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         
         return container(
           context,
-          color: themeData.surfaceContainer,
+          color: AppColors.surfaceContainer(context),
           padding: AppPaddings.all16,
           borderRadius: AppRadius.r16,
           width: width,
@@ -599,7 +599,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                     'Son Ürünler',
                     context,
                     weight: FontWeight.bold,
-                    size: themeData.titleMedium.fontSize,
+                    size: AppTextSizes.titleMedium(context),
                   ),
                   if (widget.myProfile)
                     GestureDetector(
@@ -613,7 +613,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       child: customText(
                         'Tümünü Gör',
                         context,
-                        color: themeData.secondary,
+                        color: AppColors.secondary(context),
                         weight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -672,12 +672,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   Container _profilLastComment(
     BuildContext context,
     double width,
-    HomeStyle themeData,
   ) {
     return container(
       context,
       width: width,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       padding: EdgeInsets.only(left: 20, top: 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -688,7 +687,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           customText(
             'Son 4 Satışın Yorumları',
             context,
-            size: themeData.bodyLarge.fontSize,
+            size: AppTextSizes.bodyLarge(context),
             weight: FontWeight.w800,
           ),
           Divider(),
@@ -698,7 +697,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
               scrollDirection: Axis.horizontal,
               itemCount: 4,
               itemBuilder: (context, index) {
-                return yorumContainer(context, themeData, width, yorum);
+                return yorumContainer(context, width, yorum);
               },
             ),
           ),
@@ -709,12 +708,11 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
 
   Container _profilGonderiler(
     BuildContext context,
-    HomeStyle themeData,
     double width,
   ) {
     return container(
       context,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       borderRadius: AppRadius.r16,
       margin: AppPaddings.h10v10,
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -727,25 +725,24 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           customText(
             'Gönderiler',
             context,
-            size: themeData.bodyLarge.fontSize,
+            size: AppTextSizes.bodyLarge(context),
             weight: FontWeight.w900,
           ),
           gonderiContainer(
             context,
-            themeData,
             gonderi['gonderiBaslik'],
             gonderi['gonderiAciklama'],
             gonderi['gonderiImages'],
             profil['profilImage'],
             _currentSellerProfil.username,
           ),
-          _seeAllPosts(width, themeData),
+          _seeAllPosts(width),
         ],
       ),
     );
   }
 
-  SizedBox _seeAllPosts(double width, HomeStyle themeData) {
+  SizedBox _seeAllPosts(double width) {
     return SizedBox(
       width: width,
       child: GestureDetector(
@@ -759,17 +756,17 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           text: TextSpan(
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              fontSize: themeData.headlineSmall.fontSize,
-              color: themeData.secondary,
+              fontSize: AppTextSizes.headlineSmall(context),
+              color: AppColors.secondary(context),
             ), // Varsayılan stil
             children: [
               TextSpan(text: 'Tüm gönderileri gör'),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: Icon(
-                  size: themeData.headlineSmall.fontSize! * 1.1,
+                  size: AppTextSizes.headlineSmall(context),
                   Icons.arrow_forward,
-                  color: themeData.secondary,
+                  color: AppColors.secondary(context),
                 ),
               ),
             ],
@@ -780,7 +777,6 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   }
 
   Widget _profilHakkinda(
-    HomeStyle themeData,
     double width,
     BuildContext context,
   ) {
@@ -789,7 +785,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         if (_currentSellerProfil.saticiProfili?.profilTanitimYazisi != '') {
           return container(
             context,
-            color: themeData.surfaceContainer,
+            color: AppColors.surfaceContainer(context),
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             borderRadius: AppRadius.r16,
             width: width,
@@ -804,7 +800,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 customText(
                   'Hakkında',
                   context,
-                  size: themeData.bodyLarge.fontSize,
+                  size: AppTextSizes.bodyLarge(context),
                   weight: FontWeight.w800,
                 ),
                 customText(
@@ -817,7 +813,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   context,
                   weight: FontWeight.w400,
                   maxLines: 13,
-                  size: themeData.bodyMedium.fontSize,
+                  size: AppTextSizes.bodyMedium(context),
                 ),
                 Builder(
                   builder: (context) {
@@ -836,10 +832,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                             text: TextSpan(
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                fontSize: HomeStyle(
-                                  context: context,
-                                ).bodyMedium.fontSize,
-                                color: themeData.secondary,
+                                fontSize: AppTextStyle.bodyMedium(context).fontSize,
+                                color: AppColors.secondary(context),
                               ), // Varsayılan stil
                               children: [
                                 TextSpan(
@@ -852,7 +846,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                   alignment: PlaceholderAlignment.middle,
                                   child: Icon(
                                     Icons.arrow_forward,
-                                    color: themeData.secondary,
+                                    color: AppColors.secondary(context),
                                   ),
                                 ),
                               ],
@@ -876,7 +870,6 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
 
   Builder _profilIstatikler(
     double width,
-    HomeStyle themeData,
     AsyncValue<List<SellerProducts>> sellerProductsAsync,
   ) {
     return Builder(
@@ -902,7 +895,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
             margin: AppPaddings.h10v10,
             borderRadius: AppRadius.r16,
             padding: AppPaddings.all16,
-            color: HomeStyle(context: context).surfaceContainer,
+            color: AppColors.surface(context),
             width: width,
             child: Column(
               spacing: 18,
@@ -912,7 +905,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 customText(
                   'Profil istatistikleri',
                   context,
-                  size: themeData.bodyLarge.fontSize,
+                  size: AppTextSizes.bodyLarge(context),
                   weight: FontWeight.w800,
                 ),
                 Row(
@@ -1012,7 +1005,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
   }) {
     final Color effectiveBackgroundColor =
         backgroundColor ??
-        HomeStyle(context: context).secondary.withOpacity(0.15);
+        AppColors.secondary(context).withOpacity(0.15);
     return Container(
       decoration: BoxDecoration(
         borderRadius: AppRadius.r16,
@@ -1292,7 +1285,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 _isUpdating ? 'Güncelleniyor...' : 'Profilimi Güncelle',
                 minSizeHeight: 40,
                 elevation: 5,
-                buttonColor: HomeStyle(context: context).secondary,
+                buttonColor: AppColors.secondary(context),
                 onPressed: _isUpdating ? null : _updateProfileImages,
               ),
             ),
@@ -1300,7 +1293,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
         container(
           context,
 
-          color: HomeStyle(context: context).surfaceContainer,
+          color: AppColors.surface(context),
           //height: 306,
           padding: EdgeInsets.only(bottom: 10),
           child: Column(
@@ -1395,7 +1388,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                                     elevation: 5,
                                     buttonColor: isFollowed
                                         ? Colors.orange[500]
-                                        : HomeStyle(context: context).secondary,
+                                        : AppColors.secondary(context),
                                     onPressed: () async {
                                       if (isFollowed) {
                                         // Takipten çık fonksiyonu (unfollow)
@@ -1514,7 +1507,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       decoration: TextDecoration.underline,
-                      fontSize: HomeStyle(context: context).bodyMedium.fontSize,
+                      fontSize: AppTextStyle.bodyMedium(context).fontSize,
                       color: Colors.white,
                     ), // Varsayılan stil
                     children: [
@@ -1545,7 +1538,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 '${_currentSellerProfil.saticiProfili?.imeceOnayLastDate ?? ''} Tarihine kadar ',
                 context,
                 weight: FontWeight.w500,
-                size: HomeStyle(context: context).bodySmall.fontSize,
+                size: AppTextStyle.bodySmall(context).fontSize,
               );
             } else {
               return SizedBox(height: 15);
@@ -1572,7 +1565,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     side: BorderSide(
-                      color: HomeStyle(context: context).outline,
+                      color: AppColors.outline(context),
                       width: 1,
                     ), // Çerçeve rengi ve kalınlığı
                     shape: RoundedRectangleBorder(
@@ -1586,7 +1579,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                     "${_currentSellerProfil.saticiProfili?.profession ?? ''}",
                     context,
                     weight: FontWeight.bold,
-                    size: HomeStyle(context: context).bodySmall.fontSize,
+                    size: AppTextStyle.bodySmall(context).fontSize,
                   ),
                 ),
               );
@@ -1603,8 +1596,8 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     decoration: TextDecoration.underline,
-                    fontSize: HomeStyle(context: context).bodyMedium.fontSize,
-                    color: HomeStyle(context: context).secondary,
+                    fontSize: AppTextStyle.bodyMedium(context).fontSize,
+                    color: AppColors.secondary(context),
                   ), // Varsayılan stil
                   children: [
                     TextSpan(text: 'Etiket adını değiştir'),
@@ -1613,7 +1606,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                       child: Icon(
                         size: 18,
                         Icons.arrow_forward_rounded,
-                        color: HomeStyle(context: context).secondary,
+                        color: AppColors.secondary(context),
                       ),
                     ),
                   ],
@@ -1639,19 +1632,19 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
           _currentSellerProfil.saticiProfili?.magazaAdi ?? 'NoName',
           context,
           weight: FontWeight.bold,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
+          size: AppTextStyle.bodyLarge(context).fontSize,
         ),
         customText(
           'çiftçi / hayvan üreticisi',
           context,
           weight: FontWeight.w500,
-          size: HomeStyle(context: context).bodySmall.fontSize,
+          size: AppTextStyle.bodySmall(context).fontSize,
         ),
         customText(
           'Türkiye / Aydın / akbük',
           context,
           weight: FontWeight.w300,
-          size: HomeStyle(context: context).bodySmall.fontSize,
+          size: AppTextStyle.bodySmall(context).fontSize,
         ),
       ],
     );

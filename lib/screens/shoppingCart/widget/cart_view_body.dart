@@ -303,14 +303,12 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return SafeArea(child: _getSepetItems(themeData, width, height));
+    return SafeArea(child: _getSepetItems(width, height));
   }
 
   FutureBuilder<Map<String, dynamic>> _getSepetItems(
-    HomeStyle themeData,
     double width,
     double height,
   ) {
@@ -344,7 +342,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                   spacing: 10,
                   children: [
                     Text(data['mesaj'] ?? 'Sepetinizde ürün yok.'),
-                    _urunEkleButton(themeData),
+                    _urunEkleButton(),
                   ],
                 ),
               ),
@@ -359,7 +357,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                     children: [
                       container(
                         context,
-                        color: themeData.surfaceContainer,
+                        color:  AppColors.surfaceContainer(context),
                         width: width,
                         isBoxShadow: true,
                         margin: AppPaddings.all8,
@@ -367,15 +365,15 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                         child: Column(
                           children: [
                             _FutureFetchUserAdress(),
-                            _teslimatBilgi(context, themeData),
+                            _teslimatBilgi(context),
                           ],
                         ),
                       ),
                       if (sepetList != null && sepetList.isNotEmpty)
                         container(
                           context,
-                          color: themeData.surfaceContainer,
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.surfaceContainer(context),
+                          borderRadius: AppRadius.r8,
                           margin: AppPaddings.all8,
                           padding: EdgeInsets.only(
                             left: 12,
@@ -496,8 +494,8 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                                 context,
                                 '+ Ürün ekle',
                                 elevation: 6,
-                                shadowColor: themeData.secondary,
-                                fontSize: themeData.bodyLarge.fontSize,
+                                shadowColor: AppColors.secondary(context),
+                                fontSize: AppTextSizes.bodyLarge(context),
                                 weight: FontWeight.bold,
                                 onPressed: () {
                                   setState(() {
@@ -516,9 +514,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                             ],
                           ),
                         ),
-                      _fiyatDetay(themeData, width),
-                      _odemeSecenegi(context, themeData, width),
-                      _satinAlim(context, themeData),
+                      _fiyatDetay(width),
+                      _odemeSecenegi(context, width),
+                      _satinAlim(context),
                       SizedBox(height: height * 0.15),
                     ],
                   ),
@@ -538,10 +536,10 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _satinAlim(BuildContext context, HomeStyle themeData) {
+  Container _satinAlim(BuildContext context) {
     return container(
       context,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       padding: AppPaddings.all12,
       margin: AppPaddings.all8,
       borderRadius: AppRadius.r8,
@@ -601,7 +599,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
               Expanded(
                 child: richText(
                   context,
-                  fontSize: themeData.bodyLarge.fontSize,
+                  fontSize: AppTextSizes.bodyLarge(context),
                   textAlign: TextAlign.left,
                   children: [
                     TextSpan(
@@ -616,7 +614,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                 child: textButton(
                   context,
                   'Satın Al',
-                  fontSize: themeData.bodyLarge.fontSize,
+                  fontSize: AppTextSizes.bodyLarge(context),
                   weight: FontWeight.bold,
                   buttonColor: _confirm ? null : Colors.grey,
                   elevation: 6,
@@ -639,13 +637,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _odemeSecenegi(BuildContext context, themeData, width) {
+  Container _odemeSecenegi(BuildContext context, width) {
     return container(
       context,
       margin: AppPaddings.all8,
       padding: AppPaddings.all12,
       borderRadius: AppRadius.r8,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       width: width,
       isBoxShadow: true,
       child: Column(
@@ -820,9 +818,9 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
             context,
             'Kart Ekle',
             elevation: 6,
-            fontSize: themeData.bodyLarge.fontSize,
+            fontSize: AppTextSizes.bodyLarge(context),
             weight: FontWeight.bold,
-            shadowColor: themeData.secondary,
+            shadowColor: AppColors.secondary(context),
             onPressed: () {
               setState(() {
                 showTemporarySnackBar(context, 'Kart Ekle Buton (){onPressed}');
@@ -845,10 +843,10 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _fiyatDetay(themeData, width) {
+  Container _fiyatDetay(width) {
     return container(
       context,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       width: width,
       padding: AppPaddings.all12,
       margin: AppPaddings.all8,
@@ -869,12 +867,12 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                 richText(
                   context,
                   fontWeight: FontWeight.w800,
-                  fontSize: themeData.bodyMedium.fontSize,
+                  fontSize: AppTextSizes.bodyMedium(context),
                   textAlign: TextAlign.left,
                   children: [
                     TextSpan(
                       text: 'Ara Toplam',
-                      style: TextStyle(fontSize: themeData.bodyLarge.fontSize),
+                      style: TextStyle(fontSize: AppTextSizes.bodyLarge(context)),
                     ),
                     TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
                     TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
@@ -904,7 +902,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                       text: '(ek ücretler ve vergiler dahil)',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
-                        color: themeData.primary.withOpacity(0.5),
+                        color: AppColors.primary(context).withOpacity(0.5),
                       ),
                     ),
                     TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
@@ -924,13 +922,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  SizedBox _urunEkleButton(themeData) {
+  SizedBox _urunEkleButton() {
     return textButton(
       context,
       '+ Ürün ekle',
       elevation: 6,
-      shadowColor: themeData.secondary,
-      fontSize: themeData.bodyLarge.fontSize,
+      shadowColor: AppColors.secondary(context),
+      fontSize: AppTextSizes.bodyLarge(context),
       weight: FontWeight.bold,
       onPressed: () {
         setState(() {
@@ -946,7 +944,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _teslimatBilgi(BuildContext context, themeData) {
+  Container _teslimatBilgi(BuildContext context) {
     String? teslimatTarihiStr =
         sepetInfo['son_teslimat_tarihi'] != null && sepetInfo.isNotEmpty
         ? sepetInfo['son_teslimat_tarihi']
@@ -970,7 +968,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     }
     return container(
       context,
-      color: themeData.surfaceContainer,
+      color: AppColors.surfaceContainer(context),
       isBoxShadow: false,
       margin: AppPaddings.all20,
       child: Row(
@@ -989,7 +987,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                 richText(
                   context,
                   textAlign: TextAlign.left,
-                  fontSize: themeData.bodyMedium.fontSize,
+                  fontSize: AppTextSizes.bodyMedium(context),
                   children: [
                     TextSpan(
                       text: 'Tahmini Teslimat Tarihi',

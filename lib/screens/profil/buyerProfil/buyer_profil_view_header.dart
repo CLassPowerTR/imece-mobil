@@ -1,3 +1,4 @@
+
 part of 'buyer_profil_screen.dart';
 
 class BuyerProfilViewHeader extends StatelessWidget
@@ -12,7 +13,7 @@ class BuyerProfilViewHeader extends StatelessWidget
       children: [
         AppBar(
           title: customText('Hesabım', context,
-              size: HomeStyle(context: context).bodyLarge.fontSize,
+              size: AppTextStyle.bodyLarge(context).fontSize,
               weight: FontWeight.w600),
           centerTitle: true,
           backgroundColor: Colors.white,

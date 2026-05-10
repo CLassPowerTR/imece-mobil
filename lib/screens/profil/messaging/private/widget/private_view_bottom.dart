@@ -24,13 +24,13 @@ class _MessagingPrivateBottomViewState
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SafeArea(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: TextField(
             controller: widget.controller,
-            style: const TextStyle(color: Colors.black), // Metin rengi ayarı
+            style: TextStyle(color: Colors.black), // Metin rengi ayarı
             decoration: InputDecoration(
               hintText: 'Metin yaz',
-              hintStyle: const TextStyle(color: Colors.grey),
+              hintStyle: TextStyle(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -39,7 +39,7 @@ class _MessagingPrivateBottomViewState
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.attach_file),
+                    icon: Icon(Icons.attach_file),
                     onPressed: () {
                       // Dosya paylaşım işlevi burada
                     },
@@ -50,7 +50,7 @@ class _MessagingPrivateBottomViewState
                     color: Colors.grey,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
+                    icon: Icon(Icons.send),
                     onPressed: widget.onPressed,
                     color: Theme.of(context).colorScheme.secondary,
                   ),

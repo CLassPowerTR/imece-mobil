@@ -1,3 +1,6 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/widgets/dropdownBox.dart';
@@ -6,7 +9,7 @@ import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/users.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:imecehub/services/api_service.dart';
 
 class AdressAddScreen extends StatefulWidget {
@@ -180,10 +183,10 @@ class _AdressAddScreenState extends State<AdressAddScreen> {
                   Expanded(
                     child: textButton(
                       context,
-                      buttonColor: HomeStyle(context: context).surface,
-                      titleColor: HomeStyle(context: context).primary,
+                      buttonColor: AppColors.surface(context),
+                      titleColor: AppColors.primary(context),
                       border: true,
-                      borderColor: HomeStyle(context: context).secondary,
+                      borderColor: AppColors.secondary(context),
                       borderWidth: 1,
                       elevation: 0,
                       'Vazgeç',

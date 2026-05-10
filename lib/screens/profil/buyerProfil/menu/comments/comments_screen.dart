@@ -1,3 +1,7 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/buttons/turnBackTextIcon.dart';
@@ -6,7 +10,7 @@ import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/services/api_service.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'seller_comments_screen.dart';
@@ -52,7 +56,7 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen>
         title: customText(
           'Değerlendirmelerim',
           context,
-          size: HomeStyle(context: context).bodyLarge.fontSize,
+          size: AppTextStyle.bodyLarge(context).fontSize,
           weight: FontWeight.w600,
         ),
         bottom: PreferredSize(

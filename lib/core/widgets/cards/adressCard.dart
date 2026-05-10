@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/models/userAdress.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class AdressCard extends StatelessWidget {
   final UserAdress adres;
@@ -269,7 +269,6 @@ class AdressCardOrder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = HomeStyle(context: context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -291,8 +290,8 @@ class AdressCardOrder extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  theme.secondary.withOpacity(0.1),
-                  theme.secondary.withOpacity(0.05),
+                  AppColors.secondary(context).withOpacity(0.1),
+                  AppColors.secondary(context).withOpacity(0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -308,12 +307,12 @@ class AdressCardOrder extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.secondary.withOpacity(0.15),
+                    color: AppColors.secondary(context).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getAddressIcon(adresTipi),
-                    color: theme.secondary,
+                    color: AppColors.secondary(context),
                     size: 28,
                   ),
                 ),
@@ -329,7 +328,7 @@ class AdressCardOrder extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.secondary.withOpacity(0.2),
+                          color:  AppColors.secondary(context).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -337,7 +336,7 @@ class AdressCardOrder extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: theme.secondary,
+                            color:  AppColors.secondary(context),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -348,7 +347,7 @@ class AdressCardOrder extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: theme.primary,
+                          color: AppColors.primary(context),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -373,7 +372,7 @@ class AdressCardOrder extends StatelessWidget {
                           Icon(
                             Icons.edit_location_alt_outlined,
                             size: 18,
-                            color: theme.secondary,
+                            color:  AppColors.secondary(context),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -381,7 +380,7 @@ class AdressCardOrder extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: theme.secondary,
+                              color:  AppColors.secondary(context),
                             ),
                           ),
                         ],
@@ -404,7 +403,7 @@ class AdressCardOrder extends StatelessWidget {
                     Icon(
                       Icons.location_city_rounded,
                       size: 18,
-                      color: theme.secondary.withOpacity(0.7),
+                      color:  AppColors.secondary(context).withOpacity(0.7),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -413,7 +412,7 @@ class AdressCardOrder extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: theme.primary,
+                          color: AppColors.primary(context),
                         ),
                       ),
                     ),
@@ -427,7 +426,7 @@ class AdressCardOrder extends StatelessWidget {
                     Icon(
                       Icons.description_outlined,
                       size: 18,
-                      color: theme.secondary.withOpacity(0.7),
+                      color:  AppColors.secondary(context).withOpacity(0.7),
                     ),
                     const SizedBox(width: 8),
                     Expanded(

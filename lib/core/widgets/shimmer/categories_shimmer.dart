@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
+import 'package:imecehub/core/constants/app_textSizes.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CategoriesShimmer extends StatelessWidget {
@@ -65,9 +66,9 @@ Padding _categoriesText(BuildContext context) {
     child: customText(
       'Kategoriler',
       context,
-      size: HomeStyle(context: context).bodyLarge.fontSize,
+      size: AppTextSizes.bodyLarge(context),
       weight: FontWeight.bold,
-      color: HomeStyle(context: context).primary,
+      color: AppColors.primary(context),
     ),
   );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/widgets/richText.dart';
 import 'package:imecehub/core/widgets/text.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
 
 class PastPaymentsMoreView extends StatelessWidget {
   final dynamic pastPayments;
@@ -10,14 +10,13 @@ class PastPaymentsMoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = HomeStyle(context: context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: themeData.secondary,
+            color: AppColors.secondary(context),
             size: 30,
           ),
           onPressed: () {
@@ -27,8 +26,8 @@ class PastPaymentsMoreView extends StatelessWidget {
         title: customText(
           'Geçmiş Ödemeler',
           context,
-          size: themeData.headlineSmall.fontSize,
-          color: themeData.secondary,
+          size: 20,
+          color: AppColors.secondary(context),
           weight: FontWeight.w600,
         ),
         centerTitle: true,
@@ -50,7 +49,7 @@ class PastPaymentsMoreView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     richText(
-                        color: themeData.primary.withOpacity(0.5),
+                        color: AppColors.primary(context).withOpacity(0.5),
                         context,
                         children: [
                           TextSpan(

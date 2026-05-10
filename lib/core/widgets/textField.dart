@@ -1,8 +1,12 @@
+import 'package:imecehub/core/constants/app_textStyle.dart';
+import 'package:imecehub/core/constants/app_radius.dart';
+import 'package:imecehub/core/constants/app_paddings.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:imecehub/screens/home/style/home_screen_style.dart';
-import 'package:imecehub/core/theme/design_tokens.dart';
+
+
 
 TextField textField(
   BuildContext context, {
@@ -44,7 +48,7 @@ TextField textField(
     expands: expands, // Bu alanı doldurmasını sağlar.
     textAlignVertical: TextAlignVertical.top, // Metin üstte hizalanır
     style: TextStyle(
-      color: HomeStyle(context: context).primary,
+      color: AppColors.primary(context),
     ),
     keyboardType:
         keyboardType ?? TextInputType.emailAddress, // Klavye tipi e-posta için
@@ -57,17 +61,17 @@ TextField textField(
       errorText: errorText,
       labelStyle: TextStyle(
           color: labelTextColor ??
-              HomeStyle(context: context).outline.withOpacity(0.5)),
+              AppColors.outline(context).withOpacity(0.5)),
       labelText: labelText,
       contentPadding: contentPadding, // Dikey dolgu
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+          color: AppColors.secondary(context),
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+          color: AppColors.secondary(context),
         ),
       ),
       errorBorder: OutlineInputBorder(
@@ -90,14 +94,14 @@ TextField textField(
           : null,
       hintStyle: TextStyle(
           color: hintTextColor ??
-              HomeStyle(context: context).outline.withOpacity(0.5)),
+              AppColors.outline(context).withOpacity(0.5)),
       hintText: hintText, // Hint metni
       border: OutlineInputBorder(
         borderRadius:
             borderRadius ?? BorderRadius.circular(8.0), // Kenar yumuşaklığı
         borderSide: BorderSide(
           color: borderColor ??
-              HomeStyle(context: context).secondary, // Kenar çizgisinin rengi
+              AppColors.secondary(context), // Kenar çizgisinin rengi
         ),
       ),
     ),
@@ -113,28 +117,28 @@ TextField profilTextField(
     controller: controller,
     decoration: InputDecoration(
       hintText: hintText,
-      hintStyle: TextStyle(color: HomeStyle(context: context).outline),
+      hintStyle: TextStyle(color: AppColors.outline(context)),
       prefixIcon: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(12.0),
         child: SvgPicture.asset(
           'assets/vectors/search.svg',
           // İkonun rengini de tercihinize göre belirleyebilirsiniz:
-          color: HomeStyle(context: context).secondary,
+          color: AppColors.secondary(context),
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+          color: AppColors.secondary(context),
         ),
-        borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+        borderRadius: AppRadius.r26,
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
-          color: HomeStyle(context: context).secondary,
+          color: AppColors.secondary(context),
         ),
-        borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+        borderRadius: AppRadius.r26,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     ),
   );
 }
@@ -143,37 +147,37 @@ Widget homeTextFieldBar(BuildContext context) {
   return SizedBox(
     height: 45,
     child: TextField(
-      style: const TextStyle(color: DesignTokens.textSecondary),
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
       decoration: InputDecoration(
         filled: true,
-        fillColor: DesignTokens.textSecondary.withOpacity(0.08),
+        fillColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.08),
         hintText: 'Ürün, Kategori veya marka ara...',
-        hintStyle: const TextStyle(
-          color: DesignTokens.textSecondary,
+        hintStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
         prefixIcon: Padding(
-          padding: const EdgeInsets.all(14.0),
+          padding: EdgeInsets.all(14.0),
           child: SvgPicture.asset(
             'assets/vectors/search.svg',
             width: 16,
             height: 16,
-            color: HomeStyle(context: context).primary,
+            color: AppColors.primary(context),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+          borderRadius: AppRadius.r26,
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: HomeStyle(context: context).primary,
+            color: AppColors.primary(context),
             width: 1.0,
           ),
-          borderRadius: HomeStyle(context: context).appBarTextFieldBorderRadius,
+          borderRadius: AppRadius.r26,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       ),
     ),
   );

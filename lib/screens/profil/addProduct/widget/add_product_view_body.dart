@@ -1,3 +1,4 @@
+
 part of '../add_product_screen.dart';
 
 class AddProductViewBody extends ConsumerStatefulWidget {
@@ -233,10 +234,7 @@ class _AddProductViewBodyState extends ConsumerState<AddProductViewBody> {
   Widget build(BuildContext context) {
     // Yerelleştirme: DateFormat('tr_TR') için gerekli
     initializeDateFormatting('tr_TR', null);
-    Color? labelTextColor = HomeStyle(
-      context: context,
-    ).outline.withOpacity(0.5);
-    final themeData = HomeStyle(context: context);
+    Color? labelTextColor = AppColors.outline(context).withOpacity(0.5);
     double width = MediaQuery.of(context).size.width;
 
     return SingleChildScrollView(
@@ -251,7 +249,6 @@ class _AddProductViewBodyState extends ConsumerState<AddProductViewBody> {
               children: [
                 Expanded(
                   child: AddProductStepperWidget(
-                    themeData: themeData,
                     activeStep: activeStep,
                     onStepReached: (index) {
                       setState(() {
@@ -848,14 +845,14 @@ class AddProductFeaturesSection extends StatelessWidget {
                   customText(
                     'Ürün Sertifikasını Ekle',
                     context,
-                    size: HomeStyle(context: context).bodyLarge.fontSize,
+                    size: AppTextStyle.bodyLarge(context).fontSize,
                     weight: FontWeight.bold,
                   ),
                   if (urunSertifikaPdfName != null)
                     customText(
                       'Seçilen dosya: ' + urunSertifikaPdfName!,
                       context,
-                      size: HomeStyle(context: context).bodySmall.fontSize,
+                      size: AppTextStyle.bodySmall(context).fontSize,
                       weight: FontWeight.w400,
                     ),
                 ],
@@ -905,7 +902,7 @@ class AddProductFeaturesSection extends StatelessWidget {
                 children: [
                   richText(
                     context,
-                    fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+                    fontSize: AppTextStyle.bodyLarge(context).fontSize,
                     fontWeight: FontWeight.bold,
                     textAlign: TextAlign.start,
                     maxLines: 10,
@@ -916,13 +913,9 @@ class AddProductFeaturesSection extends StatelessWidget {
                         text:
                             'Değerli üreticimiz, ürününüzü laboratuvarda test ettirmeniz ve çıkan sonucu listelemeniz halinde sizlere x% kadar komisyon indirimi tanınacaktır.',
                         style: TextStyle(
-                          fontSize: HomeStyle(
-                            context: context,
-                          ).bodyMedium.fontSize,
+                          fontSize: AppTextStyle.bodyMedium(context).fontSize,
                           fontWeight: FontWeight.normal,
-                          color: HomeStyle(
-                            context: context,
-                          ).primary.withOpacity(0.5),
+                          color: AppColors.primary(context).withOpacity(0.5),
                         ),
                       ),
                     ],
@@ -931,7 +924,7 @@ class AddProductFeaturesSection extends StatelessWidget {
                     customText(
                       'Seçilen dosya: ' + urunLabSonucPdfName!,
                       context,
-                      size: HomeStyle(context: context).bodySmall.fontSize,
+                      size: AppTextStyle.bodySmall(context).fontSize,
                       weight: FontWeight.w400,
                     ),
                 ],
@@ -1020,7 +1013,7 @@ class _PhotoUploadArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return container(
       context,
-      color: HomeStyle(context: context).surfaceContainer,
+      color: AppColors.surface(context),
       isBoxShadow: true,
       padding: EdgeInsets.all(20),
       borderRadius: BorderRadius.circular(8),
@@ -1122,7 +1115,7 @@ class AddProductHeadlineText extends StatelessWidget {
     return customText(
       text,
       context,
-      size: HomeStyle(context: context).bodyLarge.fontSize,
+      size: AppTextStyle.bodyLarge(context).fontSize,
       weight: FontWeight.bold,
     );
   }
@@ -1144,23 +1137,22 @@ class AddProductNextButton extends StatelessWidget {
       'Devam Et',
       buttonColor: enabled
           ? null
-          : HomeStyle(context: context).primary.withOpacity(0.3),
-      titleColor: HomeStyle(context: context).onSecondary,
+          : AppColors.primary(context).withOpacity(0.3),
+      titleColor: AppColors.onSecondary(context),
       weight: FontWeight.bold,
       elevation: 6,
-      fontSize: HomeStyle(context: context).bodyLarge.fontSize,
+      fontSize: AppTextStyle.bodyLarge(context).fontSize,
       onPressed: enabled ? onPressed : null,
     );
   }
 }
 
 class AddProductStepperWidget extends StatelessWidget {
-  final HomeStyle themeData;
+
   final int activeStep;
   final ValueChanged<int> onStepReached;
   const AddProductStepperWidget({
     super.key,
-    required this.themeData,
     required this.activeStep,
     required this.onStepReached,
   });
@@ -1177,22 +1169,22 @@ class AddProductStepperWidget extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         internalPadding: 0,
         stepRadius: 25,
-        finishedStepBorderColor: themeData.onSecondary,
-        finishedStepTextColor: themeData.onSecondary,
-        finishedStepBackgroundColor: themeData.secondary,
-        activeStepIconColor: themeData.secondary,
+        finishedStepBorderColor: AppColors.onSecondary(context),
+        finishedStepTextColor: AppColors.onSecondary(context),
+        finishedStepBackgroundColor: AppColors.secondary(context),
+        activeStepIconColor: AppColors.secondary(context),
         showLoadingAnimation: false,
         steps: [
           EasyStep(
             customStep: CircleAvatar(
               backgroundColor: activeStep >= 0
-                  ? themeData.secondary
-                  : themeData.onSecondary,
+                  ? AppColors.secondary(context)
+                  : AppColors.onSecondary(context),
               child: Icon(
                 Icons.settings_system_daydream_rounded,
                 color: activeStep >= 0
-                    ? themeData.onSecondary
-                    : themeData.secondary,
+                    ? AppColors.onSecondary(context)
+                    : AppColors.secondary(context),
               ),
             ),
             customTitle: customText(
@@ -1201,19 +1193,19 @@ class AddProductStepperWidget extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               weight: activeStep == 0 ? FontWeight.bold : FontWeight.normal,
-              color: activeStep >= 1 ? themeData.secondary : themeData.primary,
+              color: activeStep >= 1 ? AppColors.secondary(context) : AppColors.primary(context),
             ),
           ),
           EasyStep(
             customStep: CircleAvatar(
               backgroundColor: activeStep >= 1
-                  ? themeData.secondary
-                  : themeData.onSecondary,
+                  ? AppColors.secondary(context)
+                  : AppColors.onSecondary(context),
               child: Icon(
                 activeStep >= 1 ? Icons.info_outline : Icons.info,
                 color: activeStep >= 1
-                    ? themeData.onSecondary
-                    : themeData.secondary,
+                    ? AppColors.onSecondary(context)
+                    : AppColors.secondary(context),
               ),
             ),
             customTitle: customText(
@@ -1222,19 +1214,19 @@ class AddProductStepperWidget extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               weight: activeStep == 1 ? FontWeight.bold : FontWeight.normal,
-              color: activeStep >= 2 ? themeData.secondary : themeData.primary,
+              color: activeStep >= 2 ? AppColors.secondary(context) : AppColors.primary(context),
             ),
           ),
           EasyStep(
             customStep: CircleAvatar(
               backgroundColor: activeStep >= 2
-                  ? themeData.secondary
-                  : themeData.onSecondary,
+                  ? AppColors.secondary(context)
+                  : AppColors.onSecondary(context),
               child: Icon(
                 Icons.display_settings_sharp,
                 color: activeStep >= 2
-                    ? themeData.onSecondary
-                    : themeData.secondary,
+                    ? AppColors.onSecondary(context)
+                    : AppColors.secondary(context),
               ),
             ),
             customTitle: customText(
@@ -1243,19 +1235,19 @@ class AddProductStepperWidget extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               weight: activeStep == 2 ? FontWeight.bold : FontWeight.normal,
-              color: activeStep >= 3 ? themeData.secondary : themeData.primary,
+              color: activeStep >= 3 ? AppColors.secondary(context) : AppColors.primary(context),
             ),
           ),
           EasyStep(
             customStep: CircleAvatar(
               backgroundColor: activeStep >= 3
-                  ? themeData.secondary
-                  : themeData.onSecondary,
+                  ? AppColors.secondary(context)
+                  : AppColors.onSecondary(context),
               child: Icon(
                 activeStep >= 4 ? Icons.image_outlined : Icons.image,
                 color: activeStep >= 3
-                    ? themeData.onSecondary
-                    : themeData.secondary,
+                    ? AppColors.onSecondary(context)
+                    : AppColors.secondary(context),
               ),
             ),
             customTitle: customText(
@@ -1264,7 +1256,7 @@ class AddProductStepperWidget extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               weight: activeStep == 3 ? FontWeight.bold : FontWeight.normal,
-              color: activeStep >= 4 ? themeData.secondary : themeData.primary,
+              color: activeStep >= 4 ? AppColors.secondary(context) : AppColors.primary(context),
             ),
           ),
         ],
