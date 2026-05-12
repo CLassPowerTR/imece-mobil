@@ -11,6 +11,7 @@ import 'package:imecehub/core/variables/url.dart';
 import 'package:imecehub/core/widgets/container.dart';
 import 'package:imecehub/core/widgets/cards/productsCard2.dart';
 import 'package:imecehub/core/widgets/cards/campaigns_items_card.dart';
+import 'package:imecehub/core/widgets/cards/campaign_stories_bar.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/shimmer/products_shimmer.dart';
 import 'package:imecehub/core/widgets/shimmer/sellers_shimmer.dart';
@@ -66,13 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Consumer(
             builder: (context, ref, _) {
-              final user = ref.watch(userProvider);
-              final bool isSeller = user?.rol == 'satici';
-
               final screens = <Widget>[
                 _HomeViewBody(),
                 Center(child: ProductsScreen()),
-                if (!isSeller) OrderScreen(),
+                OrderScreen(),
                 ProfileScreen(),
               ];
 

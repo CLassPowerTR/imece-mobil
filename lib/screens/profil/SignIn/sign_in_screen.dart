@@ -235,12 +235,21 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                     isLoading = false;
                                   });
                                   if (mounted) {
-                                    
-                                    showTemporarySnackBar(
-                                      context,
-                                      'Giriş başarılı!',
-                                      type: SnackBarType.success,
-                                    );
+                                    // Satıcı hesabı uyarısı
+                                    if (ref.read(userProvider.notifier).isSaticiHesabi) {
+                                      showTemporarySnackBar(
+                                        context,
+                                        'Bu hesap bir satıcı hesabıdır. Mobil uygulamada alıcı olarak devam edeceksiniz.',
+                                        type: SnackBarType.info,
+                                        duration: 5,
+                                      );
+                                    } else {
+                                      showTemporarySnackBar(
+                                        context,
+                                        'Giriş başarılı!',
+                                        type: SnackBarType.success,
+                                      );
+                                    }
 
                                     ref.read(bottomNavIndexProvider.notifier).setIndex(3);
                                     Navigator.pushNamedAndRemoveUntil(
@@ -308,11 +317,21 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                 await ref.read(userProvider.notifier).googleLogin();
                                 setState(() => isLoading = false);
                                 if (mounted) {
-                                  showTemporarySnackBar(
-                                    context,
-                                    'Google ile giriş başarılı!',
-                                    type: SnackBarType.success,
-                                  );
+                                  // Satıcı hesabı uyarısı
+                                  if (ref.read(userProvider.notifier).isSaticiHesabi) {
+                                    showTemporarySnackBar(
+                                      context,
+                                      'Bu hesap bir satıcı hesabıdır. Mobil uygulamada alıcı olarak devam edeceksiniz.',
+                                      type: SnackBarType.info,
+                                      duration: 5,
+                                    );
+                                  } else {
+                                    showTemporarySnackBar(
+                                      context,
+                                      'Google ile giriş başarılı!',
+                                      type: SnackBarType.success,
+                                    );
+                                  }
                                   ref.read(bottomNavIndexProvider.notifier).setIndex(3);
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,

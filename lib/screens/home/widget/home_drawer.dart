@@ -108,15 +108,53 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
           // Body
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
+                // Ana Menü
                 Padding(
-                  padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Text(
-                    "Kategoriler",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    "ANA MENÜ",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.grey.shade400,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+                _buildMenuItem(context, "Ana Sayfa", Icons.home_outlined, () {
+                  Navigator.pop(context);
+                }),
+                _buildMenuItem(context, "Tüm Ürünler", Icons.storefront_outlined, () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/products');
+                }),
+                _buildMenuItem(context, "Favorilerim", Icons.favorite_border, () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/favorites');
+                }),
+                _buildMenuItem(context, "Sepetim", Icons.shopping_bag_outlined, () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/basket');
+                }),
+                _buildMenuItem(context, "Siparişlerim", Icons.inventory_2_outlined, () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/profile');
+                }),
+
+                const SizedBox(height: 24),
+
+                // Kategoriler
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Text(
+                    "KATEGORİLER",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.grey.shade400,
+                      letterSpacing: 1.5,
                     ),
                   ),
                 ),
@@ -132,30 +170,86 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                       );
                     } else if (snapshot.hasError) {
                       return Padding(
-                        padding: EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Text("Hata: ${snapshot.error}"),
                       );
                     } else if (snapshot.hasData) {
                       final categories = snapshot.data!;
+                      
+                      // Build a 2-level tree: root categories and their immediate children
+                      final rootCategories = categories.where((c) => c.parent == null).toList();
+
                       return Column(
-                        children: categories.map((category) {
-                          return ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            title: Text(
-                              category.altKategoriAdi.toString(),
-                              style: AppTextStyle.bodyMedium(context).copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: rootCategories.map((root) {
+                          final children = categories.where((c) => c.parent == root.kategoriId).toList();
+                          
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/home/category',
+                                      arguments: root.kategoriId,
+                                    );
+                                  },
+                                  child: Text(
+                                    root.name.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ),
+                                if (children.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 8),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: Colors.grey.shade200,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: children.map((sub) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/home/category',
+                                              arguments: sub.kategoriId,
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                            child: Text(
+                                              sub.name,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ]
+                              ],
                             ),
-                            onTap: () {
-                              Navigator.pop(context); // close drawer
-                              Navigator.pushNamed(
-                                context,
-                                '/home/category',
-                                arguments: category.kategoriId,
-                              );
-                            },
                           );
                         }).toList(),
                       );
@@ -164,10 +258,34 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                     }
                   },
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: Colors.grey.shade700),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

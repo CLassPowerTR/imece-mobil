@@ -61,8 +61,6 @@ class _ProductsDetailViewBottomState
         ),
       ),
       data: (product) {
-        final currentUser = ref.watch(userProvider);
-        final isSeller = currentUser?.rol == 'satici';
         return container(
           context,
           padding: EdgeInsets.symmetric(
@@ -80,10 +78,8 @@ class _ProductsDetailViewBottomState
               if (product.satis_turu == 2) ...[
                 _grupAlimButton(context, isSmallScreen),
               ] else ...[
-                if (!isSeller) ...[
-                  _sepeteEkleButton(context, product, isSmallScreen),
-                  SizedBox(width: isSmallScreen ? 6 : 10),
-                ],
+                _sepeteEkleButton(context, product, isSmallScreen),
+                SizedBox(width: isSmallScreen ? 6 : 10),
               ],
             ],
           ),

@@ -13,15 +13,11 @@ class _HomeBottomNavigationBarTestState
     extends ConsumerState<_HomeBottomNavigationBarTest> {
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-    final bool isSeller = user?.rol == 'satici';
-
     final itemsData = <Map<String, String>>[
       {'label': 'Anasayfa', 'iconPath': 'assets/vectors/homePage.svg'},
       {'label': 'Ürünler', 'iconPath': 'assets/vectors/urunler.svg'},
-      if (!isSeller)
-        {'label': 'Sepetim', 'iconPath': 'assets/vectors/sepet.svg'},
-      {'label': 'Profilim', 'iconPath': 'assets/vectors/profil.svg'},
+      {'label': 'Sepetim', 'iconPath': 'assets/vectors/sepet.svg'},
+      {'label': 'Hesabım', 'iconPath': 'assets/vectors/profil.svg'},
     ];
 
     final selectedIndex = ref.watch(bottomNavIndexProvider);

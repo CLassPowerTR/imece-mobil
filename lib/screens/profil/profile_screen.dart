@@ -100,13 +100,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with RouteAware {
     if (_lastUser == null) {
       return ProfileNotLogin();
     }
-    if (_lastUser!.saticiProfili != null) {
-      return SellerProfilScreen(
-        sellerProfil: _lastUser!,
-        myProfile: true,
-      );
-    } else if (_lastUser!.saticiProfili == null &&
-        _lastUser!.aliciProfili != null) {
+    // Tüm kullanıcılar alıcı profili görür (satıcı ayrımı mobilde kaldırıldı)
+    if (_lastUser!.aliciProfili != null) {
       return BuyerProfilScreen(buyerProfil: _lastUser!);
     } else {
       return Builder(

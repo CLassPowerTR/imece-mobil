@@ -22,13 +22,25 @@ class HomeHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: homeTextFieldBar(context),
       ),
       actions: [
-        IconButton(
-          icon: Icon(Icons.mail_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          onPressed: () {},
+        Badge(
+          label: const Text('2'),
+          backgroundColor: Colors.red,
+          alignment: Alignment.topRight,
+          offset: const Offset(-4, 4),
+          child: IconButton(
+            icon: Icon(Icons.mail_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            onPressed: () {},
+          ),
         ),
-        IconButton(
-          icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          onPressed: () {},
+        Badge(
+          label: const Text('5'),
+          backgroundColor: Colors.red,
+          alignment: Alignment.topRight,
+          offset: const Offset(-4, 4),
+          child: IconButton(
+            icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            onPressed: () {},
+          ),
         ),
         SizedBox(width: 8),
       ],

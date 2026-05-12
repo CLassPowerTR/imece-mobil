@@ -37,136 +37,14 @@ class OrderScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
-  int tryLoginCount = 0;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkLogin(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: buildLoadingBar(context));
-        } else if (snapshot.hasError) {
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  spacing: 15,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      NotFound.LogoPNGUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (
-                            BuildContext context,
-                            Object exception,
-                            StackTrace? stackTrace,
-                          ) {
-                            return Image.network(
-                              NotFound.LogoPNGUrl,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                    ),
-                    Text('Hata Oluştu.\nLütfen Tekrar Deneyiniz.'),
-                    TextButton(
-                      onPressed: () async {
-                        setState(() {
-                          tryLoginCount++;
-                        });
-                      },
-                      child: Text('Tekrar Dene'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        } else if (snapshot.hasData) {
-          final isLoggedIn = snapshot.data!;
-          if (!isLoggedIn) {
-            return _isNotLoggin(context, ref);
-          }
-          return Scaffold(
-            appBar: _CartScreenHeader(context),
-            body: _CartViewBody(),
-          );
-        } else {
-          return const Scaffold(body: Center(child: Text('Bilinmeyen hata')));
-        }
-      },
-    );
-  }
-
-  Scaffold _isNotLoggin(BuildContext context, WidgetRef ref) {
+    // Sepet artık login gerektirmeden açılır
+    // Login kontrolü sadece "Satın Al" / sipariş tamamlama butonunda yapılır
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            spacing: 20,
-            children: [
-              Image.network(
-                NotFound.LogoPNGUrl,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (
-                      BuildContext context,
-                      Object exception,
-                      StackTrace? stackTrace,
-                    ) {
-                      return Image.network(NotFound.LogoPNGUrl);
-                    },
-              ),
-              customText(
-                'Sepetim',
-                context,
-                textAlign: TextAlign.center,
-                size: AppTextSizes.bodyLarge(context),
-                weight: FontWeight.bold,
-              ),
-              customText(
-                'Sepetinizi görüntüleyebilmek için lütfen giriş yapınız.',
-                context,
-                textAlign: TextAlign.center,
-                size: AppTextSizes.bodySmall(context),
-              ),
-              textButton(
-                context,
-                'Üye Ol',
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profil/signUp');
-                },
-                shadowColor: AppColors.secondary(context).withOpacity(0.5),
-              ),
-              textButton(
-                context,
-                'Giriş Yap',
-                buttonColor: AppColors.secondary(context).withOpacity(0.2),
-                titleColor: AppColors.tertiary(context),
-                shadowColor: AppColors.secondary(
-                  context,
-                ).withOpacity(0.5),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profil/signIn');
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      appBar: _CartScreenHeader(context),
+      body: _CartViewBody(),
     );
-  }
-
-  Future<bool> _checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accesToken') ?? '';
-    return token.isNotEmpty;
   }
 }
 

@@ -18,6 +18,18 @@ class AppTextStyle {
       color: color ?? AppColors.secondary(context),
     );
   }
+  static TextStyle headerOnPrimary(BuildContext context, {Color? color}) {
+    return Theme.of(context).textTheme.headlineSmall!.copyWith(
+      fontWeight: FontWeight.w700,
+      color: color ?? AppColors.onPrimary(context),
+    );
+  }
+   static TextStyle headerOnPrimaryContainer(BuildContext context, {Color? color}) {
+    return Theme.of(context).textTheme.headlineSmall!.copyWith(
+      fontWeight: FontWeight.w700,
+      color: color ?? AppColors.onPrimaryContainer(context),
+    );
+  }
 
   // Titles
   static TextStyle titlePrimary(BuildContext context, {Color? color}) {
@@ -31,6 +43,12 @@ class AppTextStyle {
     return Theme.of(context).textTheme.titleMedium!.copyWith(
       fontWeight: FontWeight.w700,
       color: color ?? AppColors.secondary(context),
+    );
+  }
+  static TextStyle titleOnPrimaryContainer(BuildContext context, {Color? color}) {
+    return Theme.of(context).textTheme.titleMedium!.copyWith(
+      fontWeight: FontWeight.w700,
+      color: color ?? AppColors.onPrimaryContainer(context),
     );
   }
 

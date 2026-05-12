@@ -735,8 +735,7 @@ class _ProductsDetailViewBodyState
         ),
         Builder(
           builder: (context) {
-            final isSeller = currentUser?.rol == 'satici';
-            return isLoggedIn && !isSeller
+            return isLoggedIn
                 ? Positioned(
                     width: isSmallScreen ? 36 : 40,
                     height: isSmallScreen ? 36 : 40,

@@ -103,6 +103,8 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                       spacing: 12,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
+                        //_greetingWidget(context),
+                        const CampaignStoriesBar(),
                         _futureCategories(width, height),
                         CampaignsItemsCard(width: width, height: height),
                         //_saticilarList(height, context, width),
@@ -122,6 +124,35 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _greetingWidget(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final name = user?.firstName ?? 'Misafir';
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Hoş Geldiniz,',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.outline(context),
+            ),
+          ),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary(context),
             ),
           ),
         ],
@@ -258,9 +289,9 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _categoriesText(context),
+              //_categoriesText(context),
               SizedBox(
-                height: 40, // Height for text pill
+                height: 50, // Height for text pill
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   clipBehavior: Clip.none,
@@ -640,26 +671,18 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
           arguments: category.kategoriId,
         );
       },
-      child: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-        ),
-        child: Text(
-          category.altKategoriAdi.toString(),
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF4B5563),
+      child: Text(
+          category.name,
+          style: TextStyle(
+            color: AppColors.onSurfaceVariant(context),
+            fontSize: AppTextStyle.bodyMedium(context).fontSize,
+            fontWeight: FontWeight.w700,
+            fontFamily: "SF Pro"
           ),
         ),
-      ),
     );
   }
-
+    
   void _voidCachedCategories() {
     //_futureCategory = ApiService.fetchCategories() as Future<List<Category>>;
     // Aşağıdaki kodu initState içine ekleyerek, eğer cachedProducts dolu ise
