@@ -268,11 +268,12 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(
-        utf8.decode(response.bodyBytes),
-      );
-
-      return jsonData.map((item) => Product.fromJson(item)).toList();
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return decoded.map((item) => Product.fromJson(item)).toList();
+      } else {
+        return PaginatedProducts.fromJson(decoded).results;
+      }
     } else {
       throw Exception(
         'Ürünler verisi alınamadı. Durum kodu: ${response.statusCode}',
@@ -314,11 +315,12 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(
-        utf8.decode(response.bodyBytes),
-      );
-
-      return jsonData.map((item) => Product.fromJson(item)).toList();
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return decoded.map((item) => Product.fromJson(item)).toList();
+      } else {
+        return PaginatedProducts.fromJson(decoded).results;
+      }
     } else {
       throw Exception(
         'Popüler Ürünler verisi alınamadı. Durum kodu: ${response.statusCode}',
