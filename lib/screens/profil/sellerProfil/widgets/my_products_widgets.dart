@@ -5,7 +5,8 @@ import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/widgets/buildLoadingBar.dart';
 import 'package:imecehub/core/widgets/buttons/turnBackTextIcon.dart';
-import 'package:imecehub/core/widgets/cards/productsCard2.dart';
+import 'package:imecehub/core/widgets/cards/productsCard4.dart';
+import 'package:imecehub/core/widgets/cards/productsCard4.dart';
 import 'package:imecehub/core/widgets/text.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/models/sellerProducts.dart';
@@ -78,12 +79,11 @@ class MyProductsGrid extends ConsumerWidget {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
-                  return productsCard2(
-                    myProducts: true,
+                  return ProductsCard4(
                     product: product,
-                    width: size.width,
+                    width: MediaQuery.of(context).size.width,
                     context: context,
-                    height: size.height,
+                    height: MediaQuery.of(context).size.height,
                   );
                 },
               );

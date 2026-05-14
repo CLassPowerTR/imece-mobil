@@ -234,169 +234,58 @@ class _ProductsScreenBodyView extends ConsumerState<ProductsScreenBodyView>
     );
   }
 
-  GridView _productCards(double height, double width, List<Product> products) {
-    return GridView.builder(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        mainAxisExtent: height * 0.4,
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: products.length,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final product = products[index];
-        final urunId = product.urunId;
-        final bool isInSepet =
-            urunId != null && sepetUrunIdList.contains(urunId);
-        final bool favoriteProduct =
-            urunId != null && favoriteProductIds.contains(urunId);
-        return productsCard(
-          productId: product.urunId ?? 0,
-          sepeteEkle: () async {
-            if (isLoggedIn) {
-              if (isInSepet) {
-                ref.read(bottomNavIndexProvider.notifier).setIndex(2);
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/home',
-                  (route) => false,
-                  arguments: {'refresh': true},
-                );
-              } else {
-                if ((product.stokDurumu ?? 0) <= 0) {
-                  showTemporarySnackBar(
-                    context,
-                    'Bu ürün stokta bulunmamaktadır',
-                    type: SnackBarType.info,
-                  );
-                } else {
-                  try {
-                    await ApiService.fetchSepetEkle(1, product.urunId ?? 0);
-                    showTemporarySnackBar(
-                      context,
-                      'Sepete eklendi',
-                      type: SnackBarType.success,
-                    );
-                  } catch (e) {
-                    showTemporarySnackBar(
-                      context,
-                      'Sepete eklenirken bir hata oluştu: $e',
-                      type: SnackBarType.error,
-                    );
-                  } finally {
-                    await _checkGetSepet();
-                    setState(() {});
-                  }
-                }
-              }
-            } else {
-              showTemporarySnackBar(
-                context,
-                'Lütfen giriş yapınız',
-                type: SnackBarType.info,
-              );
-            }
-          },
-          favoriEkle: () {
-            setState(() async {
-              if (isLoggedIn) {
-                var user = ref.read(userProvider);
-                if (user == null) {
-                  // Kullanıcı state'i henüz yüklenmemiş olabilir; yüklemeyi dene
-                  await ref.read(userProvider.notifier).fetchUserMe();
-                  user = ref.read(userProvider);
-                }
-                if (user == null) {
-                  showTemporarySnackBar(
-                    context,
-                    'Lütfen giriş yapınız',
-                    type: SnackBarType.info,
-                  );
-                  return;
-                }
-                if (favoriteProduct) {
-                  // Favoriden çıkar
-                  final favoriteProductId = productIdToFavoriteId[urunId];
+  Widget _productCards(double height, double width, List<Product> products) {
+    return ItemGrid(
+      items: products,
+      cardType: 'card3', // Varsayılan olarak card3 (yeni tasarım) kullanılıyor
+      favorites: favoriteProductIds,
+      onFavoriteToggle: (productId) async {
+        if (!isLoggedIn) {
+          showTemporarySnackBar(
+            context,
+            'Lütfen giriş yapınız',
+            type: SnackBarType.info,
+          );
+          return;
+        }
 
-                  if (favoriteProductId != null) {
-                    try {
-                      await ApiService.fetchUserFavorites(
-                        null,
-                        null,
-                        null,
-                        favoriteProductId,
-                      );
-                      showTemporarySnackBar(
-                        context,
-                        'Favoriden çıkarıldı',
-                        type: SnackBarType.success,
-                      );
-                    } catch (e) {
-                      showTemporarySnackBar(
-                        context,
-                        'Hata: $e',
-                        type: SnackBarType.error,
-                      );
-                    } finally {
-                      await _fetchFavorites();
-                      setState(() {});
-                    }
-                  }
-                } else {
-                  // Favoriye ekle
-                  final currentUrunId = product.urunId;
-                  if (currentUrunId == null) {
-                    showTemporarySnackBar(
-                      context,
-                      'Ürün bilgisi eksik (urunId boş)',
-                    );
-                    return;
-                  }
-                  try {
-                    await ApiService.fetchUserFavorites(
-                      null,
-                      user.id,
-                      currentUrunId,
-                      null,
-                    );
-                    showTemporarySnackBar(
-                      context,
-                      'Favoriye eklendi',
-                      type: SnackBarType.success,
-                    );
-                  } catch (e) {
-                    showTemporarySnackBar(
-                      context,
-                      'Hata: $e',
-                      type: SnackBarType.error,
-                    );
-                  } finally {
-                    await _fetchFavorites();
-                    setState(() {});
-                  }
-                }
-                setState(() async {
-                  await _fetchFavorites();
-                  setState(() {});
-                });
-              } else {
-                showTemporarySnackBar(
-                  context,
-                  'Lütfen giriş yapınız',
-                  type: SnackBarType.info,
-                );
-              }
-            });
-          },
-          isSepet: isInSepet,
-          isFavorite: favoriteProduct,
-          width: width,
-          context: context,
-          height: height,
-        );
+        final bool favoriteProduct = favoriteProductIds.contains(productId);
+        
+        var user = ref.read(userProvider);
+        if (user == null) {
+          await ref.read(userProvider.notifier).fetchUserMe();
+          user = ref.read(userProvider);
+        }
+        
+        if (user == null) {
+          showTemporarySnackBar(context, 'Lütfen giriş yapınız', type: SnackBarType.info);
+          return;
+        }
+
+        if (favoriteProduct) {
+          final favoriteProductId = productIdToFavoriteId[productId];
+          if (favoriteProductId != null) {
+            try {
+              await ApiService.fetchUserFavorites(null, null, null, favoriteProductId);
+              showTemporarySnackBar(context, 'Favoriden çıkarıldı', type: SnackBarType.success);
+            } catch (e) {
+              showTemporarySnackBar(context, 'Hata: $e', type: SnackBarType.error);
+            } finally {
+              await _fetchFavorites();
+              setState(() {});
+            }
+          }
+        } else {
+          try {
+            await ApiService.fetchUserFavorites(null, user.id, productId, null);
+            showTemporarySnackBar(context, 'Favoriye eklendi', type: SnackBarType.success);
+          } catch (e) {
+            showTemporarySnackBar(context, 'Hata: $e', type: SnackBarType.error);
+          } finally {
+            await _fetchFavorites();
+            setState(() {});
+          }
+        }
       },
     );
   }

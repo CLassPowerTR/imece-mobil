@@ -104,17 +104,18 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         //_greetingWidget(context),
-                        const CampaignStoriesBar(),
+                        
                         _futureCategories(width, height),
                         CampaignsItemsCard(width: width, height: height),
+                        _seninIcinSectiklerimiz(width, height),
+                        const CampaignStoriesBar(),
                         //_saticilarList(height, context, width),
                         //SizedBox(height: 16),
                         StoryCampaingsCard(height: height, width: width),
+                        NewImeceCampaigns(width: width, height: height),
                         _futureSellersView(height, width),
                         //_alimTipiContainer(height, context),
                         //_populerUrunCards(width, height),
-                        
-                        _futurePopulerProductsView(width, height),
                         //_onerilerContainer(height, context, width),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.14,
@@ -157,6 +158,84 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _seninIcinSectiklerimiz(double width, double height) {
+    final populerProductsAsync = ref.watch(populerProductsProvider);
+
+    return populerProductsAsync.when(
+      loading: () => ProductsGridShimmer(itemCount: 2),
+      error: (error, _) => Text("Hata oluştu: $error"),
+      data: (products) {
+        if (products.isEmpty) return const SizedBox.shrink();
+        
+        // Match the slice(0, 15) logic from React
+        final displayProducts = products.take(15).toList();
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: "SENİN İÇİN ",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontStyle: FontStyle.italic,
+                          letterSpacing: -0.5,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "SEÇTİKLERİMİZ",
+                            style: TextStyle(
+                              color: AppColors.primary(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        // Navigate to all popular products or similar
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            "TÜMÜ",
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, size: 14, color: Colors.grey.shade400),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Horizontal List (Swiper equivalent)
+              _AutoScrollProductList(
+                products: displayProducts,
+                width: width,
+                height: height,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -424,7 +503,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final product = populerProducts[index];
-        return productsCard2(
+        return ProductsCard4(
           product: product,
           width: width,
           context: context,
@@ -712,5 +791,91 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
         cachedSellers = sellers;
       });
     }
+  }
+}
+
+class _AutoScrollProductList extends StatefulWidget {
+  final List<Product> products;
+  final double width;
+  final double height;
+
+  const _AutoScrollProductList({
+    Key? key,
+    required this.products,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
+
+  @override
+  State<_AutoScrollProductList> createState() => _AutoScrollProductListState();
+}
+
+class _AutoScrollProductListState extends State<_AutoScrollProductList> {
+  late ScrollController _scrollController;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startAutoScroll();
+    });
+  }
+
+  void _startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_scrollController.hasClients) {
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final currentScroll = _scrollController.position.pixels;
+        final itemWidth = widget.width * 0.45 + 12; // width + margin
+
+        if (currentScroll >= maxScroll - 10) { // close to end
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          _scrollController.animateTo(
+            currentScroll + itemWidth,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.height * 0.4,
+      child: ListView.builder(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        itemCount: widget.products.length,
+        clipBehavior: Clip.none,
+        itemBuilder: (context, index) {
+          return Container(
+            width: widget.width * 0.45,
+            margin: EdgeInsets.only(right: 12, left: index == 0 ? 4 : 0),
+            child: ProductsCard4(
+              product: widget.products[index],
+              width: widget.width,
+              context: context,
+              height: widget.height,
+            ),
+          );
+        },
+      ),
+    );
   }
 }

@@ -1,493 +1,405 @@
 import 'package:flutter/material.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
-import 'package:imecehub/core/constants/app_textSizes.dart';
-
 import 'package:imecehub/core/variables/url.dart';
-import 'package:imecehub/core/widgets/raitingStars.dart';
-import 'package:imecehub/core/widgets/richText.dart';
-import 'package:imecehub/core/widgets/buttons/textButton.dart';
-import 'package:imecehub/models/products.dart';
+import 'package:intl/intl.dart';
 
-class productsCard2 extends StatefulWidget {
-  final Product product;
-  final double width;
-  final BuildContext context;
-  final double height;
-  final bool? myProducts;
-  const productsCard2({
-    super.key,
-    required this.product,
-    required this.width,
-    required this.context,
-    required this.height,
-    this.myProducts = false,
-  });
+class ImeceCard extends StatefulWidget {
+  final Map<String, dynamic> campaign;
+  final bool isFavorite;
+  final Function(int)? onFavoriteToggle;
+
+  const ImeceCard({
+    Key? key,
+    required this.campaign,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
+  }) : super(key: key);
 
   @override
-  State<productsCard2> createState() => _productsCardState();
+  State<ImeceCard> createState() => _ImeceCardState();
 }
 
-class _productsCardState extends State<productsCard2> {
-  bool favoriteProduct = false;
-  bool cokluGorsel = false;
-  bool _isDeleting = false;
+class _ImeceCardState extends State<ImeceCard> {
+  bool _isFavorite = false;
 
-  Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.warning_rounded,
-                color: Colors.red,
-                size: 24,
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Ürünü Sil',
-                style: TextStyle(
-                  fontSize: AppTextSizes.titleLarge(context),
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(ctx).colorScheme.onSurface,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bu ürünü silmek istediğinize emin misiniz?',
-              style: TextStyle(
-                fontSize: AppTextSizes.bodyLarge(context),
-                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            SizedBox(height: 8),
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 18,
-                    color: AppColors.primary(ctx),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      widget.product.urunAdi ?? 'Ürün',
-                      style: TextStyle(
-                        fontSize: AppTextSizes.bodyMedium(context),
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(ctx).colorScheme.onSurface,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Bu işlem geri alınamaz.',
-              style: TextStyle(
-                fontSize: AppTextSizes.bodySmall(context),
-                color: Colors.red.withOpacity(0.8),
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            child: Text(
-              'İptal',
-              style: TextStyle(
-                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Sil',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _isFavorite = widget.isFavorite;
+  }
 
-    if (confirmed == true && context.mounted) {
-      await _deleteProduct(context);
+  void _handleFavoriteClick() {
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+    if (widget.onFavoriteToggle != null) {
+      widget.onFavoriteToggle!(widget.campaign['campaign_id']);
     }
   }
 
-  Future<void> _deleteProduct(BuildContext context) async {
-    setState(() {
-      _isDeleting = true;
-    });
+  void _handleCardClick() {
+    // Navigate to Imece Detail
+  }
 
-    try {
-      final productId = widget.product.urunId;
-      if (productId == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Ürün bilgisi bulunamadı.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
-
-      // TODO: API servisine silme metodu eklendikten sonra buraya eklenecek
-      // await ApiService.deleteSellerProduct(productId);
-
-      // Şimdilik placeholder
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Text('Ürün başarıyla silindi.'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.error_outline, color: Colors.white),
-                SizedBox(width: 8),
-                Expanded(child: Text('Ürün silinirken bir hata oluştu: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDeleting = false;
-        });
-      }
-    }
+  void _handleSellerClick() {
+    // Navigate to Seller Profile
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.surfaceContainer(context),
-      child: Padding(
-        padding: EdgeInsets.all(10),
+    final campaign = widget.campaign;
+
+    final double capacity = double.tryParse(campaign['capacity']?.toString() ?? '1') ?? 1;
+    final double currentOccupancy = double.tryParse(campaign['current_occupancy']?.toString() ?? '0') ?? 0;
+    
+    final double occupancyRate = (currentOccupancy / capacity) * 100;
+    final int remainingSpots = (capacity - currentOccupancy).toInt();
+    final bool isUrgent = remainingSpots > 0 && (remainingSpots <= 5 || occupancyRate >= 85);
+    
+    final badges = campaign['seller_badges'] ?? {};
+    final bool hizliTeslimat = badges['hizli_teslimat'] == true;
+    final bool guvenilirUrun = badges['guvenilir_urun'] == true;
+    final bool onayliSatici = badges['onayli_satici'] == true;
+
+    final double maxPrice = double.tryParse(campaign['display_max_price']?.toString() ?? '0') ?? 0;
+    final double minPrice = double.tryParse(campaign['display_min_price']?.toString() ?? '0') ?? 0;
+    final double currentPrice = double.tryParse(campaign['display_current_price']?.toString() ?? '0') ?? 0;
+
+    return GestureDetector(
+      onTap: _handleCardClick,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
         child: Column(
-          spacing: 3,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Builder(
-              builder: (context) {
-                if (widget.product.kapakGorseli != '') {
-                  return Expanded(
-                    child: cokluGorsel == true
-                        ? PageView.builder(
-                            itemCount: widget.product.kapakGorseli!.length,
-                            itemBuilder: (context, imgIndex) {
-                              return Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                          widget
-                                                      .product
-                                                      .kapakGorseli![imgIndex] ==
-                                                  ''
-                                              ? NotFound.defaultBannerImageUrl
-                                              : widget
-                                                    .product
-                                                    .kapakGorseli![imgIndex],
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                                  Positioned(
-                                    bottom: 4,
-                                    right: 4,
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      width: 25,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.outline(context),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        "${imgIndex + 1}/${widget.product.kapakGorseli!.length}",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          )
-                        : Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      widget.product.kapakGorseli ??
-                                          NotFound.defaultBannerImageUrl,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ), // Görselin alt sağ köşesinde kaçıncı görsel olduğunu gösteren etiket
-                              Positioned(
-                                bottom: 4,
-                                right: 4,
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  width: 25,
-                                  height: 25,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.outline(context),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "1/1",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+            // Resim Alanı
+            Expanded(
+              flex: 5,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: campaign['display_image'] != null && campaign['display_image'].toString().isNotEmpty
+                          ? Image.network(
+                              campaign['display_image'],
+                              fit: BoxFit.contain,
+                            )
+                          : Image.network(
+                              NotFound.defaultBannerImageUrl,
+                              fit: BoxFit.contain,
+                            ),
+                    ),
+                  ),
+
+                  // Aciliyet Rozeti
+                  if (isUrgent)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade600,
+                          borderRadius: BorderRadius.circular(6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.3),
+                              blurRadius: 4,
+                            )
+                          ],
+                        ),
+                        child: Text(
+                          'SON $remainingSpots KİŞİ!',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                            fontStyle: FontStyle.italic,
+                            letterSpacing: 1,
                           ),
-                  );
-                } else {
-                  return Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: NetworkImage(NotFound.defaultBannerImageUrl),
-                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                  );
-                }
-              },
-            ),
-            SizedBox(height: 4),
-            richText(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: AppTextSizes.bodyLarge(context),
-              textAlign: TextAlign.start,
-              context,
-              maxLines: 10,
-              children: [
-                TextSpan(
-                  text: widget.product.urunAdi ?? '',
-                  style: TextStyle(color: AppColors.primary(context)),
-                ),
-                TextSpan(text: '\n', style: TextStyle(fontSize: 11)),
-                WidgetSpan(
-                  child: buildRatingStars(widget.product.degerlendirmePuani),
-                ),
-                TextSpan(text: '\n\n', style: TextStyle(fontSize: 10)),
-                TextSpan(
-                  text: 'Birim: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(text: '${widget.product.urunParakendeFiyat} TL\n'),
-                if (widget.product.satis_turu == 2) ...[
-                  TextSpan(
-                    children: [
-                      TextSpan(text: 'Grup Alım ile '),
-                      TextSpan(
-                        text: '(${widget.product.urunMinFiyat} TL)',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: ' kadar indirim\n'),
-                    ],
-                  ),
-                ],
-                TextSpan(
-                  text: 'Stok: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(text: widget.product.stokDurumu.toString()),
-              ],
-            ),
-            SizedBox(height: 4),
-            widget.myProducts == true
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: textButton(
-                          context,
-                          'Ürünü Düzenle',
-                          minSizeHeight: 38,
-                          elevation: 0,
-                          weight: FontWeight.bold,
-                          fontSize: AppTextSizes.bodyLarge(context),
-                          buttonColor: AppColors.surfaceContainer(context),
-                          titleColor: AppColors.secondary(context),
-                          border: true,
-                          borderWidth: 1,
-                          onPressed: _isDeleting
-                              ? null
-                              : () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/profil/addProduct',
-                                    arguments: {
-                                      'product': widget.product,
-                                      'user': null, // User boş gelebilir
-                                    },
-                                  );
-                                },
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Container(
-                        width: 38,
-                        height: 38,
+
+                  // Favori Butonu
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: GestureDetector(
+                      onTap: _handleFavoriteClick,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: _isDeleting
-                              ? Colors.grey.withOpacity(0.2)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                          shape: BoxShape.circle,
                           border: Border.all(
-                            color: _isDeleting
-                                ? Colors.grey.withOpacity(0.3)
-                                : Colors.red.withOpacity(0.3),
-                            width: 1,
+                            color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
                           ),
                         ),
-                        child: _isDeleting
-                            ? Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.red,
+                        child: Icon(
+                          _isFavorite ? Icons.favorite : Icons.favorite_border,
+                          size: 14,
+                          color: _isFavorite ? Colors.red : Colors.grey.shade400,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Satıcı Rozetleri
+                  if (hizliTeslimat || guvenilirUrun)
+                    Positioned(
+                      bottom: 6,
+                      left: 6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (hizliTeslimat)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade500,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.bolt, size: 8, color: Colors.white),
+                                  const SizedBox(width: 2),
+                                  const Text(
+                                    'HIZLI TESLİMAT',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 6,
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
-                                ),
-                              )
-                            : IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.red,
-                                  size: 20,
-                                ),
-                                onPressed: () =>
-                                    _showDeleteConfirmationDialog(context),
+                                ],
                               ),
+                            ),
+                          if (guvenilirUrun)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade500,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.check_circle, size: 8, color: Colors.white),
+                                  const SizedBox(width: 2),
+                                  const Text(
+                                    'ANALİZLİ ÜRÜN',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 6,
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  )
-                : textButton(
-                    context,
-                    'Ürün Detay',
-                    minSizeHeight: 38,
-                    elevation: 0,
-                    weight: FontWeight.bold,
-                    fontSize: AppTextSizes.bodyLarge(context),
-                    buttonColor: AppColors.surfaceContainer(context),
-                    titleColor: Theme.of(context).colorScheme.primary,
-                    border: true,
-                    borderWidth: 1,
-                    onPressed: () {
-                      final productId = widget.product.urunId;
-                      if (productId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Ürün bilgisi bulunamadı.'),
+                    ),
+                ],
+              ),
+            ),
+
+            // İçerik Alanı
+            Expanded(
+              flex: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Kampanya Adı
+                    Text(
+                      (campaign['display_title'] ?? '').toString().toUpperCase(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.2,
+                        height: 1.1,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 4),
+
+                    // Satıcı Bilgisi
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _handleSellerClick,
+                          child: Text(
+                            (campaign['seller_name'] ?? '').toString().toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.grey.shade400,
+                              fontStyle: FontStyle.italic,
+                              letterSpacing: 0.5,
+                            ),
                           ),
-                        );
-                        return;
-                      }
-                      setState(() {
-                        Navigator.pushNamed(
-                          context,
-                          '/home/productsDetail',
-                          arguments: productId,
-                        );
-                      });
-                    },
-                  ),
+                        ),
+                        const SizedBox(width: 4),
+                        if (onayliSatici)
+                          Icon(
+                            Icons.verified,
+                            size: 12,
+                            color: Colors.blue.shade500,
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // İlerleme Çubuğu
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'KATILIM: ${currentOccupancy.toInt()}/${capacity.toInt()}',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.grey.shade400,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        Text(
+                          '%${occupancyRate.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.orange.shade600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      height: 6,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: (occupancyRate / 100).clamp(0.0, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade600,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+                    
+                    // Ayırıcı
+                    Divider(height: 8, color: Theme.of(context).colorScheme.surfaceContainerHighest),
+
+                    // Fiyat ve Katıl Butonu
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '₺${NumberFormat('#,##0.00', 'tr_TR').format(maxPrice)}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade400,
+                            decoration: TextDecoration.lineThrough,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        Text(
+                          'HEDEF ₺${NumberFormat('#,##0.00', 'tr_TR').format(minPrice)}',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.green.shade600,
+                            fontStyle: FontStyle.italic,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '₺${NumberFormat('#,##0.00', 'tr_TR').format(currentPrice)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.orange.shade600,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 4),
+                    
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade600,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'ŞİMDİ KATIL',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          fontStyle: FontStyle.italic,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

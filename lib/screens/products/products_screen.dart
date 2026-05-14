@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 // import 'package:imecehub/core/function/actions.dart';
 import 'package:imecehub/core/widgets/cards/productsCard.dart';
 import 'package:imecehub/main.dart';
+import 'package:imecehub/core/widgets/text.dart';
+import 'package:imecehub/core/widgets/item_grid.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/models/products.dart';

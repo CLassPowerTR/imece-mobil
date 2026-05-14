@@ -632,8 +632,7 @@ class _SellerProfilBodyState extends ConsumerState<SellerProfilBody> {
                     return Container(
                       width: 160,
                       margin: EdgeInsets.only(right: index < products.length - 1 ? 12 : 0),
-                      child: productsCard2(
-                        myProducts: widget.myProfile,
+                      child: ProductsCard4(
                         product: product,
                         width: 160,
                         context: context,

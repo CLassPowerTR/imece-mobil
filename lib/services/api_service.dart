@@ -254,6 +254,28 @@ class ApiService {
   }
 
   /// API'den Product verisini çekmek için metot.
+  static Future<List<Map<String, dynamic>>> fetchImeceCampaigns() async {
+    final response = await _deps.httpClient.get(
+      Uri.parse('${config.baseUrl}/api/imece/campaigns/'),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return List<Map<String, dynamic>>.from(decoded);
+      } else if (decoded is Map<String, dynamic> && decoded.containsKey('results')) {
+        return List<Map<String, dynamic>>.from(decoded['results']);
+      }
+      return [];
+    } else {
+      throw Exception('İmece kampanyaları alınamadı. Durum: ${response.statusCode}');
+    }
+  }
+
   static Future<List<Product>> fetchProducts({String? id}) async {
     // HTTP GET isteği gönderilirken header'a API key eklenir.
     final response = await _deps.httpClient.get(

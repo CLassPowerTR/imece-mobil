@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:imecehub/core/variables/url.dart';
+import 'package:imecehub/core/widgets/cards/productsCard4.dart';
 import 'seller_profil_screen_library.dart';
 
 part 'views/seller_profil_view_header.dart';
