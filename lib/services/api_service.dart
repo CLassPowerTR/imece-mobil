@@ -324,6 +324,39 @@ class ApiService {
     }
   }
 
+  static Future<List<Category>> fetchCategoriesTree() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedTree = prefs.getString('categoryTree');
+    
+    if (cachedTree != null && cachedTree.isNotEmpty) {
+      try {
+        final List<dynamic> data = json.decode(cachedTree);
+        return data.map((json) => Category.fromJson(json)).toList();
+      } catch (e) {
+        debugPrint('Kategori ağacı cache parse hatası: $e');
+      }
+    }
+
+    final response = await _deps.httpClient.get(
+      Uri.parse(config.categoriesTreeApiUrl),
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final bodyText = utf8.decode(response.bodyBytes);
+      prefs.setString('categoryTree', bodyText);
+      List<dynamic> data = json.decode(bodyText);
+      return data.map((json) => Category.fromJson(json)).toList();
+    } else {
+      throw Exception(
+        'Category tree verisi alınamadı. Durum kodu: ${response.statusCode}',
+      );
+    }
+  }
+
   /// API'den Product verisini çekmek için metot.
   static Future<List<Product>> fetchPopulerProducts() async {
     // HTTP GET isteği gönderilirken header'a API key eklenir.

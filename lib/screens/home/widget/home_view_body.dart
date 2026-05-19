@@ -35,7 +35,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
   // Refresh işlemini gerçekleştiren metod:
   Future<void> _refreshFutures() async {
     // API'den verileri çek ve cache'i güncelle
-    List<Category> freshCategory = await ApiService.fetchCategories();
+    List<Category> freshCategory = await ApiService.fetchCategoriesTree();
     setState(() {
       cachedCategories = freshCategory;
       _futureCategory = Future.value(freshCategory);
@@ -79,8 +79,8 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     final isOnline = ref.watch(isOnlineProvider);
 
     return Scaffold(
-      drawer: const HomeDrawer(),
       appBar: HomeHeaderAppBar(),
+      drawer: const HomeDrawer(),
       body: Column(
         children: [
           // Offline Banner
@@ -364,28 +364,91 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
         } else if (snapshot.hasData) {
           List<Category> categories = snapshot.data!;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              //_categoriesText(context),
-              SizedBox(
-                height: 50, // Height for text pill
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: index == categories.length - 1 ? 0 : 16,
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ...categories.map((cat) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/home/category',
+                          arguments: cat.kategoriId,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 24.0, bottom: 4.0),
+                        child: Text(
+                          cat.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
                       ),
-                      child: _categories(categories[index], width),
                     );
-                  },
-                ),
+                  }).toList(),
+                  
+                  // Divider
+                  Container(
+                    width: 1,
+                    height: 20,
+                    margin: const EdgeInsets.only(right: 24.0),
+                    color: Colors.grey.shade300,
+                  ),
+
+                  // Trendler
+                  InkWell(
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 24.0, bottom: 4.0),
+                      child: Row(
+                        children: [
+                          const Text("🔥", style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Trendler",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.orange.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Fırsatlar
+                  InkWell(
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12.0, bottom: 4.0),
+                      child: Row(
+                        children: [
+                          const Text("💎", style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Fırsatlar",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         } else {
           return const SizedBox.shrink();
@@ -741,26 +804,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
     );
   }
 
-  Widget _categories(Category category, double screenWidth) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/home/category',
-          arguments: category.kategoriId,
-        );
-      },
-      child: Text(
-          category.name,
-          style: TextStyle(
-            color: AppColors.onSurfaceVariant(context),
-            fontSize: AppTextStyle.bodyMedium(context).fontSize,
-            fontWeight: FontWeight.w700,
-            fontFamily: "SF Pro"
-          ),
-        ),
-    );
-  }
+
     
   void _voidCachedCategories() {
     //_futureCategory = ApiService.fetchCategories() as Future<List<Category>>;
@@ -771,7 +815,7 @@ class _HomeViewBodyState extends ConsumerState<_HomeViewBody> {
       _futureCategory = Future.value(cachedCategories);
     } else {
       // İlk açılışta veya cache boşsa API'den verileri çek
-      _futureCategory = ApiService.fetchCategories();
+      _futureCategory = ApiService.fetchCategoriesTree();
       _futureCategory.then((categories) {
         // Gelen veriyi cache'e atıyoruz.
         cachedCategories = categories;

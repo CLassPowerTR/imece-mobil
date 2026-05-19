@@ -36,6 +36,6 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: HomeHeaderAppBar(), body: ProductsScreenBodyView());
+    return Scaffold(appBar: HomeHeaderAppBar(), body: ProductsScreenBodyView(),drawer:const HomeDrawer(),);
   }
 }

@@ -14,7 +14,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   void initState() {
     super.initState();
-    _futureCategory = ApiService.fetchCategories();
+    _futureCategory = ApiService.fetchCategoriesTree();
   }
 
   @override
@@ -36,43 +36,49 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             ),
             color: AppColors.primary(context),
             child: user == null
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
+                  ? GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/profil/signIn');
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.white70,
-                            radius: 24,
-                            child: Icon(Icons.person, color: AppColors.primary(context), size: 24),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                text: "Giriş yap",
-                                style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "\nHesabım & Siparişlerim",
-                                    style: AppTextStyle.bodySmall(context).copyWith(
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Colors.white70,
+                                radius: 24,
+                                child: Icon(Icons.person, color: AppColors.primary(context), size: 24),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: "Giriş yap",
+                                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                ],
-                            ),
-                          ),
-                      )],
-                      ),    
-                      
-                      
-                    ],
-                  )
+                                    children: [
+                                      TextSpan(
+                                        text: "\nHesabım & Siparişlerim",
+                                        style: AppTextStyle.bodySmall(context).copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                ),
+                              ),
+                          )],
+                          ),    
+                          
+                          
+                        ],
+                      ),
+                    )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -125,22 +131,34 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 ),
                 _buildMenuItem(context, "Ana Sayfa", Icons.home_outlined, () {
                   Navigator.pop(context);
+                  ref.read(bottomNavIndexProvider.notifier).setIndex(0);
                 }),
                 _buildMenuItem(context, "Tüm Ürünler", Icons.storefront_outlined, () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, '/products');
+                  ref.read(bottomNavIndexProvider.notifier).setIndex(1);
                 }),
-                _buildMenuItem(context, "Favorilerim", Icons.favorite_border, () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/favorites');
-                }),
+                if (user != null) ...[
+                  _buildMenuItem(context, "Favorilerim", Icons.favorite_border, () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/favorites');
+                  }),
+                  _buildMenuItem(context, "Siparişlerim", Icons.inventory_2_outlined, () {
+                    Navigator.pop(context);
+                    ref.read(bottomNavIndexProvider.notifier).setIndex(3); // Profile is index 3
+                  }),
+                ] else ...[
+                  _buildMenuItem(context, "Giriş Yap", Icons.login, () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/profil/signIn');
+                  }),
+                  _buildMenuItem(context, "Kayıt Ol", Icons.person_add_outlined, () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/profil/signUp');
+                  }),
+                ],
                 _buildMenuItem(context, "Sepetim", Icons.shopping_bag_outlined, () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, '/basket');
-                }),
-                _buildMenuItem(context, "Siparişlerim", Icons.inventory_2_outlined, () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/profile');
+                  ref.read(bottomNavIndexProvider.notifier).setIndex(2);
                 }),
 
                 const SizedBox(height: 24),
@@ -162,12 +180,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   future: _futureCategory,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
+                      return const DrawerShimmer();
                     } else if (snapshot.hasError) {
                       return Padding(
                         padding: const EdgeInsets.all(20.0),
@@ -176,79 +189,54 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                     } else if (snapshot.hasData) {
                       final categories = snapshot.data!;
                       
-                      // Build a 2-level tree: root categories and their immediate children
-                      final rootCategories = categories.where((c) => c.parent == null).toList();
-
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: rootCategories.map((root) {
-                          final children = categories.where((c) => c.parent == root.kategoriId).toList();
+                        children: categories.map((root) {
+                          final children = root.children ?? [];
                           
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                GestureDetector(
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent, // Remove border
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
+                              tilePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                              iconColor: Colors.grey.shade600,
+                              collapsedIconColor: Colors.grey.shade600,
+                              title: Text(
+                                root.name.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              children: children.map((sub) {
+                                return GestureDetector(
                                   onTap: () {
                                     Navigator.pop(context);
                                     Navigator.pushNamed(
                                       context,
                                       '/home/category',
-                                      arguments: root.kategoriId,
+                                      arguments: sub.kategoriId,
                                     );
                                   },
-                                  child: Text(
-                                    root.name.toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w900,
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                ),
-                                if (children.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    margin: const EdgeInsets.only(left: 8),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        left: BorderSide(
-                                          color: Colors.grey.shade200,
-                                          width: 2,
-                                        ),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                                    child: Text(
+                                      sub.name,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade600,
                                       ),
                                     ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: children.map((sub) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            Navigator.pushNamed(
-                                              context,
-                                              '/home/category',
-                                              arguments: sub.kategoriId,
-                                            );
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                            child: Text(
-                                              sub.name,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.grey.shade600,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
                                   ),
-                                ]
-                              ],
+                                );
+                              }).toList(),
                             ),
                           );
                         }).toList(),

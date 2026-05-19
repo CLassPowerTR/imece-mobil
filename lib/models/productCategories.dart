@@ -10,6 +10,7 @@ class Category {
   final int anaKategoriAdi;
   final String? altKategoriAdi;
   final String? gorsel;
+  final List<Category>? children;
 
   Category({
     required this.kategoriId,
@@ -23,6 +24,7 @@ class Category {
     required this.anaKategoriAdi,
     this.altKategoriAdi,
     this.gorsel,
+    this.children,
   });
 
   // JSON'dan Category nesnesine dönüşüm
@@ -39,6 +41,9 @@ class Category {
       anaKategoriAdi: json['ana_kategori_adi'] as int? ?? 0,
       altKategoriAdi: json['alt_kategori_adi'] as String?,
       gorsel: json['gorsel'] as String?,
+      children: json['children'] != null 
+          ? (json['children'] as List).map((i) => Category.fromJson(i as Map<String, dynamic>)).toList()
+          : null,
     );
   }
 
@@ -56,6 +61,7 @@ class Category {
       'ana_kategori_adi': anaKategoriAdi,
       'alt_kategori_adi': altKategoriAdi,
       'gorsel': gorsel,
+      'children': children?.map((c) => c.toJson()).toList(),
     };
   }
 }

@@ -292,8 +292,8 @@ class ProductsCard3 extends StatelessWidget {
 
                     // Ayırıcı ve Fiyat Alanı
                     Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.only(top: 12),
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
@@ -301,40 +301,29 @@ class ProductsCard3 extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (hasDiscount)
-                                Text(
-                                  '₺${NumberFormat('#,##0.00', 'tr_TR').format(asilFiyat)}',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade400,
-                                    decoration: TextDecoration.lineThrough,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    '₺${NumberFormat('#,##0.00', 'tr_TR').format(satisFiyati)}',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                      letterSpacing: -1,
-                                    ),
-                                  ),
-                                ],
+                          if (hasDiscount)
+                            Text(
+                              '₺${NumberFormat('#,##0.00', 'tr_TR').format(asilFiyat)}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade400,
+                                decoration: TextDecoration.lineThrough,
+                                letterSpacing: -0.5,
                               ),
-                            ],
+                            ),
+                          Text(
+                            '₺${NumberFormat('#,##0.00', 'tr_TR').format(satisFiyati)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              letterSpacing: -1,
+                            ),
                           ),
+                          const SizedBox(height: 6),
                           GestureDetector(
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -346,15 +335,19 @@ class ProductsCard3 extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.orange.shade600,
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Icon(
-                                Icons.shopping_bag_outlined,
-                                size: 14,
-                                color: Colors.white,
+                              child: const Text(
+                                'Sepete Ekle',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),

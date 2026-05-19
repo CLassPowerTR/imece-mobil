@@ -28,14 +28,15 @@ class ItemGrid extends StatelessWidget {
         // Ekran genişliğine göre sütun sayısını (responsive) belirle
         int crossAxisCount = 2;
         if (width >= 1200) {
-          crossAxisCount = 6;
-        } else if (width >= 900) {
           crossAxisCount = 5;
-        } else if (width >= 600) {
+        } else if (width >= 900) {
           crossAxisCount = 4;
-        } else if (width >= 400) {
+        } else if (width >= 600) {
           crossAxisCount = 3;
+        }else if (width >= 400) {
+          crossAxisCount = 2;
         }
+
 
         // Yataydaki padding (15*2) ve aralıkları (12*(crossAxisCount-1)) çıkararak net kart genişliğini bul
         final double availableWidth = width - 30 - ((crossAxisCount - 1) * 12);

@@ -53,70 +53,71 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     double width = double.infinity;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
+    final double inputHeight = isSmallScreen ? 40 : 48;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: SignInAppBar(context),
+      //appBar: SignInAppBar(context),
       body: SafeArea(
         child: Stack(
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  physics: const ClampingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - 40,
-                    ),
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: Center(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-                        width: double.infinity,
-                        padding: EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 24,
-                              offset: const Offset(0, 40),
-                            ),
-                          ],
-                        ),
-                        child: Column(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                          child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // ── Logo ──
+                            // ── Logo & Geri Butonu ──
                             Padding(
                               padding: EdgeInsets.only(bottom: 20),
-                              child: Image.asset(
-                                'assets/image/website.png',
-                                height: 36,
-                                fit: BoxFit.contain,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Theme.of(context).colorScheme.onSurface),
+                                          SizedBox(width: 4),
+                                          Text('Geri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Image.asset(
+                                    'assets/image/website.png',
+                                    height: isSmallScreen ? 28 : 36,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ],
                               ),
                             ),
 
                             // ── Başlık ──
-                            _buildHeader(),
-                            SizedBox(height: 24),
+                            _buildHeader(isSmallScreen),
+                            SizedBox(height: isSmallScreen ? 14 : 24),
 
                             // ── Kullanıcı Adı ──
                             usernameContainer(
                               width,
                               context,
+                              textFieldHeight: inputHeight,
                               controller: usernameController,
                               errorText: errorMessage?['username'] != null
                                   ? (errorMessage?['username'] is List
@@ -124,12 +125,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       : errorMessage?['username'].toString())
                                   : null,
                             ),
-                            SizedBox(height: 14),
+                            SizedBox(height: isSmallScreen ? 10 : 14),
 
                             // ── E-posta ──
                             emailAdressContainer(
                               width,
                               context,
+                              textFieldHeight: inputHeight,
                               controller: emailController,
                               errorText: emailValidationError ??
                                   (errorMessage?['email'] != null
@@ -140,41 +142,33 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             ),
                             SizedBox(height: 14),
 
-                            // ── Şifre & Tekrar (yan yana) ──
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Şifre
-                                Expanded(
-                                  child: _buildCompactPasswordField(
-                                    label: 'ŞİFRE',
-                                    controller: passwordController,
-                                    obscure: showPassword,
-                                    onToggle: () =>
-                                        setState(() => showPassword = !showPassword),
-                                    errorText: errorMessage?['password'] != null
-                                        ? (errorMessage?['password'] is List
-                                            ? (errorMessage?['password'] as List)
-                                                .join(', ')
-                                            : errorMessage?['password'].toString())
-                                        : null,
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                // Tekrar
-                                Expanded(
-                                  child: _buildCompactPasswordField(
-                                    label: 'TEKRAR',
-                                    controller: confirmPasswordController,
-                                    obscure: showConfirmPassword,
-                                    onToggle: () => setState(
-                                        () => showConfirmPassword = !showConfirmPassword),
-                                    errorText: null,
-                                  ),
-                                ),
-                              ],
+                            // ── Şifre ──
+                            _buildCompactPasswordField(
+                              label: 'ŞİFRE',
+                              controller: passwordController,
+                              obscure: showPassword,
+                              inputHeight: inputHeight,
+                              onToggle: () =>
+                                  setState(() => showPassword = !showPassword),
+                              errorText: errorMessage?['password'] != null
+                                  ? (errorMessage?['password'] is List
+                                      ? (errorMessage?['password'] as List)
+                                          .join(', ')
+                                      : errorMessage?['password'].toString())
+                                  : null,
                             ),
-                            SizedBox(height: 12),
+                            SizedBox(height: isSmallScreen ? 10 : 14),
+                            // ── Tekrar ──
+                            _buildCompactPasswordField(
+                              label: 'ŞİFRE TEKRARI',
+                              controller: confirmPasswordController,
+                              obscure: showConfirmPassword,
+                              inputHeight: inputHeight,
+                              onToggle: () => setState(
+                                  () => showConfirmPassword = !showConfirmPassword),
+                              errorText: null,
+                            ),
+                            SizedBox(height: isSmallScreen ? 8 : 12),
 
                             // ── Şifre Kuralları ──
                             if (passwordController.text.isNotEmpty)
@@ -202,15 +196,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             SizedBox(height: 8),
 
                             // ── Kayıt Ol Butonu ──
-                            _buildRegisterButton(context),
-                            SizedBox(height: 16),
+                            _buildRegisterButton(context, inputHeight),
+                            SizedBox(height: isSmallScreen ? 10 : 16),
 
                             // ── Veya ──
                             orLine(width, context, containerHeight: 24),
-                            SizedBox(height: 16),
+                            SizedBox(height: isSmallScreen ? 10 : 16),
 
                             // ── Google ile Kayıt ──
-                            signInWithGoogle(context, width, containerHeight: 50, onTap: () async {
+                            signInWithGoogle(context, width, containerHeight: inputHeight, onTap: () async {
                               setState(() => isLoading = true);
                               try {
                                 await ref.read(userProvider.notifier).googleLogin();
@@ -257,7 +251,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       ),
                     ),
                   ),
-                );
+                ));
               },
             ),
 
@@ -275,7 +269,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   // ───────────────────────────────────────────────────────────────────────
   // Başlık Widget'ı
   // ───────────────────────────────────────────────────────────────────────
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isSmallScreen) {
     return Column(
       children: [
         RichText(
@@ -284,14 +278,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           overflow: TextOverflow.ellipsis,
           text: TextSpan(
             style: TextStyle(
-              fontSize: 22,
+              fontSize: isSmallScreen ? 18 : 22,
               fontWeight: FontWeight.w900,
               color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.3,
             ),
             children: [
               TextSpan(
-                text: 'İMECEHUB\'YE ',
+                text: 'İMECEHUB\'A ',
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
               TextSpan(text: 'HOŞ GELDİN'),
@@ -302,10 +296,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
          Text(
           'Hemen ücretsiz hesabınızı oluşturun',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: isSmallScreen ? 9 : 10,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondary(context),
             letterSpacing: 2.0,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -321,6 +315,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     required TextEditingController controller,
     required bool obscure,
     required VoidCallback onToggle,
+    required double inputHeight,
     String? errorText,
   }) {
     return Column(
@@ -342,15 +337,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ),
         // Input
         Container(
-          height: 48,
+          height: inputHeight,
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: errorText != null
                   ? Theme.of(context).colorScheme.error
-                  : const Color(0xFFF1F5F9),
-              width: 2,
+                  : Colors.black87,
+              width: 1.5,
             ),
           ),
           child: TextField(
@@ -503,7 +498,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   // ───────────────────────────────────────────────────────────────────────
   // Kayıt Ol Butonu
   // ───────────────────────────────────────────────────────────────────────
-  Widget _buildRegisterButton(BuildContext context) {
+  Widget _buildRegisterButton(BuildContext context, double height) {
     final isFormValid = isCheckedContract &&
         usernameController.text.trim().isNotEmpty &&
         emailController.text.trim().isNotEmpty &&
@@ -512,7 +507,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: height,
       child: Material(
         color: isFormValid
             ? Theme.of(context).colorScheme.onSurface

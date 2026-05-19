@@ -56,70 +56,66 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     double width = double.infinity;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
+    final double inputHeight = isSmallScreen ? 40 : 48;
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: SignInAppBar(context),
+      //appBar: SignInAppBar(context),
       body: SafeArea(
         child: Stack(
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  physics: const ClampingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - 40,
-                    ),
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: Center(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-
-          width: double.infinity,
-
-          padding: EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                          
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-                              Theme.of(context).colorScheme.surface,
-
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 24,
-                              //spreadRadius: -20,
-                offset: const Offset(0, 40),
-                            ),
-                          ],
-                        ),
-                        child: Column(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                          child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo
+                            // Logo & Geri
                             Padding(
                               padding: EdgeInsets.only(bottom: 24),
-                              child: Image.asset(
-                                'assets/image/website.png',
-                                height: 40,
-                                fit: BoxFit.contain,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Theme.of(context).colorScheme.onSurface),
+                                          SizedBox(width: 4),
+                                          Text('Geri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Image.asset(
+                                    'assets/image/website.png',
+                                    height: isSmallScreen ? 40 : 60,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ],
                               ),
                             ),
-                            headText(context),
-                            SizedBox(height: 28),
+                            headText(context, isSmallScreen: isSmallScreen),
+                            SizedBox(height: isSmallScreen ? 14 : 28),
                             emailAdressContainer(
                               width,
                               context,
+                              textFieldHeight: inputHeight,
                               controller: emailController,
                               errorText: emailValidationError ?? 
                                   generalFieldError ?? 
@@ -129,10 +125,11 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                             : fieldErrors?['email'].toString())
                                       : null),
                             ),
-                            SizedBox(height: 12),
+                            SizedBox(height: isSmallScreen ? 10 : 12),
                             passwordContainer(
                               width,
                               context,
+                              textFieldHeight: inputHeight,
                               textFieldController: passwordController,
                               obscureText: showPassword,
                               onTap: () {
@@ -151,13 +148,13 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                 Navigator.pushNamed(context, '/profil/changePassword');
                               },
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: isSmallScreen ? 10 : 16),
                             checkContract(width, context, isCheckedContract, (value) {
                               setState(() {
                                 isCheckedContract = value!;
                               });
                             }),
-                            SizedBox(height: 12),
+                            SizedBox(height: isSmallScreen ? 8 : 12),
                             // Hata banner — React tarzı
                             if (errorMessage != null)
                               Container(
@@ -189,11 +186,12 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                   ],
                                 ),
                               ),
-                            SizedBox(height: 6),
+                            SizedBox(height: isSmallScreen ? 4 : 6),
                             NextButton(
                               context,
                               'Giriş Yap',
                               isCheckedContract,
+                              minSizeHeight: inputHeight,
                               onPressed: () async {
                                 // E-posta format kontrolü
                                 final email = emailController.text.trim();
@@ -308,10 +306,10 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                                 }
                               },
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: isSmallScreen ? 10 : 20),
                             orLine(width, context),
-                            SizedBox(height: 20),
-                            signInWithGoogle(context, width, onTap: () async {
+                            SizedBox(height: isSmallScreen ? 10 : 20),
+                            signInWithGoogle(context, width, containerHeight: inputHeight, onTap: () async {
                               setState(() => isLoading = true);
                               try {
                                 await ref.read(userProvider.notifier).googleLogin();
@@ -362,7 +360,7 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                       ),
                     ),
                   ),
-                );
+                ));
               },
             ),
             if (isLoading)

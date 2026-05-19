@@ -17,6 +17,7 @@ import 'package:imecehub/core/widgets/new_imece_campaigns.dart';
 import 'package:imecehub/core/widgets/cards/campaigns_items_card.dart';
 import 'package:imecehub/core/widgets/cards/campaign_stories_bar.dart';
 import 'package:imecehub/core/widgets/shadow.dart';
+import 'package:imecehub/core/widgets/shimmer/drawer_shimmer.dart';
 import 'package:imecehub/core/widgets/shimmer/products_shimmer.dart';
 import 'package:imecehub/core/widgets/shimmer/sellers_shimmer.dart';
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
@@ -67,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const HomeDrawer(),
       body: Stack(
         children: [
           Consumer(

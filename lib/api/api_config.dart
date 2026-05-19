@@ -23,6 +23,7 @@ class ApiConfig {
   final String productsCategoryApiUrl =
       dotenv.env['PRODUCTS_CATEGORY_API_URL'] ?? '';
   final String categoriesApiUrl = dotenv.env['CATEGORIES_API_URL'] ?? '';
+  final String categoriesTreeApiUrl = '${dotenv.env['BASE_URL'] ?? ''}/api/products/kategoriler/tree/';
   final String populerProductsApiUrl =
       dotenv.env['POPULER_PRODUCTS_API_URL'] ?? '';
   final String productsCampaingsApiUrl =

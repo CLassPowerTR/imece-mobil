@@ -3,7 +3,7 @@ part of 'sign_in_screen.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // Başlık Metni — "HESABINIZA GİRİŞ YAPIN" stilinde
 // ─────────────────────────────────────────────────────────────────────────────
-Widget headText(BuildContext context) {
+Widget headText(BuildContext context, {bool isSmallScreen = false}) {
   return Column(
     children: [
       RichText(
@@ -12,7 +12,7 @@ Widget headText(BuildContext context) {
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           style: TextStyle(
-            fontSize: 24,
+            fontSize: isSmallScreen ? 18 : 24,
             fontWeight: FontWeight.w900,
             color: Theme.of(context).colorScheme.onSurface,
             letterSpacing: -0.5,
@@ -32,7 +32,7 @@ Widget headText(BuildContext context) {
       Text(
         'Hoş geldiniz, maceraya devam edin',
         style: TextStyle(
-          fontSize: 11,
+          fontSize: isSmallScreen ? 9 : 11,
           fontWeight: FontWeight.w800,
           color: AppColors.onPrimaryContainer(context).withValues(alpha: 0.5),
           letterSpacing: 2.0,
@@ -78,12 +78,12 @@ Widget emailAdressContainer(
           height: textFieldHeight ?? 56,
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: errorText != null
                   ? Theme.of(context).colorScheme.error
-                  : const Color(0xFFF1F5F9),
-              width: 2,
+                  : Colors.black87,
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
@@ -117,7 +117,7 @@ Widget emailAdressContainer(
               ),
               border: InputBorder.none,
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
           ),
         ),
@@ -208,12 +208,12 @@ Widget passwordContainer(
           height: textFieldHeight ?? 56,
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: errorText != null
                   ? Theme.of(context).colorScheme.error
-                  : const Color(0xFFF1F5F9),
-              width: 2,
+                  : Colors.black87,
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
@@ -264,7 +264,7 @@ Widget passwordContainer(
               ),
               border: InputBorder.none,
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
           ),
         ),
@@ -331,12 +331,12 @@ Widget usernameContainer(
           height: textFieldHeight ?? 56,
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: errorText != null
                   ? Theme.of(context).colorScheme.error
-                  : const Color(0xFFF1F5F9),
-              width: 2,
+                  : Colors.black87,
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
@@ -366,11 +366,11 @@ Widget usernameContainer(
               hintStyle: TextStyle(
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                 fontWeight: FontWeight.w700,
-                fontSize: 14,
+                fontSize: 12,
               ),
               border: InputBorder.none,
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
           ),
         ),
@@ -420,8 +420,8 @@ SizedBox checkContract(
         children: [
           // Checkbox
           Container(
-            width: 22,
-            height: 22,
+            width: 18,
+            height: 18,
             decoration: BoxDecoration(
               color: isCheckedContract
                   ? Theme.of(context).colorScheme.primary
@@ -436,16 +436,16 @@ SizedBox checkContract(
             ),
             child: isCheckedContract
                 ? Icon(Icons.check_rounded,
-                    size: 16, color: Colors.white)
+                    size: 14, color: Colors.white)
                 : null,
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 8),
           // Metin
           Expanded(
             child: Text.rich(
               TextSpan(
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary(context),
                   letterSpacing: 0.8,
