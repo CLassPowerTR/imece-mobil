@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/core/variables/url.dart';
+import 'package:imecehub/providers/cart_provider.dart';
+import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:intl/intl.dart';
 
-class ProductsCard4 extends StatefulWidget {
+class ProductsCard4 extends ConsumerStatefulWidget {
   final Product product;
   final double width;
   final BuildContext context;
@@ -18,15 +21,15 @@ class ProductsCard4 extends StatefulWidget {
     required this.width,
     required this.context,
     required this.height,
-    this.isFavorite = false,
+    this.isFavorite,
     this.onFavoriteToggle,
   });
 
   @override
-  State<ProductsCard4> createState() => _ProductsCard4State();
+  ConsumerState<ProductsCard4> createState() => _ProductsCard4State();
 }
 
-class _ProductsCard4State extends State<ProductsCard4> {
+class _ProductsCard4State extends ConsumerState<ProductsCard4> {
   bool _isFavorite = false;
 
   @override
@@ -361,20 +364,67 @@ class _ProductsCard4State extends State<ProductsCard4> {
                               ),
                             ),
                             if (product.satis_turu != 2)
-                              GestureDetector(
-                                onTap: _handleAddToCart,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.shopping_bag_outlined,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final isSepet = ref.watch(cartProvider).items.any((item) => item.product.urunId == product.urunId);
+                                  
+                                  if (isSepet) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        ref.read(bottomNavIndexProvider.notifier).setIndex(2);
+                                        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.shade600,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.shopping_cart_checkout, size: 12, color: Colors.white),
+                                            const SizedBox(width: 4),
+                                            const Text(
+                                              'Sepete Git',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        ref.read(cartProvider.notifier).addToCart(product);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Ürün sepete eklendi!'),
+                                            backgroundColor: Colors.green,
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 30,
+                                        width: 30,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary(context),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.shopping_cart_outlined,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
                           ],
                         ),

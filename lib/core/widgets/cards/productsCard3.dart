@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/models/products.dart';
 import 'package:imecehub/core/variables/url.dart';
+import 'package:imecehub/providers/cart_provider.dart';
+import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:intl/intl.dart';
 
-class ProductsCard3 extends StatelessWidget {
+class ProductsCard3 extends ConsumerWidget {
   final Product data;
   final bool isFavorite;
   final Function(int)? onFavoriteToggle;
@@ -54,13 +57,15 @@ class ProductsCard3 extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final double asilFiyat = double.tryParse(data.urunAsilFiyati ?? data.urunParakendeFiyat ?? '0') ?? 0;
     final double satisFiyati = double.tryParse(data.urunParakendeFiyat ?? '0') ?? 0;
     final bool hasDiscount = asilFiyat > satisFiyati;
     final int discountPercentage = hasDiscount 
         ? (((asilFiyat - satisFiyati) / asilFiyat) * 100).round() 
         : 0;
+
+    final isSepet = ref.watch(cartProvider).items.any((item) => item.product.urunId == data.urunId);
 
     return GestureDetector(
       onTap: () => _handleClick(context),
@@ -314,42 +319,74 @@ class ProductsCard3 extends StatelessWidget {
                                 letterSpacing: -0.5,
                               ),
                             ),
-                          Text(
-                            '₺${NumberFormat('#,##0.00', 'tr_TR').format(satisFiyati)}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: Theme.of(context).colorScheme.onSurface,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          GestureDetector(
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Ürün sepete eklendi!'),
-                                  backgroundColor: Colors.green,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade600,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text(
-                                'Sepete Ekle',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '₺${NumberFormat('#,##0.00', 'tr_TR').format(satisFiyati)}',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                  letterSpacing: -1,
                                 ),
                               ),
-                            ),
+                              if (isSepet)
+                                GestureDetector(
+                                  onTap: () {
+                                    ref.read(bottomNavIndexProvider.notifier).setIndex(2);
+                                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade600,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.shopping_cart_checkout, size: 12, color: Colors.white),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          'Sepete Git',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else
+                                GestureDetector(
+                                  onTap: () {
+                                    ref.read(cartProvider.notifier).addToCart(data);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Ürün sepete eklendi!'),
+                                        backgroundColor: Colors.green,
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 30,
+                                    width: 30,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary(context),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.shopping_cart_outlined,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),

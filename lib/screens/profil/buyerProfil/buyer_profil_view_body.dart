@@ -49,7 +49,7 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
           pinned: true,
           floating: false,
           snap: false,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface(context),
           title: customText(
             'Hesabım',
             context,
@@ -59,7 +59,7 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
           ),
           centerTitle: true,
           elevation: 4,
-          shadowColor: Colors.grey[300],
+          shadowColor: AppColors.shadow(context).withOpacity(0.15),
           actions: [
             IconButton(icon: Icon(Icons.notification_add), onPressed: () {}),
           ],
@@ -75,31 +75,39 @@ class _BuyerProfilViewBodyState extends ConsumerState<BuyerProfilViewBody> {
           ),
         ),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: AppPaddings.h16,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: 24),
-                _userMenu(buyerProfil: widget.buyerProfil),
-                SizedBox(height: 24),
-                Divider(),
-                _logoutButton(
-                  onLogout: () {
-                    ref.read(bottomNavIndexProvider.notifier).setIndex(3);
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/home',
-                      (route) => false,
-                      arguments: {'refresh': true},
-                    );
-                  },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 20),
+              // Tasarruf Karnesi
+              _savingsCards(buyerProfil: widget.buyerProfil),
+              const SizedBox(height: 20),
+              Padding(
+                padding: AppPaddings.h16,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _userMenu(buyerProfil: widget.buyerProfil),
+                    SizedBox(height: 12),
+                    Divider(color: AppColors.outline(context).withOpacity(0.3)),
+                    _logoutButton(
+                      onLogout: () {
+                        ref.read(bottomNavIndexProvider.notifier).setIndex(3);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/home',
+                          (route) => false,
+                          arguments: {'refresh': true},
+                        );
+                      },
+                    ),
+                    SizedBox(height: height * 0.15),
+                  ],
                 ),
-                SizedBox(height: height * 0.2),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

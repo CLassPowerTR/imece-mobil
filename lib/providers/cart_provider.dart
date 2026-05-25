@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imecehub/models/products.dart';
+import 'package:imecehub/providers/auth_provider.dart';
+import 'package:imecehub/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -58,15 +60,16 @@ class CartItem {
 
   Map<String, dynamic> toJson() {
     return {
+      'product': product.toJson(),
       'product_id': product.urunId,
       'quantity': quantity,
       'price': price,
     };
   }
 
-  factory CartItem.fromJson(Map<String, dynamic> json, Product product) {
+  factory CartItem.fromJson(Map<String, dynamic> json, {Product? product}) {
     return CartItem(
-      product: product,
+      product: product ?? Product.fromJson(json['product'] as Map<String, dynamic>),
       quantity: json['quantity'] ?? 1,
       price: json['price']?.toDouble() ?? 0.0,
     );
@@ -107,12 +110,44 @@ class CartNotifier extends Notifier<CartState> {
       double total = 0.0;
       int count = 0;
 
+      // offline cart verisini uygulama depolamasından yükle (API'ye istek atmadan)
       for (var item in cartJson) {
-        // Burada gerçek ürün bilgisini API'den çekmek gerekebilir
-        // Şimdilik mock data kullanıyoruz
-        // TODO: ApiService.fetchProduct(item['product_id']) ile gerçek ürünü çek
-        count += (item['quantity'] as int? ?? 1);
-        total += (item['price']?.toDouble() ?? 0.0) * (item['quantity'] ?? 1);
+        try {
+          if (item['product'] != null) {
+            // Eğer tam ürün verisi önbellekte varsa direkt onu kullan
+            final product = Product.fromJson(item['product'] as Map<String, dynamic>);
+            final int qty = item['quantity'] as int? ?? 1;
+            final double price = double.tryParse(product.urunParakendeFiyat ?? '0') ?? 0.0;
+            
+            items.add(CartItem(
+              product: product,
+              quantity: qty,
+              price: price,
+            ));
+            
+            count += qty;
+            total += price * qty;
+          } else {
+            // Sadece product_id kalmış çok eski bir veri ise (Geçiş dönemi için koruma amaçlı)
+            final int? pId = item['product_id'];
+            if (pId != null) {
+              final product = await ApiService.fetchProduct(pId);
+              final int qty = item['quantity'] as int? ?? 1;
+              final double price = double.tryParse(product.urunParakendeFiyat ?? '0') ?? 0.0;
+              
+              items.add(CartItem(
+                product: product,
+                quantity: qty,
+                price: price,
+              ));
+              
+              count += qty;
+              total += price * qty;
+            }
+          }
+        } catch (e) {
+          debugPrint('CartProvider: Ürün yüklenemedi - Hata: $e');
+        }
       }
 
       state = state.copyWith(
@@ -132,40 +167,64 @@ class CartNotifier extends Notifier<CartState> {
     }
   }
 
-  /// Sepete ürün ekle
-  Future<void> addToCart(Product product, {int quantity = 1}) async {
+  /// Sepete ürün ekle, çıkar veya sil
+  /// [quantity] eklenecek/çıkarılacak miktardır. Örn: sepette 1 var, 1 eklemek için quantity=1. 
+  /// Tamamen silmek için [setQuantity] parametresini kullanabiliriz veya quantity = -mevcutMiktar diyebiliriz.
+  Future<void> addToCart(Product product, {int quantity = 1, int? setQuantity}) async {
     try {
+      final user = ref.read(userProvider);
+      
       final existingItemIndex = state.items.indexWhere(
         (item) => item.product.urunId == product.urunId,
       );
 
-      List<CartItem> updatedItems;
+      int currentQuantity = existingItemIndex >= 0 ? state.items[existingItemIndex].quantity : 0;
+      int newQuantity = setQuantity ?? (currentQuantity + quantity);
+      
+      if (newQuantity < 0) newQuantity = 0;
 
-      if (existingItemIndex >= 0) {
-        // Ürün zaten sepette, miktarı artır
-        updatedItems = List.from(state.items);
-        final existingItem = updatedItems[existingItemIndex];
-        updatedItems[existingItemIndex] = CartItem(
-          product: existingItem.product,
-          quantity: existingItem.quantity + quantity,
-          price: existingItem.price,
-        );
+      // Kullanıcı giriş yapmışsa API çağrısı yap (backend absolute miktar bekliyor)
+      if (user != null && product.urunId != null) {
+        try {
+          await ApiService.fetchSepetEkle(newQuantity, product.urunId!);
+          debugPrint('CartProvider: Ürün API ile sepete eklendi - ${product.urunAdi} (Yeni Miktar: $newQuantity)');
+        } catch (e) {
+          debugPrint('CartProvider: API sepete ekleme hatası: $e');
+        }
+      }
+
+      List<CartItem> updatedItems = List.from(state.items);
+
+      if (newQuantity == 0) {
+        // Ürünü sepetten tamamen çıkar
+        if (existingItemIndex >= 0) {
+          updatedItems.removeAt(existingItemIndex);
+        }
       } else {
-        // Yeni ürün ekle
-        updatedItems = [
-          ...state.items,
-          CartItem(
-            product: product,
-            quantity: quantity,
-            price: double.tryParse(product.urunParakendeFiyat ?? '0') ?? 0.0,
-          ),
-        ];
+        if (existingItemIndex >= 0) {
+          // Ürün zaten sepette, miktarı güncelle
+          final existingItem = updatedItems[existingItemIndex];
+          updatedItems[existingItemIndex] = CartItem(
+            product: existingItem.product,
+            quantity: newQuantity,
+            price: existingItem.price,
+          );
+        } else {
+          // Yeni ürün ekle
+          updatedItems.add(
+            CartItem(
+              product: product,
+              quantity: newQuantity,
+              price: double.tryParse(product.urunParakendeFiyat ?? '0') ?? 0.0,
+            ),
+          );
+        }
       }
 
       await _saveCart(updatedItems);
       _updateState(updatedItems);
 
-      debugPrint('CartProvider: Ürün sepete eklendi - ${product.urunAdi}');
+      debugPrint('CartProvider: Ürün yerel sepet güncellendi - ${product.urunAdi} (Miktar: $newQuantity)');
     } catch (e) {
       state = state.copyWith(error: e.toString());
       debugPrint('CartProvider: Ürün eklenirken hata: $e');

@@ -37,7 +37,7 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
         title: Text(
           "Gruplarım",
           style: TextStyle(
-            color: const Color(0xFF1A1A1A),
+            color: AppColors.onSurface(context),
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
@@ -50,22 +50,55 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
 
   Widget _buildBody(GroupsState state) {
     if (state.isLoading) {
-      return Center(child: buildLoadingBar(context));
+      return _buildGroupSkeleton();
     }
 
     if (state.error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 48, color: Colors.redAccent),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 56,
+                color: AppColors.error(context).withOpacity(0.5),
+              ),
               const SizedBox(height: 16),
-              Text('Hata oluştu: ${state.error}', textAlign: TextAlign.center),
-              TextButton(
+              Text(
+                'Bir hata oluştu',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.onSurface(context),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${state.error}',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: AppColors.onSurfaceVariant(context),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
                 onPressed: () => ref.read(groupsProvider.notifier).fetchJoinedGroups(),
-                child: const Text('Tekrar Dene'),
+                icon: const Icon(Icons.refresh),
+                label: Text(
+                  'Tekrar Dene',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary(context),
+                  foregroundColor: AppColors.onPrimary(context),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ],
           ),
@@ -74,49 +107,123 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
     }
 
     if (state.joinedGroups.isEmpty) {
-      return const Center(
-        child: Text(
-          'Herhangi bir gruba dahil değilsiniz.',
-          style: TextStyle(color: Color(0xFF86868B), fontSize: 15),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.groups_outlined,
+                size: 72,
+                color: AppColors.primary(context).withOpacity(0.25),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Henüz Bir Gruba Dahil Değilsiniz',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.onSurface(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'İmece gruplarına katılarak toplu alışverişin avantajlarından yararlanın.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: AppColors.onSurfaceVariant(context),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/home'),
+                icon: const Icon(Icons.explore_outlined),
+                label: Text(
+                  'Ürünleri Keşfet',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary(context),
+                  foregroundColor: AppColors.onPrimary(context),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      itemCount: state.joinedGroups.length,
-      itemBuilder: (context, index) {
-        return _buildGroupCard(state.joinedGroups[index]);
+    return RefreshIndicator(
+      color: AppColors.primary(context),
+      backgroundColor: AppColors.surface(context),
+      onRefresh: () async {
+        ref.read(groupsProvider.notifier).fetchJoinedGroups();
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: state.joinedGroups.length,
+        itemBuilder: (context, index) {
+          return _buildGroupCard(state.joinedGroups[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildGroupSkeleton( ) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.outline(context).withOpacity(0.12),
+      highlightColor: AppColors.surface(context),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        itemCount: 3,
+        itemBuilder: (_, __) => Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          height: 140,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildGroupCard(GroupInfo group) {
+    final progress = group.capacity > 0
+        ? group.usersCount / group.capacity
+        : 0.0;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF000000).withOpacity(0.05),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-            spreadRadius: -5,
-          ),
-          BoxShadow(
-            color: const Color(0xFF007AFF).withOpacity(0.02),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
+            color: AppColors.shadow(context).withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: Colors.white, width: 0.8),
+        border: Border.all(
+          color: AppColors.outline(context).withOpacity(0.15),
+          width: 0.8,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header: Icon + Name + Menu
             Row(
               children: [
                 _buildHeaderIcon(),
@@ -127,10 +234,10 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
                     children: [
                       Text(
                         group.groupName,
-                        style: const TextStyle(
-                          fontSize: 17,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1D1D1F),
+                          color: AppColors.onSurface(context),
                           letterSpacing: -0.4,
                         ),
                       ),
@@ -139,9 +246,9 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
                           padding: const EdgeInsets.only(top: 2),
                           child: Text(
                             group.productName!,
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               fontSize: 13,
-                              color: const Color(0xFF007AFF).withOpacity(0.8),
+                              color: AppColors.primary(context).withOpacity(0.8),
                               fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
@@ -154,16 +261,153 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
                 _buildActionMenu(group),
               ],
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 16),
+
+            // Progress bar
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${group.usersCount} / ${group.capacity} Kişi',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.onSurface(context),
+                      ),
+                    ),
+                    Text(
+                      '%${(progress * 100).toInt()}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary(context),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: progress.clamp(0.0, 1.0),
+                    minHeight: 8,
+                    backgroundColor:  AppColors.primary(context).withOpacity(0.1),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      progress >= 1.0
+                          ? AppColors.succesful(context)
+                          : AppColors.primary(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 14),
+
+            // Info chips
             Wrap(
-              spacing: 10,
+              spacing: 8,
               runSpacing: 8,
               children: [
-                _buildDataChip(Icons.people_alt_rounded, '${group.usersCount} / ${group.capacity} Kişi'),
-                _buildDataChip(Icons.payments_rounded, '₺${group.currentPrice.toStringAsFixed(2)}'),
+                _buildDataChip(
+                
+                  Icons.payments_rounded,
+                  '₺${group.currentPrice.toStringAsFixed(2)}',
+                ),
                 if (group.groupCapacityLeft != null)
-                  _buildDataChip(Icons.event_available_rounded, '${group.groupCapacityLeft} Kontenjan Kaldı'),
+                  _buildDataChip(
+                   
+                    Icons.event_available_rounded,
+                    '${group.groupCapacityLeft} Kontenjan',
+                  ),
               ],
+            ),
+
+            const SizedBox(height: 14),
+
+            // Paylaşım butonları
+            Row(
+              children: [
+                Expanded(
+                  child: _buildShareButton(
+              
+                    icon: Icons.share_outlined,
+                    label: 'Paylaş',
+                    color: AppColors.primary(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      // TODO: Paylaşım fonksiyonu
+                      showTemporarySnackBar(
+                        context,
+                        'Paylaşım linki kopyalandı!',
+                        type: SnackBarType.success,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildShareButton(
+           
+                    icon: Icons.copy_outlined,
+                    label: 'Link Kopyala',
+                    color: AppColors.secondary(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Clipboard.setData(ClipboardData(
+                        text: 'https://imecehub.com/group/${group.groupId}',
+                      ));
+                      showTemporarySnackBar(
+                        context,
+                        'Referans linki kopyalandı!',
+                        type: SnackBarType.success,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareButton(
+     {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: color.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -175,19 +419,12 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF007AFF).withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF007AFF).withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.primary(context).withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.group_work_rounded,
-        color: Color(0xFF007AFF),
+        color: AppColors.primary(context),
         size: 22,
       ),
     );
@@ -196,7 +433,7 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
   Widget _buildActionMenu(GroupInfo group) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: const Icon(Icons.more_horiz_rounded, color: Color(0xFF86868B)),
+      icon: Icon(Icons.more_horiz_rounded, color: AppColors.onSurfaceVariant(context)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
       offset: const Offset(0, 40),
@@ -205,16 +442,31 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
           final confirm = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Gruptan Ayrıl'),
-              content: const Text('Bu gruptan ayrılmak istediğinizden emin misiniz?'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                'Gruptan Ayrıl',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              ),
+              content: Text(
+                'Bu gruptan ayrılmak istediğinizden emin misiniz?',
+                style: GoogleFonts.poppins(),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('İptal'),
+                  child: Text(
+                    'İptal',
+                    style: GoogleFonts.poppins(color: AppColors.onSurfaceVariant(context)),
+                  ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Ayrıl', style: TextStyle(color: Colors.redAccent)),
+                  child: Text(
+                    'Ayrıl',
+                    style: GoogleFonts.poppins(color: AppColors.error(context)),
+                  ),
                 ),
               ],
             ),
@@ -235,20 +487,30 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
           value: 'details',
           child: Row(
             children: [
-              Icon(Icons.info_outline_rounded, size: 20, color: Colors.blue[600]),
+              Icon(Icons.info_outline_rounded, size: 20, color: AppColors.primary(context)),
               const SizedBox(width: 12),
-              const Text('Detaylar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              Text(
+                'Detaylar',
+                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
             ],
           ),
         ),
         const PopupMenuDivider(height: 1),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'leave',
           child: Row(
             children: [
-              Icon(Icons.logout_rounded, size: 20, color: Colors.redAccent),
+              Icon(Icons.logout_rounded, size: 20, color: AppColors.error(context)),
               const SizedBox(width: 12),
-              Text('Gruptan Ayrıl', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+              Text(
+                'Gruptan Ayrıl',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color:  AppColors.error(context),
+                ),
+              ),
             ],
           ),
         ),
@@ -258,23 +520,26 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
 
   Widget _buildDataChip(IconData icon, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F7).withOpacity(0.8),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8E8ED), width: 0.5),
+        color: AppColors.surfaceContainer(context).withOpacity(0.6),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppColors.outline(context).withOpacity(0.2),
+          width: 0.5,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF86868B)),
+          Icon(icon, size: 14, color: AppColors.onSurfaceVariant(context)),
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 13,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF424245),
+              color: AppColors.onSurface(context),
               letterSpacing: -0.2,
             ),
           ),

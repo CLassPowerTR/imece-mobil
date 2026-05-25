@@ -26,7 +26,7 @@ class _topProfile extends StatelessWidget {
         ? buyerProfil.username
         : '${buyerProfil.firstName} ${buyerProfil.lastName}';
 
-    final roleText = buyerProfil.rol == 'alici' ? 'Alıcı' : '';
+    final roleText = buyerProfil.rol == 'alici' ? 'Üye' : (buyerProfil.rol == 'satici' ? 'Satıcı' : '');
 
     return Container(
       height: isSmallScreen ? height * 0.25 : height * 0.28,
@@ -59,7 +59,7 @@ class _topProfile extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withOpacity(0.15),
                         offset: const Offset(0, 4),
                         blurRadius: 12,
                       ),
@@ -135,34 +135,158 @@ class _topProfile extends StatelessWidget {
               const SizedBox(height: 4),
 
               // Rol Badge
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 12 : 16,
-                  vertical: isSmallScreen ? 4 : 6,
-                ),
-                decoration: BoxDecoration(
+              if (roleText.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 12 : 16,
+                    vertical: isSmallScreen ? 4 : 6,
+                  ),
+                  decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
                     color: Colors.white.withOpacity(0.3),
-                    width: 1,
+                      width: 1,
+                    ),
                   ),
-                ),
-                child: Text(
-                  roleText,
-                  style: GoogleFonts.poppins(
-                    fontSize: isSmallScreen ? 11 : 12,
-                    fontWeight: FontWeight.w500,
+                  child: Text(
+                    roleText,
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallScreen ? 11 : 12,
+                      fontWeight: FontWeight.w500,
                     color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Tasarruf Karnesi - Yatay kaydırılabilir bilgi kartları
+class _savingsCards extends StatelessWidget {
+  final User buyerProfil;
+
+  const _savingsCards({required this.buyerProfil});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+
+    final blockedBakiye = buyerProfil.aliciProfili?.blockedBakiye ?? 0.0;
+    final bakiye = double.tryParse(buyerProfil.bakiye) ?? 0.0;
+
+    final cards = [
+      _SavingsCardData(
+        title: 'Bakiye',
+        value: '₺${bakiye.toStringAsFixed(2)}',
+        icon: Icons.account_balance_wallet_outlined,
+        color: colorScheme.primary,
+      ),
+      _SavingsCardData(
+        title: 'Bloke Bakiye',
+        value: '₺${blockedBakiye.toStringAsFixed(2)}',
+        icon: Icons.lock_outline,
+        color: colorScheme.tertiary,
+      ),
+      _SavingsCardData(
+        title: 'Durum',
+        value: buyerProfil.isActive ? 'Aktif' : 'Pasif',
+        icon: Icons.verified_outlined,
+        color: AppColors.succesful(context),
+      ),
+    ];
+
+    return SizedBox(
+      height: isSmallScreen ? 100 : 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: cards.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final card = cards[index];
+          return Container(
+            width: isSmallScreen ? 140 : 155,
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 14),
+            decoration: BoxDecoration(
+              color: card.color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: card.color.withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: card.color.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        card.icon,
+                        size: isSmallScreen ? 16 : 18,
+                        color: card.color,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        card.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: isSmallScreen ? 11 : 12,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  card.value,
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallScreen ? 18 : 20,
+                    fontWeight: FontWeight.w700,
+                    color: card.color,
+                    letterSpacing: -0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SavingsCardData {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _SavingsCardData({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 }
 
 class _userMenu extends StatelessWidget {
@@ -212,7 +336,7 @@ class _userMenu extends StatelessWidget {
         ),
       ),
       _MenuItem(
-        icon: Icons.group,
+        icon: Icons.group_outlined,
         title: 'Dahil Olduğum Gruplar',
         onTap: () => Navigator.pushNamed(
           context,
@@ -220,7 +344,6 @@ class _userMenu extends StatelessWidget {
           arguments: buyerProfil,
         ),
       ),
-
       _MenuItem(
         icon: Icons.people_outline,
         title: 'Takip Ettiklerim',
@@ -230,17 +353,6 @@ class _userMenu extends StatelessWidget {
           arguments: buyerProfil,
         ),
       ),
-      /*
-      _MenuItem(
-        icon: Icons.card_giftcard_rounded,
-        title: 'İndirim Kuponlarım',
-        onTap: () => Navigator.pushNamed(
-          context,
-          '/profil/coupons',
-          arguments: buyerProfil,
-        ),
-      ),
-      */
       _MenuItem(
         icon: Icons.location_on_outlined,
         title: 'Adreslerim',
@@ -251,7 +363,7 @@ class _userMenu extends StatelessWidget {
         ),
       ),
       _MenuItem(
-        icon: Icons.credit_card_rounded,
+        icon: Icons.credit_card_outlined,
         title: 'Kartlarım',
         onTap: () => Navigator.pushNamed(
           context,
@@ -259,7 +371,6 @@ class _userMenu extends StatelessWidget {
           arguments: buyerProfil,
         ),
       ),
-
       _MenuItem(
         icon: Icons.support_agent_outlined,
         title: 'Destek',
@@ -279,16 +390,16 @@ class _userMenu extends StatelessWidget {
     return Column(
       children: menuItems.map((item) {
         return Container(
-          margin: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
+          margin: EdgeInsets.only(bottom: isSmallScreen ? 6 : 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
+            color: AppColors.surface(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.outline(context).withOpacity(0.5)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: AppColors.shadow(context).withOpacity(0.04),
                 offset: const Offset(0, 2),
-                blurRadius: 6,
+                blurRadius: 8,
               ),
             ],
           ),
@@ -296,7 +407,7 @@ class _userMenu extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: item.onTap,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isSmallScreen ? 14 : 16,
@@ -305,10 +416,12 @@ class _userMenu extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      width: isSmallScreen ? 40 : 44,
+                      height: isSmallScreen ? 40 : 44,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppColors.primary(context).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.primary(context).withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         item.icon,
@@ -328,9 +441,9 @@ class _userMenu extends StatelessWidget {
                       ),
                     ),
                     Icon(
-                      Icons.arrow_forward_ios,
-                      size: isSmallScreen ? 14 : 16,
-                      color: Colors.grey[400],
+                      Icons.chevron_right,
+                      size: isSmallScreen ? 20 : 22,
+                      color: AppColors.onSurfaceVariant(context).withOpacity(0.5),
                     ),
                   ],
                 ),
@@ -397,7 +510,7 @@ class _logoutButton extends ConsumerWidget {
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[600],
+                      backgroundColor: AppColors.error(context),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -422,30 +535,30 @@ class _logoutButton extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Çıkış yapılamadı: $e'),
-                      backgroundColor: Colors.red[700],
+                      backgroundColor: AppColors.error(context),
                     ),
                   );
                 }
               }
             }
           },
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: isSmallScreen ? 14 : 16,
               vertical: isSmallScreen ? 14 : 16,
             ),
             decoration: BoxDecoration(
-              color: Colors.red[50],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red[200]!),
+              color: AppColors.error(context).withOpacity(0.06),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.error(context).withOpacity(0.2)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.logout_rounded,
-                  color: Colors.red[700],
+                  color: AppColors.error(context),
                   size: isSmallScreen ? 20 : 22,
                 ),
                 SizedBox(width: isSmallScreen ? 8 : 12),
@@ -454,7 +567,7 @@ class _logoutButton extends ConsumerWidget {
                   style: GoogleFonts.poppins(
                     fontSize: isSmallScreen ? 14 : 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.red[700],
+                    color: AppColors.error(context),
                   ),
                 ),
               ],

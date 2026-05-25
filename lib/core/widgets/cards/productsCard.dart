@@ -9,6 +9,7 @@ import 'package:imecehub/models/products.dart';
 import 'package:imecehub/providers/auth_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:imecehub/screens/home/home_screen.dart';
 
 class productsCard extends ConsumerStatefulWidget {
   final int productId;
@@ -277,31 +278,51 @@ class _productsCardState extends ConsumerState<productsCard> {
                                     ),
                                   );
                                 } else {
-                                  return TextButton(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: widget.isSepet
-                                          ? Colors.orangeAccent[200]
-                                          : AppColors.secondary(context),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
+                                  if (widget.isSepet) {
+                                    // Sepetteyse Sepete Git butonu
+                                    return TextButton(
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.orange.shade600,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
                                       ),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                    onPressed:
-                                        product.stokDurumu != null &&
-                                            product.stokDurumu! >= 0
-                                        ? widget.sepeteEkle
-                                        : null,
-                                    child: customText(
-                                      widget.isSepet
-                                          ? 'Sepete Git'
-                                          : 'Sepete Ekle',
-                                      context,
-                                      color: Colors.white,
-                                      weight: FontWeight.bold,
-                                      size:   AppTextSizes.bodySmall(context),
-                                    ),
-                                  );
+                                      onPressed: () {
+                                         ref.read(bottomNavIndexProvider.notifier).setIndex(2);
+                                         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.shopping_cart_checkout, size: 14, color: Colors.white),
+                                          SizedBox(width: 4),
+                                          customText('Sepete Git', context, color: Colors.white, size: AppTextSizes.bodySmall(context), weight: FontWeight.bold),
+                                        ],
+                                      )
+                                    );
+                                  } else {
+                                    // Sepette değilse yuvarlak primary icon butonu
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: GestureDetector(
+                                        onTap: widget.sepeteEkle,
+                                        child: Container(
+                                          height: 30,
+                                          width: 30,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary(context),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.shopping_cart_outlined,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 }
                               } else {
                                 return groupBuyButton(

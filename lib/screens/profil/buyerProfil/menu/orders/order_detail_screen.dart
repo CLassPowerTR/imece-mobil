@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/constants/app_paddings.dart';
 import 'package:imecehub/core/constants/app_radius.dart';
@@ -148,6 +150,11 @@ class OrderDetailScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            // Sipariş Yolculuğu - Step Indicator
+            _OrderStepIndicator(durumRaw: durumRaw),
+            // Sipariş İptal (sadece BEKLEMEDE durumunda)
+            if (durumRaw.toUpperCase() == 'BEKLEMEDE')
+              _CancelOrderSection(siparisId: siparisId),
             _infoCard(
               context,
               title: 'Alıcı Bilgileri',
@@ -457,5 +464,324 @@ _StatusVisual _mapOrderStatus(String raw, BuildContext context) {
         label: raw,
         color: Theme.of(context).colorScheme.primary,
       );
+  }
+}
+
+/// Sipariş Yolculuğu - Dikey Step Indicator
+class _OrderStepIndicator extends StatelessWidget {
+  final String durumRaw;
+
+  const _OrderStepIndicator({required this.durumRaw});
+
+  int _getStepIndex() {
+    final upper = durumRaw.trim().toUpperCase();
+    if (upper.contains('IPTAL') || upper.contains('HATA') || upper.contains('GERI_ODENDI')) {
+      return -1; // İptal/Hata durumu
+    }
+    if (upper == 'BEKLEMEDE') return 0;
+    if (upper.contains('KARGOYA') || upper.contains('KARGOLANMAYI') || upper.contains('HAZIRLANIYOR')) return 1;
+    if (upper == 'KARGOLANDI') return 2;
+    if (upper == 'TAMAMLANDI' || upper.contains('TESLİM') || upper.contains('TESLIM')) return 3;
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentStep = _getStepIndex();
+
+    // İptal/Hata durumunda step indicator gösterme
+    if (currentStep == -1) return const SizedBox.shrink();
+
+    final steps = [
+      _StepData(
+        title: 'Sipariş Alındı',
+        description: 'Siparişiniz sisteme kaydedildi.',
+        icon: Icons.check_circle_outline,
+      ),
+      _StepData(
+        title: 'Hazırlanıyor',
+        description: 'Ürünleriniz hazırlanıp paketleniyor.',
+        icon: Icons.inventory_2_outlined,
+      ),
+      _StepData(
+        title: 'Kargolandı',
+        description: 'Paketiniz kargo firmasına teslim edildi.',
+        icon: Icons.local_shipping_outlined,
+      ),
+      _StepData(
+        title: 'Teslim Edildi',
+        description: 'Siparişiniz size ulaştırıldı.',
+        icon: Icons.where_to_vote_outlined,
+      ),
+    ];
+
+    return Container(
+      padding: AppPaddings.all12,
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: AppRadius.r10,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow(context).withOpacity(0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              children: [
+                Icon(Icons.route, size: 18, color: AppColors.primary(context)),
+                const SizedBox(width: 8),
+                Text(
+                  'Sipariş Yolculuğu',
+                  style: AppTextStyle.bodyLargeBold(context),
+                ),
+              ],
+            ),
+          ),
+          ...List.generate(steps.length, (index) {
+            final step = steps[index];
+            final isCompleted = index <= currentStep;
+            final isCurrent = index == currentStep;
+            final isLast = index == steps.length - 1;
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sol taraf: dot + çizgi
+                SizedBox(
+                  width: 36,
+                  child: Column(
+                    children: [
+                      // İkon/Dot
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: isCurrent ? 36 : 28,
+                        height: isCurrent ? 36 : 28,
+                        decoration: BoxDecoration(
+                          color: isCompleted
+                              ? AppColors.primary(context)
+                              : AppColors.outline(context).withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          boxShadow: isCurrent
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.primary(context).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          step.icon,
+                          size: isCurrent ? 18 : 14,
+                          color: isCompleted
+                              ? AppColors.onPrimary(context)
+                              : AppColors.outline(context),
+                        ),
+                      ),
+                      // Bağlantı çizgisi
+                      if (!isLast)
+                        Container(
+                          width: 2,
+                          height: 32,
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          color: isCompleted && index < currentStep
+                              ? AppColors.primary(context)
+                              : AppColors.outline(context).withOpacity(0.2),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Sağ taraf: başlık + açıklama
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: isCurrent ? 4 : 2,
+                      bottom: isLast ? 0 : 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          step.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: isCurrent ? 15 : 13,
+                            fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w500,
+                            color: isCompleted
+                                ? AppColors.onSurface(context)
+                                : AppColors.onSurfaceVariant(context).withOpacity(0.5),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          step.description,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: isCompleted
+                                ? AppColors.onSurfaceVariant(context)
+                                : AppColors.onSurfaceVariant(context).withOpacity(0.4),
+                          ),
+                        ),
+                        if (isCurrent)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary(context).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Şu an burada',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary(context),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepData {
+  final String title;
+  final String description;
+  final IconData icon;
+
+  const _StepData({
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+}
+
+/// Sipariş İptal Bölümü
+class _CancelOrderSection extends StatelessWidget {
+  final String siparisId;
+
+  const _CancelOrderSection({required this.siparisId});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colorScheme.error.withOpacity(0.04),
+        borderRadius: AppRadius.r10,
+        border: Border.all(
+          color: colorScheme.error.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 20,
+            color: colorScheme.error.withOpacity(0.7),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Sipariş henüz kargoya verilmedi. İptal talebinde bulunabilirsiniz.',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              // TODO: Sipariş iptal API entegrasyonu
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: Text(
+                    'Sipariş İptali',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  content: Text(
+                    'Sipariş #$siparisId iptal edilecek. Devam etmek istediğinizden emin misiniz?',
+                    style: GoogleFonts.poppins(),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(
+                        'Vazgeç',
+                        style: GoogleFonts.poppins(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('İptal talebi gönderildi.'),
+                            backgroundColor: colorScheme.primary,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.error,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'İptal Et',
+                        style: GoogleFonts.poppins(color: colorScheme.onError),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: colorScheme.error,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            child: Text(
+              'İptal Et',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

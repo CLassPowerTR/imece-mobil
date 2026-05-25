@@ -29,15 +29,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final secondary = theme.colorScheme.secondary;
+    
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface(context),
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        elevation: 4,
-        shadowColor: Colors.grey[300],
+        elevation: 0.5,
+        shadowColor: AppColors.shadow(context).withOpacity(0.15),
         leadingWidth: MediaQuery.of(context).size.width * 0.3,
         title: customText('Siparişlerim', context,
             size: AppTextStyle.bodyLarge(context).fontSize,
@@ -47,8 +47,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: selectedFilter,
-              style: TextStyle(color: secondary, fontWeight: FontWeight.bold),
-              icon: Icon(Icons.filter_list, color: secondary),
+              style: TextStyle(
+                color: AppColors.primary(context),
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              icon: Icon(Icons.filter_list, color: AppColors.primary(context)),
               items: filterOptions.map((option) {
                 return DropdownMenuItem<String>(
                   value: option,
@@ -71,7 +75,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         children: [
           Container(
             color: AppColors.surface(context),
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -80,24 +84,43 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     final isSelected = selectedTab == index;
                     return Padding(
                       padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        label: Text(
-                          orderTabs[index],
-                          style: TextStyle(
-                            color: isSelected ? secondary : Colors.black87,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: secondary.withOpacity(0.15),
-                        backgroundColor: Colors.white,
-                        onSelected: (_) {
+                      child: GestureDetector(
+                        onTap: () {
                           setState(() {
                             selectedTab = index;
                           });
                         },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary(context)
+                                : AppColors.primary(context).withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primary(context)
+                                  : AppColors.outline(context).withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            orderTabs[index],
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppColors.onPrimary(context)
+                                  : AppColors.onSurface(context),
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   }),
@@ -105,7 +128,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.outline(context).withOpacity(0.3)),
           // Buraya sipariş listesi veya filtrelenmiş içerik gelecek
           Expanded(
             child: OrderScreenBody(),

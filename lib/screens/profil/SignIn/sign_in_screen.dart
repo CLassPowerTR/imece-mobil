@@ -5,6 +5,7 @@ import 'package:imecehub/core/constants/app_colors.dart';
 
 import 'package:imecehub/core/widgets/showTemporarySnackBar.dart';
 import 'package:imecehub/core/widgets/text.dart';
+import 'package:imecehub/core/widgets/buttons/backButton.dart';
 import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 import 'package:imecehub/core/widgets/loading_overlay.dart';
@@ -82,29 +83,19 @@ class _SignInScreen extends ConsumerState<SignInScreen> with RouteAware {
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo & Geri
+                            // ── Logo & Geri Butonu ──
                             Padding(
-                              padding: EdgeInsets.only(bottom: 24),
+                              padding: EdgeInsets.only(bottom: 20),
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: GestureDetector(
-                                      onTap: () => Navigator.pop(context),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Theme.of(context).colorScheme.onSurface),
-                                          SizedBox(width: 4),
-                                          Text('Geri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
-                                        ],
-                                      ),
-                                    ),
+                                    child: const CustomBackButton(),
                                   ),
                                   Image.asset(
                                     'assets/image/website.png',
-                                    height: isSmallScreen ? 40 : 60,
+                                    height: isSmallScreen ? 36 : 48,
                                     fit: BoxFit.contain,
                                   ),
                                 ],

@@ -16,6 +16,7 @@ import 'package:imecehub/core/widgets/buttons/textButton.dart';
 import 'package:imecehub/models/userAdress.dart';
 import 'package:imecehub/models/users.dart';
 import 'package:imecehub/providers/auth_provider.dart';
+import 'package:imecehub/providers/cart_provider.dart';
 import 'package:imecehub/providers/products_provider.dart';
 import 'package:imecehub/screens/home/home_screen.dart';
 import 'package:imecehub/services/api_service.dart';
@@ -48,32 +49,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 }
 
-Scaffold _isNotLoggin(BuildContext context, WidgetRef ref) {
-  return Scaffold(
-    body: Center(
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          spacing: 20,
-          children: [
-            customText('Lütfen giriş yapınız', context),
-            textButton(
-              context,
-              'Giriş Yap',
-              onPressed: () {
-                ref.read(bottomNavIndexProvider.notifier).setIndex(3);
-                //Navigator.pushReplacementNamed(context, '/home');
-              },
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
 
 Text _appBarHeaderText(String title) {
   return Text(

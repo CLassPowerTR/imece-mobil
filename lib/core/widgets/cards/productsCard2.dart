@@ -382,7 +382,7 @@ class _ImeceCardState extends State<ImeceCard> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade600,
+                        color: AppColors.primary(context),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(

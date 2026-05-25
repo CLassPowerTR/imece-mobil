@@ -272,11 +272,13 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   }
 
   // Otomatik ve manuel yenileme için fonksiyon
-  void _fetchSepet() {
-    setState(() {
-      _sepetFuture = ApiService.fetchSepetGet();
-      _sepetInfoFuture = ApiService.fetchSepetInfo();
-    });
+  void _fetchSepet() async {
+    try {
+      final info = await ApiService.fetchSepetInfo();
+      setState(() {
+        sepetInfo = info;
+      });
+    } catch (_) {}
   }
 
   Future<void> _loadCardInfo() async {
@@ -305,238 +307,142 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return SafeArea(child: _getSepetItems(width, height));
+    final cartState = ref.watch(cartProvider);
+    final user = ref.watch(userProvider);
+    return SafeArea(child: _getSepetItems(width, height, cartState, user != null));
   }
 
-  FutureBuilder<Map<String, dynamic>> _getSepetItems(
+  Widget _getSepetItems(
     double width,
     double height,
+    CartState cartState,
+    bool isLoggedIn,
   ) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _sepetFuture,
-      builder: (context, snapshot) {
-        bool isLoading = snapshot.connectionState == ConnectionState.waiting;
+    if (cartState.isLoading) {
+      return Scaffold(body: buildLoadingBar(context));
+    }
+    
+    if (cartState.items.isEmpty) {
+      return Padding(
+        padding: AppPaddings.all32,
+        child: Center(
+          child: Column(
+            spacing: 10,
+            children: [
+              Text('Sepetinizde ürün yok.'),
+              _urunEkleButton(),
+            ],
+          ),
+        ),
+      );
+    }
 
-        if (snapshot.hasError) {
-          final errorText = snapshot.error?.toString() ?? '';
-          if (errorText.contains('Unauthorized')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.remove('accesToken');
-              await prefs.remove('refreshToken');
-            });
-            return _isNotLoggin(context, ref);
-          } else {
-            return Center(child: Text('Hata: $errorText'));
-          }
-        } else if (!snapshot.hasData) {
-          return Scaffold(body: buildLoadingBar(context));
-        } else {
-          final data = snapshot.data!;
-          final durum = data['durum'];
-          if (durum == 'BOS_SEPET') {
-            return Padding(
-              padding: AppPaddings.all32,
-              child: Center(
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              if (isLoggedIn)
+                container(
+                  context,
+                  color: AppColors.surfaceContainer(context),
+                  width: width,
+                  isBoxShadow: true,
+                  margin: AppPaddings.all8,
+                  borderRadius: AppRadius.r8,
+                  child: Column(
+                    children: [
+                      _FutureFetchUserAdress(),
+                      _teslimatBilgi(context),
+                    ],
+                  ),
+                ),
+              container(
+                context,
+                color: AppColors.surfaceContainer(context),
+                borderRadius: AppRadius.r8,
+                margin: AppPaddings.all8,
+                padding: EdgeInsets.only(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                ),
                 child: Column(
                   spacing: 10,
                   children: [
-                    Text(data['mesaj'] ?? 'Sepetinizde ürün yok.'),
+                    Text(
+                      'Sepetinizdeki Ürünler:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...cartState.items.map((item) {
+                      final product = item.product;
+                      return FutureBuilder<User>(
+                        future: isLoggedIn && product.satici != null 
+                            ? ApiService.fetchUserId(product.satici) 
+                            : Future.value(User.fromJson({
+                                'id': product.satici ?? 0,
+                                'username': 'satici_${product.satici}',
+                                'satici_profili': {
+                                    'magaza_adi': product.saticiMagazaAdi ?? 'Satıcı'
+                                }
+                              })),
+                        builder: (context, sellerSnapshot) {
+                          if (sellerSnapshot.connectionState == ConnectionState.waiting) {
+                            return Center(child: buildLoadingBar(context));
+                          }
+                          
+                          User seller;
+                          if (sellerSnapshot.hasError || !sellerSnapshot.hasData) {
+                            // Hata durumunda (ör. 404 Not Found) arayüzü bozmak yerine geçici bir User objesi oluştur
+                            seller = User.fromJson({
+                              'id': product.satici ?? 0,
+                              'username': 'satici_${product.satici}',
+                              'satici_profili': {
+                                'magaza_adi': product.saticiMagazaAdi ?? 'Satıcı'
+                              }
+                            });
+                          } else {
+                            seller = sellerSnapshot.data!;
+                          }
+
+                          return SepetProductsCard(
+                            sellerProfile: seller,
+                            product: product,
+                            item: {
+                              'urun': product.urunId,
+                              'miktar': item.quantity,
+                            },
+                            context: context,
+                            removeCart: () {
+                              ref.read(cartProvider.notifier).addToCart(product, quantity: -1);
+                            },
+                            updateCart: () {
+                              ref.read(cartProvider.notifier).addToCart(product, quantity: 1);
+                            },
+                            deleteFromCart: () {
+                              ref.read(cartProvider.notifier).addToCart(product, setQuantity: 0);
+                            },
+                          );
+                        },
+                      );
+                    }).toList(),
                     _urunEkleButton(),
                   ],
                 ),
               ),
-            );
-          } else {
-            final sepetList = data['sepet'] as List?;
-            return Stack(
-              children: [
-                SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(
-                    children: [
-                      container(
-                        context,
-                        color:  AppColors.surfaceContainer(context),
-                        width: width,
-                        isBoxShadow: true,
-                        margin: AppPaddings.all8,
-                        borderRadius: AppRadius.r8,
-                        child: Column(
-                          children: [
-                            _FutureFetchUserAdress(),
-                            _teslimatBilgi(context),
-                          ],
-                        ),
-                      ),
-                      if (sepetList != null && sepetList.isNotEmpty)
-                        container(
-                          context,
-                          color: AppColors.surfaceContainer(context),
-                          borderRadius: AppRadius.r8,
-                          margin: AppPaddings.all8,
-                          padding: EdgeInsets.only(
-                            left: 12,
-                            right: 12,
-                            bottom: 12,
-                          ),
-                          child: Column(
-                            spacing: 10,
-                            children: [
-                              Text(
-                                'Sepetinizdeki Ürünler:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              ...(() {
-                                final sortedList =
-                                    List<Map<String, dynamic>>.from(sepetList);
-                                sortedList.sort(
-                                  (a, b) => (a['urun'] as int).compareTo(
-                                    b['urun'] as int,
-                                  ),
-                                );
-                                return sortedList.map<Widget>((item) {
-                                  final productAsync = ref.watch(
-                                    productProvider(item['urun'] as int),
-                                  );
-                                  return productAsync.when(
-                                    loading: () =>
-                                        Center(child: buildLoadingBar(context)),
-                                    error: (error, _) =>
-                                        Text('Ürün verisi alınamadı: $error'),
-                                    data: (product) {
-                                      return FutureBuilder<User>(
-                                        future: ApiService.fetchUserId(
-                                          product.satici,
-                                        ),
-                                        builder: (context, sellerSnapshot) {
-                                          if (sellerSnapshot.hasError) {
-                                            return Text(
-                                              'Satıcı verisi alınamadı: ${sellerSnapshot.error}',
-                                            );
-                                          } else if (sellerSnapshot.hasData) {
-                                            final seller = sellerSnapshot.data!;
-                                            return SepetProductsCard(
-                                              sellerProfile: seller,
-                                              product: product,
-                                              item: item,
-                                              context: context,
-                                              removeCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService.fetchSepetEkle(
-                                                      item['miktar'] - 1,
-                                                      product.urunId!,
-                                                    );
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                      context,
-                                                      e.toString(),
-                                                    );
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                              updateCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService.fetchSepetEkle(
-                                                      item['miktar'] + 1,
-                                                      product.urunId!,
-                                                    );
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                      context,
-                                                      e.toString(),
-                                                    );
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                              deleteFromCart: () {
-                                                setState(() async {
-                                                  try {
-                                                    await ApiService.fetchSepetEkle(
-                                                      0,
-                                                      product.urunId!,
-                                                    );
-                                                  } catch (e) {
-                                                    showTemporarySnackBar(
-                                                      context,
-                                                      e.toString(),
-                                                    );
-                                                  } finally {
-                                                    setState(() {
-                                                      _fetchSepet();
-                                                    });
-                                                  }
-                                                });
-                                              },
-                                            );
-                                          } else {
-                                            return Center(
-                                              child: buildLoadingBar(context),
-                                            );
-                                          }
-                                        },
-                                      );
-                                    },
-                                  );
-                                }).toList();
-                              })(),
-                              textButton(
-                                context,
-                                '+ Ürün ekle',
-                                elevation: 6,
-                                shadowColor: AppColors.secondary(context),
-                                fontSize: AppTextSizes.bodyLarge(context),
-                                weight: FontWeight.bold,
-                                onPressed: () {
-                                  setState(() {
-                                    ref
-                                        .read(bottomNavIndexProvider.notifier)
-                                        .setIndex(1);
-                                    Navigator.pushNamedAndRemoveUntil(
-                                      context,
-                                      '/home',
-                                      (route) => false,
-                                      arguments: {'refresh': true},
-                                    );
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      _fiyatDetay(width),
-                      _odemeSecenegi(context, width),
-                      _satinAlim(context),
-                      SizedBox(height: height * 0.15),
-                    ],
-                  ),
-                ),
-                if (isLoading)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.black.withOpacity(0.3),
-                      child: Center(child: buildLoadingBar(context)),
-                    ),
-                  ),
-              ],
-            );
-          }
-        }
-      },
+              _fiyatDetay(width, cartState),
+              if (isLoggedIn) _odemeSecenegi(context, width),
+              _satinAlim(context, cartState, isLoggedIn),
+              SizedBox(height: height * 0.15),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  Container _satinAlim(BuildContext context) {
+  Container _satinAlim(BuildContext context, CartState cartState, bool isLoggedIn) {
     return container(
       context,
       color: AppColors.surfaceContainer(context),
@@ -547,52 +453,40 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
         spacing: 10,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Satın alım koşullarını onaylıyorum",
-                style: TextStyle(fontSize: 15),
-              ),
-              Transform.scale(
-                scale: 1.2,
-                child: Checkbox(
-                  side: BorderSide(
-                    color: Color.fromARGB(
-                      255,
-                      34,
-                      255,
-                      34,
-                    ), // Dış çizginin rengi
-                    width: 2, // Dış çizginin kalınlığı
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      4,
-                    ), // Köşeleri yuvarlak yapmak için
-                  ),
-
-                  value: _confirm,
-                  onChanged: (bool? newValue) {
-                    final double? currentOffset = _scrollController.hasClients
-                        ? _scrollController.offset
-                        : null;
-                    setState(() {
-                      _confirm = newValue ?? false;
-                    });
-                    if (currentOffset != null && _scrollController.hasClients) {
-                      _scrollController.jumpTo(currentOffset);
-                    }
-                  },
-                  activeColor: Color.fromARGB(
-                    255,
-                    34,
-                    255,
-                    34,
-                  ), // Seçildiğinde rengi
+          if (isLoggedIn)
+            Row(
+              children: [
+                Text(
+                  "Satın alım koşullarını onaylıyorum",
+                  style: TextStyle(fontSize: 15),
                 ),
-              ),
-            ],
-          ),
+                Transform.scale(
+                  scale: 1.2,
+                  child: Checkbox(
+                    side: BorderSide(
+                      color: Color.fromARGB(255, 34, 255, 34),
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    value: _confirm,
+                    onChanged: (bool? newValue) {
+                      final double? currentOffset = _scrollController.hasClients
+                          ? _scrollController.offset
+                          : null;
+                      setState(() {
+                        _confirm = newValue ?? false;
+                      });
+                      if (currentOffset != null && _scrollController.hasClients) {
+                        _scrollController.jumpTo(currentOffset);
+                      }
+                    },
+                    activeColor: Color.fromARGB(255, 34, 255, 34),
+                  ),
+                ),
+              ],
+            ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -606,29 +500,37 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
                       text: 'Total Ücret: ',
                       style: TextStyle(fontWeight: FontWeight.w900),
                     ),
-                    TextSpan(text: '${sepetInfo['toplam_tutar']} TL'),
+                    TextSpan(text: '${cartState.totalPrice.toStringAsFixed(2)} TL'),
                   ],
                 ),
               ),
               Expanded(
-                child: textButton(
-                  context,
-                  'Satın Al',
-                  fontSize: AppTextSizes.bodyLarge(context),
-                  weight: FontWeight.bold,
-                  buttonColor: _confirm ? null : Colors.grey,
-                  elevation: 6,
-                  shadowColor: _confirm
-                      ? AppColors.secondary(context)
-                      : Colors.grey,
-                  onPressed: _confirm
-                      ? () async {
-                          if (_confirm) {
-                            await _handleSatinAl(context);
-                          }
-                        }
-                      : null,
-                ),
+                child: isLoggedIn
+                    ? textButton(
+                        context,
+                        'Satın Al',
+                        fontSize: AppTextSizes.bodyLarge(context),
+                        weight: FontWeight.bold,
+                        buttonColor: _confirm ? null : Colors.grey,
+                        elevation: 6,
+                        shadowColor: _confirm ? AppColors.secondary(context) : Colors.grey,
+                        onPressed: _confirm
+                            ? () async {
+                                await _handleSatinAl(context);
+                              }
+                            : null,
+                      )
+                    : textButton(
+                        context,
+                        'Siparişi Tamamlamak İçin Giriş Yap',
+                        fontSize: 12,
+                        weight: FontWeight.bold,
+                        elevation: 6,
+                        shadowColor: AppColors.secondary(context),
+                        onPressed: () {
+                          ref.read(bottomNavIndexProvider.notifier).setIndex(3);
+                        },
+                      ),
               ),
             ],
           ),
@@ -843,7 +745,7 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
     );
   }
 
-  Container _fiyatDetay(width) {
+  Container _fiyatDetay(double width, CartState cartState) {
     return container(
       context,
       color: AppColors.surfaceContainer(context),
@@ -851,73 +753,60 @@ class _CartViewBodyState extends ConsumerState<_CartViewBody> {
       padding: AppPaddings.all12,
       margin: AppPaddings.all8,
       borderRadius: AppRadius.r8,
-      child: FutureBuilder<Map<String, dynamic>>(
-        future: _sepetInfoFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Hata: ${snapshot.error}'));
-          }
-          if (snapshot.hasData) {
-            final data = snapshot.data!;
-            sepetInfo = data;
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                richText(
-                  context,
-                  fontWeight: FontWeight.w800,
-                  fontSize: AppTextSizes.bodyMedium(context),
-                  textAlign: TextAlign.left,
-                  children: [
-                    TextSpan(
-                      text: 'Ara Toplam',
-                      style: TextStyle(fontSize: AppTextSizes.bodyLarge(context)),
-                    ),
-                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
-                    TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
-                    TextSpan(
-                      text: '${data['adet']} Adet',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                    TextSpan(text: 'Ürünlerin Tutarı: '),
-                    TextSpan(
-                      text: '${data['urun_toplam_tutari']} TL',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                    TextSpan(text: 'Taşıma Ücreti: '),
-                    TextSpan(
-                      text: '${data['tasima_ucreti']} TL',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                    TextSpan(text: 'Toplam: '),
-                    TextSpan(
-                      text: '${data['toplam_tutar']} TL ',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                    TextSpan(
-                      text: '(ek ücretler ve vergiler dahil)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.primary(context).withOpacity(0.5),
-                      ),
-                    ),
-                    TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
-                    TextSpan(text: 'Son Teslim Tarihi: '),
-                    TextSpan(
-                      text: '${data['son_teslimat_tarihi']}',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                  ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          richText(
+            context,
+            fontWeight: FontWeight.w800,
+            fontSize: AppTextSizes.bodyMedium(context),
+            textAlign: TextAlign.left,
+            children: [
+              TextSpan(
+                text: 'Ara Toplam',
+                style: TextStyle(fontSize: AppTextSizes.bodyLarge(context)),
+              ),
+              TextSpan(text: '\n\n', style: TextStyle(fontSize: 15)),
+              TextSpan(text: 'Satın Alınan farklı ürün sayısı: '),
+              TextSpan(
+                text: '${cartState.items.length} Adet',
+                style: TextStyle(fontWeight: FontWeight.w400),
+              ),
+              TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+              TextSpan(text: 'Ürünlerin Tutarı: '),
+              TextSpan(
+                text: '${cartState.totalPrice.toStringAsFixed(2)} TL',
+                style: TextStyle(fontWeight: FontWeight.w400),
+              ),
+              TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+              TextSpan(text: 'Taşıma Ücreti: '),
+              TextSpan(
+                text: sepetInfo['tasima_ucreti'] != null && sepetInfo['tasima_ucreti'] != 0 ? '${sepetInfo['tasima_ucreti']} TL' : 'Ücretsiz',
+                style: TextStyle(fontWeight: FontWeight.w400, color: (sepetInfo['tasima_ucreti'] != null && sepetInfo['tasima_ucreti'] != 0) ? AppColors.onSurface(context) : Colors.green),
+              ),
+              TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+              TextSpan(text: 'Toplam: '),
+              TextSpan(
+                text: '${cartState.totalPrice.toStringAsFixed(2)} TL ',
+                style: TextStyle(fontWeight: FontWeight.w400),
+              ),
+              TextSpan(
+                text: '(ek ücretler ve vergiler dahil)',
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.primary(context).withOpacity(0.5),
                 ),
-              ],
-            );
-          }
-          return SizedBox();
-        },
+              ),
+              TextSpan(text: '\n\n', style: TextStyle(fontSize: 8)),
+              TextSpan(text: 'Son Teslim Tarihi: '),
+              TextSpan(
+                text: sepetInfo['son_teslimat_tarihi'] != null ? '${sepetInfo['son_teslimat_tarihi']}' : 'Tahmini 3-5 İş Günü',
+                style: TextStyle(fontWeight: FontWeight.w400),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

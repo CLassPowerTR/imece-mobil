@@ -88,21 +88,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 children: [
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: GestureDetector(
-                                      onTap: () => Navigator.pop(context),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Theme.of(context).colorScheme.onSurface),
-                                          SizedBox(width: 4),
-                                          Text('Geri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
-                                        ],
-                                      ),
-                                    ),
+                                    child: const CustomBackButton(),
                                   ),
                                   Image.asset(
                                     'assets/image/website.png',
-                                    height: isSmallScreen ? 28 : 36,
+                                    height: isSmallScreen ? 36 : 48,
                                     fit: BoxFit.contain,
                                   ),
                                 ],
