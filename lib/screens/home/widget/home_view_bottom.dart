@@ -37,10 +37,10 @@ class _HomeBottomNavigationBarTestState
         borderRadius: AppRadius.r16,
         child: BottomNavigationBar(
           backgroundColor: AppColors.surface(context),
-          selectedItemColor: AppColors.secondary(context),
+          selectedItemColor: AppColors.onPrimaryContainer(context),
           unselectedItemColor: AppColors.primary(context),
           selectedLabelStyle: TextStyle(
-            color: AppColors.secondary(context),
+            color: AppColors.onPrimaryContainer(context),
           ),
           unselectedLabelStyle: TextStyle(
             color: AppColors.primary(context),

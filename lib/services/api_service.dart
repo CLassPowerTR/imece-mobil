@@ -303,6 +303,104 @@ class ApiService {
     }
   }
 
+  /// Filtre, sıralama ve sayfalama destekli ürün listesi çekme.
+  /// Web tarafındaki products.jsx fetchProducts fonksiyonunun karşılığı.
+  static Future<PaginatedProducts> fetchPaginatedProducts({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+    String? sort,
+    String? minFiyat,
+    String? maxFiyat,
+    String? minRating,
+    List<String> kategoriSlugs = const [],
+    Map<String, String> attrFilters = const {},
+  }) async {
+    final params = <String, dynamic>{
+      'page': page.toString(),
+      'page_size': pageSize.toString(),
+    };
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (sort != null && sort.isNotEmpty) params['sort'] = sort;
+    if (minFiyat != null && minFiyat.isNotEmpty) params['min_fiyat'] = minFiyat;
+    if (maxFiyat != null && maxFiyat.isNotEmpty) params['max_fiyat'] = maxFiyat;
+    if (minRating != null && minRating.isNotEmpty) params['min_rating'] = minRating;
+
+    // Kategori slug'larını ekle (çoklu parametre desteği)
+    // URI query string'inde aynı key birden fazla kez kullanılabilir
+    final uri = Uri.parse(config.productsApiUrl).replace(
+      queryParameters: {
+        ...params,
+        if (kategoriSlugs.isNotEmpty) 'kategori': kategoriSlugs,
+        ...attrFilters.map((key, value) => MapEntry('attr_$key', value)),
+      },
+    );
+
+    final response = await _deps.httpClient.get(
+      uri,
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      return PaginatedProducts.fromJson(decoded as Map<String, dynamic>);
+    } else {
+      throw Exception(
+        'Sayfalı ürün verisi alınamadı. Durum kodu: ${response.statusCode}',
+      );
+    }
+  }
+
+  /// Dinamik filtre seçeneklerini getirme.
+  /// Web tarafındaki available_filters API'sinin karşılığı.
+  /// Seçili kategori ve arama metnine göre mevcut filtreleri döner.
+  static Future<List<Map<String, dynamic>>> fetchAvailableFilters({
+    String? search,
+    List<String> kategoriSlugs = const [],
+    Map<String, String> attrFilters = const {},
+  }) async {
+    final baseUrl = config.productsApiUrl;
+    // productsApiUrl sonuna available_filters/ ekle
+    final filterUrl = baseUrl.endsWith('/')
+        ? '${baseUrl}available_filters/'
+        : '$baseUrl/available_filters/';
+
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+
+    final uri = Uri.parse(filterUrl).replace(
+      queryParameters: {
+        ...params,
+        if (kategoriSlugs.isNotEmpty) 'kategori': kategoriSlugs,
+        ...attrFilters.map((key, value) => MapEntry('attr_$key', value)),
+      },
+    );
+
+    final response = await _deps.httpClient.get(
+      uri,
+      headers: {
+        'X-API-Key': config.apiKey,
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(utf8.decode(response.bodyBytes));
+      if (decoded is List) {
+        return decoded.cast<Map<String, dynamic>>();
+      }
+      return [];
+    } else {
+      throw Exception(
+        'Dinamik filtreler alınamadı. Durum kodu: ${response.statusCode}',
+      );
+    }
+  }
+
   static Future<List<Category>> fetchCategories() async {
     final response = await _deps.httpClient.get(
       Uri.parse(config.categoriesApiUrl),

@@ -375,27 +375,14 @@ class _ProductsCard4State extends ConsumerState<ProductsCard4> {
                                         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                                       },
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.shade600,
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(Icons.shopping_cart_checkout, size: 12, color: Colors.white),
-                                            const SizedBox(width: 4),
-                                            const Text(
-                                              'Sepete Git',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary(context).withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Icon(Icons.shopping_cart_checkout, size: 16, color: Colors.white),
+                                  ),
                                     );
                                   } else {
                                     return GestureDetector(

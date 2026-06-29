@@ -292,14 +292,15 @@ class _productsCardState extends ConsumerState<productsCard> {
                                          ref.read(bottomNavIndexProvider.notifier).setIndex(2);
                                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                                       },
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.shopping_cart_checkout, size: 14, color: Colors.white),
-                                          SizedBox(width: 4),
-                                          customText('Sepete Git', context, color: Colors.white, size: AppTextSizes.bodySmall(context), weight: FontWeight.bold),
-                                        ],
-                                      )
+                                      child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary(context).withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Icon(Icons.shopping_cart_checkout, size: 16, color: Colors.white),
+                                  ),
                                     );
                                   } else {
                                     // Sepette değilse yuvarlak primary icon butonu

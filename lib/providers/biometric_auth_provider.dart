@@ -88,12 +88,14 @@ class BiometricAuthService {
 }
 
 /// Biyometrik kimlik doğrulama durumunu yöneten StateNotifier
-class BiometricAuthNotifier extends StateNotifier<BiometricAuthState> {
-  final BiometricAuthService _service;
+class BiometricAuthNotifier extends Notifier<BiometricAuthState> {
+  late BiometricAuthService _service;
 
-  BiometricAuthNotifier(this._service)
-    : super(BiometricAuthState.notAvailable) {
+  @override
+  BiometricAuthState build() {
+    _service = ref.watch(biometricAuthServiceProvider);
     _init();
+    return BiometricAuthState.notAvailable;
   }
 
   /// Başlangıç durumunu ayarlar
@@ -150,10 +152,9 @@ final biometricAuthServiceProvider = Provider<BiometricAuthService>((ref) {
 
 /// Biyometrik kimlik doğrulama durumunu sağlayan Provider
 final biometricAuthProvider =
-    StateNotifierProvider<BiometricAuthNotifier, BiometricAuthState>((ref) {
-      final service = ref.watch(biometricAuthServiceProvider);
-      return BiometricAuthNotifier(service);
-    });
+    NotifierProvider<BiometricAuthNotifier, BiometricAuthState>(
+      BiometricAuthNotifier.new,
+    );
 
 /// Biyometrik kimlik doğrulamanın kullanılabilir olup olmadığını döner
 final canUseBiometricsProvider = FutureProvider<bool>((ref) async {

@@ -1,8 +1,5 @@
-import 'package:imecehub/core/constants/app_textStyle.dart';
-import 'package:imecehub/core/constants/app_radius.dart';
-import 'package:imecehub/core/constants/app_paddings.dart';
-import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:imecehub/core/constants/app_colors.dart';
 import 'package:imecehub/core/widgets/textField.dart';
 
 import 'package:imecehub/screens/products/products_screen.dart';
@@ -20,8 +17,9 @@ class CategoriesScreen extends StatelessWidget {
     return Scaffold(
       appBar: CategoriesViewHeader(),
       body: ProductsScreenBodyView(
-        categoryId: '?kategori_id=${categoryId}',
+        initialCategory: categoryId.toString(),
       ),
     );
   }
 }
+

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Arama geçmişini yöneten StateNotifier
-class SearchHistoryNotifier extends StateNotifier<List<String>> {
+class SearchHistoryNotifier extends Notifier<List<String>> {
   static const String _storageKey = 'search_history';
   static const int _maxHistoryCount = 10;
 
-  SearchHistoryNotifier() : super([]) {
+  @override
+  List<String> build() {
     _loadHistory();
+    return [];
   }
 
   /// SharedPreferences'tan arama geçmişini yükler
@@ -76,8 +78,8 @@ class SearchHistoryNotifier extends StateNotifier<List<String>> {
 
 /// Arama geçmişini sağlayan Provider
 final searchHistoryProvider =
-    StateNotifierProvider<SearchHistoryNotifier, List<String>>(
-      (ref) => SearchHistoryNotifier(),
+    NotifierProvider<SearchHistoryNotifier, List<String>>(
+      SearchHistoryNotifier.new,
     );
 
 /// Arama geçmişi varsa true döner

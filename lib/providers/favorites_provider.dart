@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Favori ürün ID'lerini yöneten StateNotifier
-class FavoritesNotifier extends StateNotifier<List<int>> {
+class FavoritesNotifier extends Notifier<List<int>> {
   static const String _storageKey = 'favorite_products';
 
-  FavoritesNotifier() : super([]) {
+  @override
+  List<int> build() {
     _loadFavorites();
+    return [];
   }
 
   /// SharedPreferences'tan favori ürünleri yükler
@@ -60,8 +62,8 @@ class FavoritesNotifier extends StateNotifier<List<int>> {
 }
 
 /// Favori ürünleri sağlayan Provider
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, List<int>>(
-  (ref) => FavoritesNotifier(),
+final favoritesProvider = NotifierProvider<FavoritesNotifier, List<int>>(
+  FavoritesNotifier.new,
 );
 
 /// Belirli bir ürünün favori olup olmadığını kontrol eden Provider
